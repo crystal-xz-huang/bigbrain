@@ -9,9 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.9.1",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
-    "@prisma/client": "^6.10.0",
+    "@prisma/client": "^6.10.1",
+    "@prisma/extension-accelerate": "^2.0.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.18.1",
     "next": "15.3.3",
@@ -27,8 +29,9 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
-    "prisma": "^6.10.0",
+    "prisma": "^6.10.1",
     "tailwindcss": "^4",
+    "tsx": "^4.20.3",
     "typescript": "^5"
   }
 }
