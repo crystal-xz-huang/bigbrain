@@ -1,18 +1,11 @@
-// Create a connection to your Prisma Client.
+// Create a singleton instance of PrismaClient to avoid exhausting database connections in development.
 // Now, whenever you need access to your database you can import the prisma instance into the file where it's needed.
 // See: https://vercel.com/guides/nextjs-prisma-postgres#step-3:-setup-prisma-and-create-the-database-schema
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
-let prisma: PrismaClient;
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
-if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient();
-} else {
-  if (!global.prisma) {
-    global.prisma = new PrismaClient();
-  }
-  prisma = global.prisma;
-}
+export const prisma = globalForPrisma.prisma || new PrismaClient();
 
-export default prisma;
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
