@@ -8,8 +8,7 @@ import { Strong, Text, TextLink } from "@/components/text";
 export default function LoginPage() {
   return (
     <form
-      action="#"
-      method="POST"
+      action={formAction}
       className="grid w-full max-w-sm grid-cols-1 gap-8"
     >
       <Heading>Sign in to your account</Heading>
