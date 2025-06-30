@@ -9,23 +9,24 @@ export default async function SignInPage({
 }: {
   searchParams: Promise<{ callbackUrl?: string | undefined }>
 }) {
-
   const { callbackUrl} = await searchParams;
+
+  async function authenticate(formData: FormData) {
+    'use server';
+      try {
+        await signIn("credentials", formData)
+      } catch (error) {
+        if (error instanceof AuthError) {
+          return redirect(`${SIGNIN_ERROR_URL}?error=${error.type}`) // redirect to '/error?error=CredentialsSignin'
+        }
+        throw error
+      }
+  }
 
   return (
     <div className="flex flex-col gap-2">
       <form
-        action={async (formData) => {
-          "use server"
-          try {
-            await signIn("credentials", formData)
-          } catch (error) {
-            if (error instanceof AuthError) {
-              return redirect(`${SIGNIN_ERROR_URL}?error=${error.type}`)
-            }
-            throw error
-          }
-        }}
+        action={authenticate}
       >
         <label htmlFor="email">
           Email
@@ -37,6 +38,8 @@ export default async function SignInPage({
         </label>
         <input type="submit" value="Sign In" />
       </form>
+
+      {/* OAuth signin buttons */}
       {Object.values(providerMap).map((provider) => (
         <form
           key={provider.id}
@@ -51,7 +54,7 @@ export default async function SignInPage({
               // not existing, or the user not having the correct role.
               // In some cases, you may want to redirect to a custom error
               if (error instanceof AuthError) {
-                return redirect(`${SIGNIN_ERROR_URL}?error=${error.type}`)
+                return redirect(`${SIGNIN_ERROR_URL}?error=${error.type}`) // e.g. '/error?error=OAuthAccountNotLinked'
               }
 
               // Otherwise if a redirects happens Next.js can handle it

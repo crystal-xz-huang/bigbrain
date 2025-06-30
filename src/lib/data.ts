@@ -1,31 +1,15 @@
-import type { User } from '@prisma/client';
-import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcrypt';
+import type { User } from '@/lib/definitions';
+import { sql } from '@/lib/neon';
 
-/***************************************************************
-  WARNING: Edge Compatibility
-  - Everything in this file is NOT edge compatible.
-  - Do not use this file in Middleware or 
-
-***************************************************************/
-export async function fetchUser(
-  email: string,
-  password: string
-): Promise<Omit<User, 'passwordHash'> | null> {
-  // Find the user by email
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  // Logic to verify if the user exists and password is correct
-  if (!user || !user.passwordHash) return null;
-
-  const passwordsMatch = await bcrypt.compare(password, user.passwordHash);
-
-  if (passwordsMatch) {
-    const { passwordHash, ...userWithoutPwHash } = user;
-    return userWithoutPwHash;
+export async function getUser(email: string): Promise<User | null> {
+  try {
+    const users = await sql`
+      SELECT * FROM users
+      WHERE email = ${email}
+    `;
+    return users[0] as User; // Return the first user found or null if none exists
+  } catch (error) {
+    console.error('Failed to fetch user:', error);
+    throw new Error('Failed to fetch user.');
   }
-
-  return null;
 }
