@@ -1,15 +1,13 @@
-import type { User } from '@/lib/definitions';
-import { sql } from '@/lib/neon';
+import type { User } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
+import bcrypt from 'bcrypt';
 
-export async function getUser(email: string): Promise<User | null> {
-  try {
-    const users = await sql`
-      SELECT * FROM users
-      WHERE email = ${email}
-    `;
-    return users[0] as User; // Return the first user found or null if none exists
-  } catch (error) {
-    console.error('Failed to fetch user:', error);
-    throw new Error('Failed to fetch user.');
-  }
+export async function getUser(email: string, password: string): Promise<Omit<User, 'passwordHash'> | null> {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) return null;
+
+  const passwordsMatch = await bcrypt.compare(password, user.passwordHash);
+  if (!passwordsMatch) return null;
+
+  return user as Omit<User, 'passwordHash'>;
 }

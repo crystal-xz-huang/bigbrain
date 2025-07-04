@@ -9,6 +9,8 @@ const styles = {
     'relative isolate inline-flex items-baseline justify-center gap-x-2 rounded-lg border text-base/6 font-semibold',
     // Sizing
     'px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6',
+    // Cursor
+    'cursor-pointer',
     // Focus
     'focus:not-data-focus:outline-hidden data-focus:outline-2 data-focus:outline-offset-2 data-focus:outline-blue-500',
     // Disabled
@@ -172,9 +174,9 @@ export const Button = forwardRef(function Button(
   ref: React.ForwardedRef<HTMLElement>
 ) {
   let classes = clsx(
-    className,
     styles.base,
-    outline ? styles.outline : plain ? styles.plain : clsx(styles.solid, styles.colors[color ?? 'dark/zinc'])
+    outline ? styles.outline : plain ? styles.plain : clsx(styles.solid, styles.colors[color ?? 'dark/zinc']),
+    className
   )
 
   return 'href' in props ? (

@@ -18,3 +18,18 @@ export function Divider({
     />
   )
 }
+
+
+export function DividerText({
+  children
+}: {
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center">
+      <hr className="inline-block grow-4 border-zinc-950 dark:border-[#dedede]" />
+      <span className="flex grow-1 justify-center text-center uppercase text-xs font-medium">{children}</span>
+      <hr className="inline-block grow-4 border-zinc-950 dark:border-[#dedede]" />
+    </div>
+  );
+}

@@ -1,36 +1,44 @@
 import NextAuth from 'next-auth';
+import { authConfig } from '@/lib/auth.config';
+
+// providers
 import GitHub from 'next-auth/providers/github';
+import Google from 'next-auth/providers/google';
 import Credentials from 'next-auth/providers/credentials';
 import type { Provider } from 'next-auth/providers';
 
 // database adapter
-import NeonAdapter from '@auth/neon-adapter';
-import { Pool } from '@neondatabase/serverless';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import { prisma } from '@/lib/prisma';
 
 // validation
 import { signInSchema } from '@/lib/zod';
-import bcrypt from 'bcrypt';
 import { getUser } from '@/lib/data';
-import type { AuthenticatedUser } from '@/lib/definitions';
+
+import { ZodError } from 'zod';
 
 const providers: Provider[] = [
   Credentials({
     credentials: { email: {}, password: {} },
     authorize: async (credentials) => {
-      const parsedCredentials = signInSchema.safeParse(credentials);
-      if (!parsedCredentials.success) {
-        console.error('Invalid credentials');
-        return null;
+      try {
+        // Validate the credentials using Zod schema
+        const { email, password } = await signInSchema.parseAsync(credentials);
+        // Return `null` if no user is found
+        return await getUser(email, password); // assuming it returns a User or null
+      } catch (error) {
+        // Handle validation errors
+        if (error instanceof ZodError) {
+          return null;
+        }
+        // Handle other errors
+        console.error('Authorization error', error);
+        throw error;
       }
-      const { email, password } = parsedCredentials.data;
-      const user = await getUser(email);
-      if (!user) return null;
-      const passwordsMatch = await bcrypt.compare(password, user.passwordHash);
-      if (!passwordsMatch) return null;
-      return user as AuthenticatedUser;
     },
   }),
   GitHub,
+  Google
 ];
 
 export const providerMap = providers
@@ -44,15 +52,9 @@ export const providerMap = providers
   })
   .filter((provider) => provider.id !== 'credentials');
 
-
-export const { handlers, auth, signIn, signOut } = NextAuth(() => {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  return {
-    adapter: NeonAdapter(pool),
-    session: { strategy: 'jwt' },
-    providers,
-    pages: {
-      signIn: '/login',
-    },
-  };
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
+  providers,
+  adapter: PrismaAdapter(prisma),
+  session: { strategy: 'jwt' },
 });
