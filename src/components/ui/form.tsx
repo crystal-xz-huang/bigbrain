@@ -15,7 +15,7 @@ function InputGroup({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function FormInput({
+function FormInput({
   invalid = false,
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean }) {
@@ -36,7 +36,7 @@ export function FormInput({
   );
 }
 
-export function InputPassword({ ...props}) {
+function InputPassword({ ...props}) {
   const [showPassword, setShowPassword] = useState(false);
   return (
     <InputGroup>
@@ -59,3 +59,5 @@ export function InputPassword({ ...props}) {
     </InputGroup>
   );
 }
+
+export { FormInput as Input, InputPassword };

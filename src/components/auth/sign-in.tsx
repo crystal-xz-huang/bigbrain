@@ -15,10 +15,11 @@ import { OAuthButton } from '@/components/auth/oauth-button';
 import { providerMap } from '@/lib/auth.config';
 import { signIn } from 'next-auth/react';
 
-import { FormInput, InputPassword } from '@/components/ui/form';
+import { Input, InputPassword } from '@/components/ui/form';
 import { ErrorMessage, Field, Label } from '@/components/ui/fieldset';
 import { CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import Form from 'next/form'
 
 const initialState: SignInActionResponse = {
   success: false,
@@ -28,7 +29,7 @@ const initialState: SignInActionResponse = {
 function FormAlert({ state }: { state?: SignInActionResponse }) {
   const searchParams = useSearchParams();
   const error = searchParams.get('error') || undefined;
-  const AUTH_ERROR = 'There was a problem when trying to authenticate. Please try again.';
+  const AUTH_ERROR = 'There was a problem when trying to authenticate.';
 
   if (!error && !state?.message) return null
   return (
@@ -77,14 +78,14 @@ export default function SignIn() {
 
       {/* Email/Password Form */}
       <DividerText>Or log in with your Email</DividerText>
-      <form
+      <Form
         action={formAction}
         className="grid w-full max-w-sm grid-cols-1 gap-8"
         noValidate
       >
         <Field>
           <Label htmlFor='email'>Email</Label>
-          <FormInput
+          <Input
             id="email"
             name="email"
             type="email"
@@ -103,6 +104,7 @@ export default function SignIn() {
             id="password"
             name="password"
             aria-describedby='password-error'
+            autoComplete="current-password"
             invalid={!!state?.errors?.password}
             defaultValue={state?.inputs?.password}
             required
@@ -122,11 +124,11 @@ export default function SignIn() {
         </Button>
         <Text>
           Don’t have an account?{' '}
-          <TextLink href="#">
+          <TextLink href="/register">
             <Strong>Sign up now</Strong>
           </TextLink>
         </Text>
-      </form>
+      </Form>
     </div>
   );
 }

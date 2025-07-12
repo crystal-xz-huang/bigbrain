@@ -24,3 +24,22 @@ export interface SignInActionResponse {
     [K in keyof SignInFormData]?: string | '';
   };
 }
+
+export interface SignUpFormData {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  redirectTo: string;
+}
+
+export interface SignUpActionResponse {
+  success: boolean;
+  message: string;
+  errors?: {
+    [K in keyof SignUpFormData]?: string[];
+  };
+  inputs?: {
+    [K in keyof SignUpFormData]?: string | '';
+  };
+}

@@ -21,7 +21,7 @@ export const password = string()
 
 export const confirmPassword = string()
   .trim()
-  .min(1, 'Confirm password is required');
+  .nonempty('Confirm password is required');
 
 export const signInSchema = object({
   email: email,
