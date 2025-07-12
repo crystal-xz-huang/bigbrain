@@ -2,39 +2,48 @@
 
 import { signIn } from "@/auth";
 import { AuthError } from 'next-auth';
-import { redirect } from 'next/navigation';
 
 import { signInSchema } from '@/lib/zod';
+import { SignInActionResponse } from "./types";
 
-export async function authenticate(
-  prevState: string | undefined, // the return value from the previous action (aka the previous form submission)
-  formData: FormData,
-): Promise<string | undefined> {
-  // Validate the form data using the signInSchema
-  const validatedFields = signInSchema.safeParse(Object.fromEntries(formData));
+export async function signInAction(_: SignInActionResponse | null, formData: FormData): Promise<SignInActionResponse> {
+  const data = Object.fromEntries(formData);
+  const parsed = signInSchema.safeParse(data);
 
   // If form validation fails, return errors early. Otherwise, continue.
-  if (!validatedFields.success) {
+  if (!parsed.success) {
     return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing Fields. Failed to Create Invoice.',
-    };
+      success: false,
+      message: 'Please fix the errors in the form.',
+      errors: parsed.error.flatten().fieldErrors,
+      inputs: data
+    }
   }
 
-  // Prepare data for signIn
-  const callbackUrl = (formData.get('callbackUrl') as string) || '/dashboard';
-
+  // Attempt to sign in with the validated credentials
   try {
-    await signIn('credentials', formData);
-    redirect(callbackUrl);
+    await signIn('credentials', {
+      ...parsed.data,
+      redirectTo: data.redirectTo as string,
+    });
+    return {
+      success: true,
+      message: 'Successfully signed in.',
+    };
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin': // Thrown when authorize() returns null
-          return 'Invalid email or password.';
+          return {
+            success: false,
+            message: 'Invalid credentials. Check the details you provided are correct.',
+          }
         default:
-          return 'Something went wrong.'; //  ← this becomes new `prevState`
-      }
+          return {
+            success: false,
+            message: 'Something went wrong. Please try again.',
+          };
+        }
     }
     // If the error is not an AuthError, rethrow it and let Next.js handle it
     throw error;

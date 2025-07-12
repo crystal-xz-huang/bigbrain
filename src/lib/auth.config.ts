@@ -22,7 +22,6 @@ export const providerMap = providers
   })
   .filter((provider) => provider.id !== 'credentials');
 
-
 export const authConfig = {
   pages: {
     signIn: '/login',
