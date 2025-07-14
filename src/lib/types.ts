@@ -53,3 +53,28 @@ export interface SignOutActionResponse {
   success: boolean;
   message: string;
 }
+
+/***************************************************************
+                      Toast
+***************************************************************/
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
+export interface ToastOptions {
+  duration?: number;
+  replace?: boolean;
+}
+export interface ToastContextType {
+  addToast: (
+    type: ToastType,
+    message: string,
+    description?: string,
+    options?: ToastOptions
+  ) => void;
+}
+
+export type ToastInput =
+  | string
+  | {
+      message?: string;
+      description?: string;
+      options?: ToastOptions;
+    };
