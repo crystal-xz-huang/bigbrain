@@ -8,6 +8,11 @@ export type Provider = {
   name: string;
 }
 
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+}
+
 export interface SignInFormData {
   email: string;
   password: string;
@@ -42,4 +47,9 @@ export interface SignUpActionResponse {
   inputs?: {
     [K in keyof SignUpFormData]?: string | '';
   };
+}
+
+export interface SignOutActionResponse {
+  success: boolean;
+  message: string;
 }

@@ -1,7 +1,6 @@
 import { AuthLayout } from '@/components/ui/auth-layout';
-import { Suspense } from 'react';
 import { Metadata } from 'next';
-import SignUp from '@/components/auth/sign-up';
+import SignUp from '@/components/auth/signup';
 
 export const metadata: Metadata = {
   title: 'Register',
@@ -10,9 +9,7 @@ export const metadata: Metadata = {
 export default function RegisterPage() {
   return (
     <AuthLayout>
-      <Suspense>
-        <SignUp />
-      </Suspense>
+      <SignUp />
     </AuthLayout>
   );
 }

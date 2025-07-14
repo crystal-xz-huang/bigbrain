@@ -2,89 +2,30 @@
 
 import { Button } from '@/components/ui/button';
 import { DividerText } from '@/components/ui/divider';
-import { Heading, Subheading } from '@/components/ui/heading';
-import { Strong, Text, TextLink } from '@/components/ui/text';
-
-import { signUpAction } from '@/lib/actions';
-import { SignUpActionResponse } from '@/lib/types';
-
-import { useSearchParams } from 'next/navigation';
-import { useActionState } from 'react';
-
-import { OAuthButton } from '@/components/auth/oauth-button';
-import { providerMap } from '@/lib/auth.config';
-import { signIn } from 'next-auth/react';
-
-import { Input, InputPassword } from '@/components/ui/form';
 import { ErrorMessage, Field, Label } from '@/components/ui/fieldset';
-import {
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-} from '@heroicons/react/24/outline';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Input, InputPassword } from '@/components/ui/form';
+import { Strong, Text, TextLink } from '@/components/ui/text';
+import { SignUpActionResponse } from '@/lib/types';
 import Form from 'next/form';
 
-const initialState: SignUpActionResponse = {
-  success: false,
-  message: '',
-};
-
-function FormAlert({ state }: { state?: SignUpActionResponse }) {
-  const searchParams = useSearchParams();
-  const error = searchParams.get('error') || undefined;
-  const AUTH_ERROR = 'There was a problem when trying to authenticate.';
-
-  if (!error && !state?.message) return null;
-  return (
-    <Alert>
-      {state?.success ? (
-        <CheckCircleIcon className="size-4" />
-      ) : (
-        <ExclamationTriangleIcon className="size-4" />
-      )}
-      <AlertTitle>{state?.success ? 'Success' : 'Error'}</AlertTitle>
-      <AlertDescription>{state?.message || AUTH_ERROR}</AlertDescription>
-    </Alert>
-  );
+interface EmailSignUpProps {
+  state: SignUpActionResponse | undefined;
+  action: (formData: FormData) => void | Promise<void>;
+  pending: boolean;
+  callbackUrl: string;
 }
 
-export default function SignUp() {
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
-  const [state, formAction, isPending] = useActionState(
-    signUpAction,
-    initialState
-  );
-
+export default function EmailSignUp({
+  state,
+  action,
+  pending,
+  callbackUrl,
+}: EmailSignUpProps) {
   return (
-    <div className="grid w-full max-w-sm grid-cols-1 gap-8">
-      <Heading>Create your account</Heading>
-
-      {/* Error Message */}
-      <FormAlert state={state} />
-
-      {/* OAuth */}
-      <div className="flex flex-col space-y-4">
-        <Subheading className="font-medium!">
-          Connect to BigBrain with:
-        </Subheading>
-        <div className="grid grid-cols-2 gap-4">
-          {Object.values(providerMap).map((provider) => (
-            <OAuthButton
-              key={provider.id}
-              provider={provider}
-              onClick={() => signIn(provider.id, { callbackUrl })}
-              disabled={isPending}
-              aria-disabled={isPending}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Email/Password Form */}
+    <>
       <DividerText>Or continue with Email</DividerText>
       <Form
-        action={formAction}
+        action={action}
         className="grid w-full max-w-sm grid-cols-1 gap-6"
         noValidate
       >
@@ -151,7 +92,8 @@ export default function SignUp() {
             id="confirmPassword"
             name="confirmPassword"
             aria-describedby="confirmPassword-error"
-            placeholder="Re-enter your password"
+            placeholder="Confirm your password"
+            autoComplete="new-password"
             invalid={!!state?.errors?.confirmPassword}
             defaultValue={state?.inputs?.confirmPassword}
             required
@@ -168,10 +110,10 @@ export default function SignUp() {
         <Button
           type="submit"
           className="w-full"
-          disabled={isPending}
-          aria-disabled={isPending}
+          disabled={pending}
+          aria-disabled={pending}
         >
-          {isPending ? 'Signing up...' : 'Sign up'}
+          {pending ? 'Signing up...' : 'Sign up'}
         </Button>
 
         <Text>
@@ -181,6 +123,6 @@ export default function SignUp() {
           </TextLink>
         </Text>
       </Form>
-    </div>
+    </>
   );
 }

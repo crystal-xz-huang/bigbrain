@@ -1,5 +1,3 @@
-'use client';
-
 import { Button } from '@/components/ui/button';
 import { Provider } from '@/lib/types';
 
@@ -50,7 +48,10 @@ const iconMap: Record<string, React.ReactElement> = {
   ),
 };
 
-export function OAuthButton({ provider, ...props }: {
+export function AuthButton({
+  provider,
+  ...props
+}: {
   provider: Provider;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
@@ -62,5 +63,5 @@ export function OAuthButton({ provider, ...props }: {
       <span className="size-[16px]">{iconMap[provider.id]}</span>
       {provider.name}
     </Button>
-  )
+  );
 }
