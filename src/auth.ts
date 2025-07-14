@@ -25,11 +25,6 @@ const providers: Provider[] = [
         // Validate the credentials using Zod schema
         const { email, password } = await signInSchema.parseAsync(credentials);
         // Return a User or null
-        // return {
-        //   id: "test",
-        //   name: "Test User",
-        //   email: "test@example.com",
-        // }
         return await getUser(email, password);
       } catch (error) {
         // Handle validation errors

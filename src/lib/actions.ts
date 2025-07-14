@@ -7,8 +7,6 @@ import { createUser, getUserByEmail } from "@/lib/data";
 import { AuthResponse, SignInActionResponse, SignUpActionResponse, SignOutActionResponse } from "@/lib/types";
 import { signInSchema, signUpSchema } from '@/lib/zod';
 
-import { redirect } from 'next/navigation';
-
 async function authenticate(email: string, password: string, redirectTo: string): Promise<AuthResponse> {
   // Attempt to sign in with the validated credentials
   try {
@@ -90,9 +88,13 @@ export async function signUpAction(_: SignUpActionResponse | null, formData: For
 
 export async function signOutAction(): Promise<SignOutActionResponse> {
   try {
-    await signOut();
-    redirect('/');
-  } catch (error) {
+    await signOut({ redirect: false });
+    return {
+      success: true,
+      message: 'Successfully signed out',
+    }
+  } catch (err) {
+    console.error('Sign out error:', err);
     return {
       success: false,
       message: 'There was a problem signing out. Please try again.',
