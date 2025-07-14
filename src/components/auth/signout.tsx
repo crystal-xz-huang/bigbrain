@@ -1,8 +1,8 @@
 'use client';
 
 import { signOutAction } from '@/lib/actions';
-import { SignOutActionResponse } from '@/lib/types';
-import { useActionState } from 'react';
+import { useToast } from '@/hooks/toast';
+import { useRouter } from 'next/navigation'
 import {
   Alert,
   AlertActions,
@@ -10,19 +10,25 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import Form from 'next/form';
-
-const initialState: SignOutActionResponse = {
-  success: false,
-  message: '',
-};
 
 export default function SignOut() {
+  const toast = useToast();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [state, formAction, pending] = useActionState(
-    signOutAction,
-    initialState
-  );
+  const [pending, setPending] = useState(false);
+
+  const handleSignOut = async () => {
+    setPending(true);
+    const response = await signOutAction();
+    if (response.success) {
+      toast.success({ message: response.message, description: 'See you next time!' });
+      setIsOpen(false);
+      router.push('/login'); // Redirect to login page
+    } else {
+      toast.error(response.message);
+    }
+    setPending(false);
+  };
 
   return (
     <>
@@ -33,17 +39,15 @@ export default function SignOut() {
 
       {/* Confirmation Dialog */}
       <Alert open={isOpen} onClose={setIsOpen}>
-        <Form action={formAction}>
-          <AlertTitle>Are you sure you want to sign out?</AlertTitle>
-          <AlertActions>
-            <Button plain type="button" onClick={() => setIsOpen(false)}>
-              Cancel
-            </Button>
-            <Button color='dark/white' type="submit" disabled={pending} aria-disabled={pending}>
-              {pending ? 'Signing out...' : 'Sign Out'}
-            </Button>
-          </AlertActions>
-        </Form>
+        <AlertTitle>Are you sure you want to sign out?</AlertTitle>
+        <AlertActions>
+          <Button plain onClick={() => setIsOpen(false)}>
+            Cancel
+          </Button>
+          <Button color='dark/white' onClick={handleSignOut} disabled={pending}>
+            {pending ? 'Signing out...' : 'Sign Out'}
+          </Button>
+        </AlertActions>
       </Alert>
     </>
   );
