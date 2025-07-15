@@ -1,5 +1,6 @@
 import { ToastProvider } from '@/hooks/toast';
 import type { Metadata } from 'next';
+import { SessionProvider } from 'next-auth/react';
 import { Inter, Roboto_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -31,7 +32,9 @@ export default function RootLayout({
       className="bg-white lg:bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950"
     >
       <body className={`${inter.variable} ${roboto_mono.variable} antialiased`}>
-        <ToastProvider>{children}</ToastProvider>
+        <SessionProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </SessionProvider>
       </body>
     </html>
   );

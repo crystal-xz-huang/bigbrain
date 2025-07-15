@@ -5,6 +5,7 @@ import { DividerText } from '@/components/ui/divider';
 import { ErrorMessage, Field, Label } from '@/components/ui/fieldset';
 import { Input, InputPassword } from '@/components/ui/form';
 import { Strong, Text, TextLink } from '@/components/ui/text';
+import { routes } from '@/lib/routes';
 import { SignInActionResponse } from '@/lib/types';
 import Form from 'next/form';
 
@@ -12,16 +13,13 @@ interface EmailSignInProps {
   state: SignInActionResponse | undefined;
   action: (formData: FormData) => void | Promise<void>;
   pending: boolean;
-  callbackUrl: string;
 }
 
 export default function EmailSignIn({
   state,
   action,
   pending,
-  callbackUrl,
 }: EmailSignInProps) {
-
   return (
     <>
       <DividerText>Or log in with your Email</DividerText>
@@ -39,7 +37,7 @@ export default function EmailSignIn({
             autoComplete="email"
             aria-describedby="email-error"
             defaultValue={state?.inputs?.email}
-            invalid={!!state?.errors?.email}
+            invalid={!!state?.errors?.email && state?.errors?.email?.length > 0}
             required
           />
           {state?.errors?.email && (
@@ -56,7 +54,9 @@ export default function EmailSignIn({
             name="password"
             aria-describedby="password-error"
             autoComplete="current-password"
-            invalid={!!state?.errors?.password}
+            invalid={
+              !!state?.errors?.password && state.errors.password.length > 0
+            }
             defaultValue={state?.inputs?.password}
             required
           />
@@ -66,8 +66,6 @@ export default function EmailSignIn({
             </ErrorMessage>
           )}
         </Field>
-
-        <input type="hidden" name="redirectTo" value={callbackUrl} />
 
         <Button
           type="submit"
@@ -80,7 +78,7 @@ export default function EmailSignIn({
 
         <Text>
           Don’t have an account?{' '}
-          <TextLink href="/register">
+          <TextLink href={routes.signup}>
             <Strong>Sign up now</Strong>
           </TextLink>
         </Text>

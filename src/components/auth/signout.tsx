@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/toast';
 import { signOutAction } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { routes } from '@/lib/routes';
 
 export default function SignOut({
   children,
@@ -27,7 +28,7 @@ export default function SignOut({
         description: 'See you next time!',
       });
       setIsOpen(false);
-      router.push('/login'); // Redirect to login page
+      router.push(routes.signin); // Redirect to sign-in page
     } else {
       toast.error(response.message);
     }

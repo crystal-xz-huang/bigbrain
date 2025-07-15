@@ -1,15 +1,12 @@
+import { routes } from '@/lib/routes';
 import type { NextAuthConfig } from 'next-auth';
-// providers
+import type { Provider } from 'next-auth/providers';
 import GitHub from 'next-auth/providers/github';
 import Google from 'next-auth/providers/google';
-import type { Provider } from 'next-auth/providers';
 
 // Edge-compatible configuration object for NextAuth.js
 
-const providers: Provider[] = [
-  GitHub,
-  Google
-];
+const providers: Provider[] = [GitHub, Google];
 
 export const providerMap = providers
   .map((provider) => {
@@ -24,21 +21,33 @@ export const providerMap = providers
 
 export const authConfig = {
   pages: {
-    signIn: '/auth/login',
+    signIn: routes.signin,
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       // Redirect unauthenticated users to the login page,
-      // otherwise allow access to the /dashboard page.
+      // otherwise allow access to the /admin/* pages
       const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
-      if (isOnDashboard) {
+      const isOnAdminRoute = nextUrl.pathname.startsWith('/admin');
+      if (isOnAdminRoute) {
         if (isLoggedIn) return true;
-        return false; // Redirect unauthenticated users to login page
+        return false;
       } else if (isLoggedIn) {
-        return Response.redirect(new URL('/dashboard', nextUrl));
+        // redirect logged-in users to the dashboard
+        return Response.redirect(new URL(routes.dashboard, nextUrl));
       }
       return true;
+    },
+    // Add user ID to the token and session
+    jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    session({ session, token }) {
+      session.user.id = token.id as string;
+      return session;
     },
   },
   providers: [],

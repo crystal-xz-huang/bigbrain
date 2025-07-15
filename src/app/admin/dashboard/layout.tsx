@@ -1,6 +1,11 @@
 import { auth } from "@/auth";
 import { SidebarLayout } from '@/components/ui/sidebar-layout'
 import { Navbar, Sidebar } from '@/components/dashboard';
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+}
 
 export default async function DashboardLayout({
   children,
@@ -15,7 +20,7 @@ export default async function DashboardLayout({
       sidebar={<Sidebar user={user} />}
       navbar={<Navbar user={user} />}
     >
-      {children}
+      <div className="container mx-auto mt-6">{children}</div>
     </SidebarLayout>
   )
 }

@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dropdown';
 import { NavbarItem } from '@/components/ui/navbar';
 import { SidebarItem } from '@/components/ui/sidebar';
+import { routes } from '@/lib/routes';
 import {
   ArrowRightStartOnRectangleIcon,
   ChevronUpIcon,
@@ -18,21 +19,30 @@ import {
   UserIcon,
 } from '@heroicons/react/16/solid';
 import type { User } from 'next-auth';
-import { signOut } from "next-auth/react";
+import { signOut } from 'next-auth/react';
 
-function ProfileDropdownMenu({ ...props }) {
+function ProfileDropdownMenu({
+  user,
+  ...props
+}: {
+  user: User;
+} & React.ComponentProps<typeof DropdownMenu>) {
   return (
     <DropdownMenu className="min-w-64" {...props}>
-      <DropdownItem href="/my-profile">
+      <DropdownItem href={routes.profile(user.id || '')}>
         <UserIcon />
         <DropdownLabel>My profile</DropdownLabel>
       </DropdownItem>
-      <DropdownItem href="/settings">
+      <DropdownItem href={routes.settings}>
         <Cog8ToothIcon />
         <DropdownLabel>Settings</DropdownLabel>
       </DropdownItem>
       <DropdownDivider />
-      <DropdownItem onClick={() => signOut({redirect: true, redirectTo: '/auth/login'})}>
+      <DropdownItem
+        onClick={() =>
+          signOut({ redirect: true, redirectTo: routes.home })
+        }
+      >
         <ArrowRightStartOnRectangleIcon />
         <DropdownLabel>Sign out</DropdownLabel>
       </DropdownItem>
@@ -46,7 +56,7 @@ export function NavbarProfileDropdown({ user }: { user: User }) {
       <DropdownButton as={NavbarItem} aria-label="Account menu">
         <AvatarUser user={user} />
       </DropdownButton>
-      <ProfileDropdownMenu anchor="bottom end" />
+      <ProfileDropdownMenu user={user} anchor="bottom end" />
     </Dropdown>
   );
 }
@@ -68,7 +78,7 @@ export function SidebarProfileDropdown({ user }: { user: User }) {
         </span>
         <ChevronUpIcon />
       </DropdownButton>
-      <ProfileDropdownMenu anchor="top start" />
+      <ProfileDropdownMenu user={user} anchor="top start" />
     </Dropdown>
   );
 }

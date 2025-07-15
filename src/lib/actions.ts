@@ -7,18 +7,23 @@ import { createUser, getUserByEmail } from "@/lib/data";
 import { AuthResponse, SignInActionResponse, SignUpActionResponse, SignOutActionResponse } from "@/lib/types";
 import { signInSchema, signUpSchema } from '@/lib/zod';
 
-async function authenticate(email: string, password: string, redirectTo: string): Promise<AuthResponse> {
+async function authenticate(email: string, password: string): Promise<AuthResponse> {
   // Attempt to sign in with the validated credentials
   try {
     await signIn('credentials', {
       email,
       password,
-      redirectTo: redirectTo,
+      redirect: false,
     });
+
+    const user = await getUserByEmail(email);
+
     return {
       success: true,
-      message: `Successfully authenticated. Redirecting to ${redirectTo}`,
+      message: 'Successfully authenticated.',
+      user,
     };
+
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -55,7 +60,7 @@ export async function signInAction(_: SignInActionResponse | null, formData: For
 
   // Attempt to sign in with the validated credentials
   const { email, password } = parsed.data;
-  return await authenticate(email, password, data.redirectTo as string);
+  return await authenticate(email, password);
 }
 
 export async function signUpAction(_: SignUpActionResponse | null, formData: FormData): Promise<SignUpActionResponse> {
@@ -83,7 +88,7 @@ export async function signUpAction(_: SignUpActionResponse | null, formData: For
   }
 
   await createUser(name, email, password);
-  return await authenticate(email, password, data.redirectTo as string);
+  return await authenticate(email, password);
 }
 
 export async function signOutAction(): Promise<SignOutActionResponse> {

@@ -1,3 +1,6 @@
+import type React from "react";
+import type { User } from '@prisma/client';
+
 /***************************************************************
                       Auth
 ***************************************************************/
@@ -11,12 +14,12 @@ export type Provider = {
 export interface AuthResponse {
   success: boolean;
   message: string;
+  user?: Omit<User, 'passwordHash'> | null;
 }
 
 export interface SignInFormData {
   email: string;
   password: string;
-  redirectTo: string;
 }
 
 export interface SignInActionResponse {
@@ -28,6 +31,7 @@ export interface SignInActionResponse {
   inputs?: {
     [K in keyof SignInFormData]?: string | '';
   };
+  user?: Omit<User, 'passwordHash'> | null;
 }
 
 export interface SignUpFormData {
@@ -35,7 +39,6 @@ export interface SignUpFormData {
   email: string;
   password: string;
   confirmPassword: string;
-  redirectTo: string;
 }
 
 export interface SignUpActionResponse {
@@ -47,6 +50,7 @@ export interface SignUpActionResponse {
   inputs?: {
     [K in keyof SignUpFormData]?: string | '';
   };
+  user?: Omit<User, 'passwordHash'> | null;
 }
 
 export interface SignOutActionResponse {
@@ -78,3 +82,13 @@ export type ToastInput =
       description?: string;
       options?: ToastOptions;
     };
+
+/***************************************************************
+                      Navigation
+***************************************************************/
+export interface NavLink {
+  label: string;
+  url: string;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  current?: boolean;
+}

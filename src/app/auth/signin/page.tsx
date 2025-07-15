@@ -2,9 +2,9 @@ import { Metadata } from 'next';
 import SignIn from '@/components/auth/signin';
 
 export const metadata: Metadata = {
-  title: 'Login',
+  title: 'Sign In',
 };
 
-export default function LoginPage() {
+export default function SignInPage() {
   return <SignIn />;
 }

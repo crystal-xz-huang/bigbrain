@@ -5,7 +5,7 @@ import {
   actions,
   mainNavigation,
   secondaryNavigation,
-} from '@/components/dashboard/items';
+} from '@/components/dashboard/nav-links';
 import { Link } from '@/components/ui/link';
 import {
   Sidebar,
@@ -19,13 +19,13 @@ import {
   SidebarSection,
   SidebarSpacer,
 } from '@/components/ui/sidebar';
-import { useNavItems } from '@/hooks/navigation';
+import { useNavLinks } from '@/hooks/navigation';
 import type { User } from 'next-auth';
 import { SidebarProfileDropdown } from './profile-dropdown';
 
 export default function DashboardSidebar({ user }: { user: User }) {
-  const mainNavItems = useNavItems(mainNavigation);
-  const secondaryNavItems = useNavItems(secondaryNavigation);
+  const mainLinks = useNavLinks(mainNavigation);
+  const secondaryLinks = useNavLinks(secondaryNavigation);
 
   return (
     <Sidebar>
@@ -37,33 +37,42 @@ export default function DashboardSidebar({ user }: { user: User }) {
       <SidebarBody>
         <SidebarSection>
           {/* Navigation items */}
-          {mainNavItems.map(({ label, url, Icon, current }) => (
-            <SidebarItem key={label} href={url} current={current}>
-              <Icon />
-              <SidebarLabel>{label}</SidebarLabel>
-            </SidebarItem>
-          ))}
+          {mainLinks.map((link) => {
+            const LinkIcon = link.icon;
+            return (
+              <SidebarItem key={link.label} href={link.url} current={link.current}>
+                {LinkIcon && <LinkIcon />}
+                <SidebarLabel>{link.label}</SidebarLabel>
+              </SidebarItem>
+            );
+          })}
         </SidebarSection>
         <SidebarDivider />
         <SidebarSection>
           <SidebarHeading>Quick Actions</SidebarHeading>
           {/* Action buttons */}
-          {actions.map(({ label, url, Icon }) => (
-            <SidebarItem key={label} href={url} aria-label={label}>
-              <Icon />
-              <SidebarLabel className="hidden md:block">{label}</SidebarLabel>
-            </SidebarItem>
-          ))}
+          {actions.map((action) => {
+            const LinkIcon = action.icon;
+            return (
+              <SidebarItem key={action.label} href={action.url} aria-label={action.label}>
+                {LinkIcon && <LinkIcon />}
+                <SidebarLabel className="hidden md:block">{action.label}</SidebarLabel>
+              </SidebarItem>
+            )
+          })}
         </SidebarSection>
         <SidebarSpacer />
         <SidebarSection>
           {/* Secondary navigation items */}
-          {secondaryNavItems.map(({ label, url, Icon, current }) => (
-            <SidebarItem key={label} href={url} current={current}>
-              <Icon />
-              <SidebarLabel>{label}</SidebarLabel>
-            </SidebarItem>
-          ))}
+          {secondaryLinks.map((link) => {
+            const LinkIcon = link.icon;
+            return (
+              <SidebarItem key={link.label} href={link.url} current={link.current}>
+                {LinkIcon && <LinkIcon />}
+                <SidebarLabel>{link.label}</SidebarLabel>
+              </SidebarItem>
+            );
+          })}
         </SidebarSection>
       </SidebarBody>
       <SidebarFooter>

@@ -1,1 +1,1 @@
-export { default as useNavItems } from '@/hooks/navigation/useNavItems';
+export { default as useNavLinks } from '@/hooks/navigation/useNavLinks';

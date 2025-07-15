@@ -1,11 +1,11 @@
 'use client';
 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { SignInActionResponse, SignUpActionResponse } from '@/lib/types';
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const getAuthError = (error: string | undefined) => {
   switch (error) {
@@ -14,7 +14,7 @@ const getAuthError = (error: string | undefined) => {
     default:
       return 'Something went wrong. Please try again.';
   }
-}
+};
 
 export default function FormAlert({
   state,
@@ -23,7 +23,7 @@ export default function FormAlert({
   state?: SignInActionResponse | SignUpActionResponse;
   error?: string;
 }) {
- const message = state?.message || (error ? getAuthError(error) : null);
+  const message = state?.message || (error ? getAuthError(error) : null);
 
   // Don't show the alert if there's no message
   if (!message) return null;

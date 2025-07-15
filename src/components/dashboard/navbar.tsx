@@ -1,7 +1,7 @@
 'use client';
 
+import { actions, mainNavigation } from '@/components/dashboard/nav-links';
 import { Branding } from '@/components/ui/branding';
-import { actions, mainNavigation } from '@/components/dashboard/items';
 import { Link } from '@/components/ui/link';
 import {
   Navbar,
@@ -10,21 +10,21 @@ import {
   NavbarSection,
   NavbarSpacer,
 } from '@/components/ui/navbar';
-import { useNavItems } from '@/hooks/navigation';
+import { useNavLinks } from '@/hooks/navigation';
 import type { User } from 'next-auth';
 import { NavbarProfileDropdown } from './profile-dropdown';
 
 export default function DashboardNavbar({ user }: { user: User }) {
-  const mainNavItems = useNavItems(mainNavigation);
+  const navigation = useNavLinks(mainNavigation);
 
   return (
     <Navbar>
-      <Link href="#" aria-label="Home" className='px-2'>
+      <Link href="#" aria-label="Home" className="px-2">
         <Branding />
       </Link>
       <NavbarSection className="max-lg:hidden">
         {/* Navigation items */}
-        {mainNavItems.map(({ label, url, current }) => (
+        {navigation.map(({ label, url, current }) => (
           <NavbarItem key={label} href={url} current={current}>
             {label}
           </NavbarItem>
@@ -33,12 +33,21 @@ export default function DashboardNavbar({ user }: { user: User }) {
       <NavbarSpacer />
       <NavbarSection>
         {/* Action buttons */}
-        {actions.map(({ label, url, Icon }) => (
-          <NavbarItem key={label} href={url} aria-label={label}>
-            <Icon />
-            <NavbarLabel className="hidden sm:block">{label}</NavbarLabel>
-          </NavbarItem>
-        ))}
+        {actions.map((action) => {
+          const LinkIcon = action.icon;
+          return (
+            <NavbarItem
+              key={action.label}
+              href={action.url}
+              aria-label={action.label}
+            >
+              {LinkIcon && <LinkIcon />}
+              <NavbarLabel className="hidden sm:block">
+                {action.label}
+              </NavbarLabel>
+            </NavbarItem>
+          );
+        })}
         {/* Profile dropdown */}
         <NavbarProfileDropdown user={user} />
       </NavbarSection>

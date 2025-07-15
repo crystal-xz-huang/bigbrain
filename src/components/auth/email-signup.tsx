@@ -5,21 +5,20 @@ import { DividerText } from '@/components/ui/divider';
 import { ErrorMessage, Field, Label } from '@/components/ui/fieldset';
 import { Input, InputPassword } from '@/components/ui/form';
 import { Strong, Text, TextLink } from '@/components/ui/text';
+import { routes } from '@/lib/routes';
 import { SignUpActionResponse } from '@/lib/types';
 import Form from 'next/form';
-
 interface EmailSignUpProps {
   state: SignUpActionResponse | undefined;
   action: (formData: FormData) => void | Promise<void>;
   pending: boolean;
-  callbackUrl: string;
+  // callbackUrl: string;
 }
 
 export default function EmailSignUp({
   state,
   action,
   pending,
-  callbackUrl,
 }: EmailSignUpProps) {
   return (
     <>
@@ -75,7 +74,9 @@ export default function EmailSignUp({
             aria-describedby="password-error"
             placeholder="Enter a unique password"
             autoComplete="new-password"
-            invalid={!!state?.errors?.password}
+            invalid={
+              !!state?.errors?.password && state.errors.password.length > 0
+            }
             defaultValue={state?.inputs?.password}
             required
           />
@@ -94,7 +95,10 @@ export default function EmailSignUp({
             aria-describedby="confirmPassword-error"
             placeholder="Confirm your password"
             autoComplete="new-password"
-            invalid={!!state?.errors?.confirmPassword}
+            invalid={
+              !!state?.errors?.confirmPassword &&
+              state.errors.confirmPassword.length > 0
+            }
             defaultValue={state?.inputs?.confirmPassword}
             required
           />
@@ -105,7 +109,7 @@ export default function EmailSignUp({
           )}
         </Field>
 
-        <input type="hidden" name="redirectTo" value={callbackUrl} />
+        {/* <input type="hidden" name="redirectTo" value={callbackUrl} /> */}
 
         <Button
           type="submit"
@@ -118,7 +122,7 @@ export default function EmailSignUp({
 
         <Text>
           Already have an account?{' '}
-          <TextLink href="/login">
+          <TextLink href={routes.signin}>
             <Strong>Log in</Strong>
           </TextLink>
         </Text>
