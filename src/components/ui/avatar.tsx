@@ -1,8 +1,12 @@
 import * as Headless from '@headlessui/react'
 import clsx from 'clsx'
+import Image from 'next/image'
 import React, { forwardRef } from 'react'
 import { TouchTarget } from './button'
 import { Link } from './link'
+
+import { getInitials, isEmptyString } from '@/lib/utils'
+import type { User } from 'next-auth'
 
 type AvatarProps = {
   src?: string | null
@@ -45,7 +49,7 @@ export function Avatar({
           </text>
         </svg>
       )}
-      {src && <img className="size-full" src={src} alt={alt} />}
+      {src && <Image className="size-full" src={src} alt={alt} />}
     </span>
   )
 }
@@ -62,7 +66,7 @@ export const AvatarButton = forwardRef(function AvatarButton(
     (Omit<Headless.ButtonProps, 'as' | 'className'> | Omit<React.ComponentPropsWithoutRef<typeof Link>, 'className'>),
   ref: React.ForwardedRef<HTMLElement>
 ) {
-  let classes = clsx(
+  const classes = clsx(
     className,
     square ? 'rounded-[20%]' : 'rounded-full',
     'relative inline-grid focus:not-data-focus:outline-hidden data-focus:outline-2 data-focus:outline-offset-2 data-focus:outline-blue-500'
@@ -82,3 +86,52 @@ export const AvatarButton = forwardRef(function AvatarButton(
     </Headless.Button>
   )
 })
+
+export function AvatarDefault( { className } : { className?: string }) {
+  return (
+    <span className={clsx('inline-block overflow-hidden rounded-full bg-zinc-800 dark:bg-zinc-100 size-10', className)}>
+      <svg
+        fill="currentColor"
+        viewBox="0 0 24 24"
+        className="size-full text-zinc-100 dark:text-zinc-500"
+      >
+        <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+      </svg>
+    </span>
+  );
+}
+
+export function AvatarUser({
+  user,
+  className,
+  ...props
+}: {
+  user: User | null;
+  className?: string;
+}) {
+  // If user is null, return default avatar
+  if (!user) {
+    return <AvatarDefault className={className} {...props} />;
+  }
+
+  // If user has no image, show initials
+  const initials = getInitials(user.name as string);
+  if (isEmptyString(initials)) {
+    return <AvatarDefault className={className} {...props} />;
+  }
+
+  // Otherwise, show avatar with initials or image
+  return (
+    <Avatar
+      square
+      className={clsx([
+        className,
+        user.image && 'bg-zinc-900 text-white dark:bg-white dark:text-black',
+        'size-10',
+      ])}
+      alt={user.name || ''}
+      {...(user.image ? { src: user.image } : { initials: initials })}
+      {...props}
+    />
+  );
+}

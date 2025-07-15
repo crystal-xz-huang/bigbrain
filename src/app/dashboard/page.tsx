@@ -10,7 +10,6 @@ export default function DashboardPage() {
     <div className="flex h-full w-full items-center justify-center flex-col">
       <h1 className="text-2xl font-bold">Dashboard</h1>
       <p className="mt-4 text-gray-600">Welcome to your dashboard!</p>
-      <SignOut />
     </div>
   );
 }

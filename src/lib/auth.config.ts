@@ -24,7 +24,7 @@ export const providerMap = providers
 
 export const authConfig = {
   pages: {
-    signIn: '/login',
+    signIn: '/auth/login',
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {

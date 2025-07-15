@@ -1,17 +1,18 @@
 'use client';
 
-import { signOutAction } from '@/lib/actions';
-import { useToast } from '@/hooks/toast';
-import { useRouter } from 'next/navigation'
-import {
-  Alert,
-  AlertActions,
-  AlertTitle,
-} from '@/components/ui/alert-dialog';
+import { Alert, AlertActions, AlertTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/toast';
+import { signOutAction } from '@/lib/actions';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export default function SignOut() {
+export default function SignOut({
+  children,
+  ...props
+}: {
+  children?: React.ReactNode;
+}) {
   const toast = useToast();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -21,7 +22,10 @@ export default function SignOut() {
     setPending(true);
     const response = await signOutAction();
     if (response.success) {
-      toast.success({ message: response.message, description: 'See you next time!' });
+      toast.success({
+        message: response.message,
+        description: 'See you next time!',
+      });
       setIsOpen(false);
       router.push('/login'); // Redirect to login page
     } else {
@@ -33,8 +37,8 @@ export default function SignOut() {
   return (
     <>
       {/* Trigger dialog */}
-      <Button type="button" onClick={() => setIsOpen(true)}>
-        Sign Out
+      <Button onClick={() => setIsOpen(true)} {...props}>
+        {children || 'Sign Out'}
       </Button>
 
       {/* Confirmation Dialog */}
@@ -44,7 +48,7 @@ export default function SignOut() {
           <Button plain onClick={() => setIsOpen(false)}>
             Cancel
           </Button>
-          <Button color='dark/white' onClick={handleSignOut} disabled={pending}>
+          <Button color="dark/white" onClick={handleSignOut} disabled={pending}>
             {pending ? 'Signing out...' : 'Sign Out'}
           </Button>
         </AlertActions>
