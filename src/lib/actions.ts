@@ -1,12 +1,15 @@
 'use server'
 
-import { signIn, signOut } from "@/auth";
+import { auth, signIn, signOut } from "@/auth";
 import { AuthError } from 'next-auth';
-
-import { createUser, getUserByEmail } from "@/lib/data";
-import { AuthResponse, SignInActionResponse, SignUpActionResponse, SignOutActionResponse } from "@/lib/types";
-import { signInSchema, signUpSchema } from '@/lib/zod';
-
+import { createUser, getUserByEmail, createGame, deleteGame} from "@/lib/data";
+import { AuthResponse, SignInActionResponse, SignUpActionResponse, SignOutActionResponse, CreateGameActionResponse, DeleteGameActionResponse } from "@/lib/types";
+import { signInSchema, signUpSchema, createGameSchema } from '@/lib/zod';
+import { revalidatePath } from 'next/cache';
+import { routes } from "./routes";
+/***************************************************************
+                     Auth
+***************************************************************/
 async function authenticate(email: string, password: string): Promise<AuthResponse> {
   // Attempt to sign in with the validated credentials
   try {
@@ -105,4 +108,74 @@ export async function signOutAction(): Promise<SignOutActionResponse> {
       message: 'There was a problem signing out. Please try again.',
     };
   }
+}
+
+/***************************************************************
+                     Game
+***************************************************************/
+export async function createGameAction(_: CreateGameActionResponse | null, formData: FormData): Promise<CreateGameActionResponse> {
+  const data = Object.fromEntries(formData);
+  const parsed = createGameSchema.safeParse(data);
+
+  // If form validation fails, return errors early. Otherwise, continue.
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: 'Please fix the errors in the form.',
+      errors: parsed.error.flatten().fieldErrors,
+      inputs: data
+    }
+  }
+
+  const session = await auth();
+  const user = await getUserByEmail(session?.user?.email || '');
+  if (!user) {
+    return {
+      success: false,
+      message: 'You must be signed in to create a game.',
+    };
+  }
+
+  // Create the game with the validated name
+  const { name } = parsed.data;
+  const game = await createGame(name, user);
+  if (!game) {
+    return {
+      success: false,
+      message: 'There was a problem creating the game. Please try again.',
+    };
+  }
+
+  revalidatePath(routes.games);
+  return {
+    success: true,
+    message: `Game created successfully!`,
+    game,
+  };
+}
+
+export async function deleteGameAction(gameId: string): Promise<DeleteGameActionResponse> {
+  const session = await auth();
+  const user = await getUserByEmail(session?.user?.email || '');
+  if (!user) {
+    return {
+      success: false,
+      message: 'You must be signed in to create a game.',
+    };
+  }
+  // Delete the game by ID
+  const success = await deleteGame(gameId, user);
+
+  if (!success) {
+    return {
+      success: false,
+      message: 'There was a problem deleting the game. Please try again.',
+    };
+  }
+
+  revalidatePath(routes.games);
+  return {
+    success: true,
+    message: 'Game deleted successfully.',
+  };
 }

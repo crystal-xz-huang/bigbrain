@@ -51,14 +51,15 @@ export function Field({ className, ...props }: { className?: string } & Omit<Hea
   )
 }
 
-export function Label({ className, ...props }: { className?: string } & Omit<Headless.LabelProps, 'as' | 'className'>) {
+export function Label({ className, required, ...props }: { className?: string; required?: boolean} & Omit<Headless.LabelProps, 'as' | 'className'>) {
   return (
     <Headless.Label
       data-slot="label"
       {...props}
       className={clsx(
         className,
-        'text-base/6 text-zinc-950 select-none data-disabled:opacity-50 sm:text-sm/6 dark:text-white'
+        'text-base/6 text-zinc-950 select-none data-disabled:opacity-50 sm:text-sm/6 dark:text-white',
+        required && 'after:ml-0.5 after:text-rose-500 after:content-["*"]',
       )}
     />
   )

@@ -1,9 +1,14 @@
-import * as Headless from '@headlessui/react'
-import clsx from 'clsx'
-import React, { forwardRef } from 'react'
+import * as Headless from '@headlessui/react';
+import clsx from 'clsx';
+import React, { forwardRef } from 'react';
+import { ChevronDownIcon } from '@heroicons/react/16/solid';
 
 export const Select = forwardRef(function Select(
-  { className, multiple, ...props }: { className?: string } & Omit<Headless.SelectProps, 'as' | 'className'>,
+  {
+    className,
+    multiple,
+    ...props
+  }: { className?: string } & Omit<Headless.SelectProps, 'as' | 'className'>,
   ref: React.ForwardedRef<HTMLSelectElement>
 ) {
   return (
@@ -58,11 +63,53 @@ export const Select = forwardRef(function Select(
             aria-hidden="true"
             fill="none"
           >
-            <path d="M5.75 10.75L8 13L10.25 10.75" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M10.25 5.25L8 3L5.75 5.25" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M5.75 10.75L8 13L10.25 10.75"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M10.25 5.25L8 3L5.75 5.25"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </span>
       )}
     </span>
-  )
-})
+  );
+});
+
+export const SelectTabs = forwardRef(function SelectTabs(
+  {
+    className,
+    children,
+    ...props
+  }: { className?: string; children?: React.ReactNode } & Omit<React.ComponentPropsWithoutRef<'select'>, 'className' | 'children'>,
+  ref: React.ForwardedRef<HTMLSelectElement>
+) {
+  return (
+    <div className="mt-2 grid grid-cols-1">
+      <select
+        ref={ref}
+        aria-label="Select a tab"
+        className={clsx(
+          'col-start-1 row-start-1 w-full appearance-none rounded-md py-1.5 pr-8 pl-3',
+          'bg-transparent dark:bg-white/5 dark:*:bg-zinc-800',
+          'text-base sm:text-sm/6 text-zinc-950 placeholder:text-zinc-500 dark:text-white dark:*:text-white',
+          'outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-pink-300',
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </select>
+      <ChevronDownIcon
+        aria-hidden="true"
+        className="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-zinc-500 dark:text-zinc-400 sm:size-4"
+      />
+    </div>
+  );
+});

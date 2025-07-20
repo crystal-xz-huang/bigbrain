@@ -1,7 +1,8 @@
-import * as Headless from '@headlessui/react'
-import clsx from 'clsx'
-import React, { forwardRef } from 'react'
-import { Link } from './link'
+import * as Headless from '@headlessui/react';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import clsx from 'clsx';
+import React, { forwardRef } from 'react';
+import { Link } from './link';
 
 const styles = {
   base: [
@@ -158,7 +159,9 @@ const styles = {
       '[--btn-icon:var(--color-rose-300)] data-active:[--btn-icon:var(--color-rose-200)] data-hover:[--btn-icon:var(--color-rose-200)]',
     ],
   },
-}
+};
+
+export type ButtonColor = keyof typeof styles.colors;
 
 type ButtonProps = (
   | { color?: keyof typeof styles.colors; outline?: never; plain?: never }
@@ -167,7 +170,7 @@ type ButtonProps = (
 ) & { className?: string; children: React.ReactNode } & (
     | Omit<Headless.ButtonProps, 'as' | 'className'>
     | Omit<React.ComponentPropsWithoutRef<typeof Link>, 'className'>
-  )
+  );
 
 export const Button = forwardRef(function Button(
   { color, outline, plain, className, children, ...props }: ButtonProps,
@@ -175,20 +178,32 @@ export const Button = forwardRef(function Button(
 ) {
   let classes = clsx(
     styles.base,
-    outline ? styles.outline : plain ? styles.plain : clsx(styles.solid, styles.colors[color ?? 'dark/zinc']),
+    outline
+      ? styles.outline
+      : plain
+      ? styles.plain
+      : clsx(styles.solid, styles.colors[color ?? 'dark/zinc']),
     className
-  )
+  );
 
   return 'href' in props ? (
-    <Link {...props} className={classes} ref={ref as React.ForwardedRef<HTMLAnchorElement>}>
+    <Link
+      {...props}
+      className={classes}
+      ref={ref as React.ForwardedRef<HTMLAnchorElement>}
+    >
       <TouchTarget>{children}</TouchTarget>
     </Link>
   ) : (
-    <Headless.Button {...props} className={clsx(classes, 'cursor-default')} ref={ref}>
+    <Headless.Button
+      {...props}
+      className={clsx(classes, 'cursor-default')}
+      ref={ref}
+    >
       <TouchTarget>{children}</TouchTarget>
     </Headless.Button>
-  )
-})
+  );
+});
 
 /**
  * Expand the hit area to at least 44×44px on touch devices
@@ -202,5 +217,38 @@ export function TouchTarget({ children }: { children: React.ReactNode }) {
       />
       {children}
     </>
-  )
+  );
+}
+
+/***************************************************************
+                     Loading Button
+***************************************************************/
+export function ButtonLoading(props: ButtonProps) {
+  const { children, ...rest } = props;
+  return (
+    <Button disabled aria-disabled {...rest}>
+      <div className="flex items-center justify-center">
+        <svg
+          className="size-5 animate-spin motion-reduce:hidden text-current mr-2 -ml-1"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+        {children || 'Loading...'}
+      </div>
+    </Button>
+  );
 }

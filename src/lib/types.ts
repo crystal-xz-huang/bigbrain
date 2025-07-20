@@ -1,20 +1,22 @@
-import type React from "react";
-import type { User } from '@prisma/client';
+import type React from 'react';
+import type { User, Game as PrismaGame, Question } from '@prisma/client';
 
 /***************************************************************
                       Auth
 ***************************************************************/
+export type AuthUser = Omit<User, 'passwordHash'>;
+
 export type FieldErrors = Record<string, string[]>;
 
 export type Provider = {
   id: string;
   name: string;
-}
+};
 
 export interface AuthResponse {
   success: boolean;
   message: string;
-  user?: Omit<User, 'passwordHash'> | null;
+  user?: AuthUser | null;
 }
 
 export interface SignInFormData {
@@ -31,7 +33,7 @@ export interface SignInActionResponse {
   inputs?: {
     [K in keyof SignInFormData]?: string | '';
   };
-  user?: Omit<User, 'passwordHash'> | null;
+  user?: AuthUser | null;
 }
 
 export interface SignUpFormData {
@@ -50,7 +52,7 @@ export interface SignUpActionResponse {
   inputs?: {
     [K in keyof SignUpFormData]?: string | '';
   };
-  user?: Omit<User, 'passwordHash'> | null;
+  user?: AuthUser | null;
 }
 
 export interface SignOutActionResponse {
@@ -91,4 +93,41 @@ export interface NavLink {
   url: string;
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   current?: boolean;
+}
+
+export interface TabLink {
+  name: string;
+  href: string;
+  current?: boolean;
+}
+
+/***************************************************************
+                      Game
+***************************************************************/
+export type Game = PrismaGame & {
+  questions: Question[] | [];
+  owner?: User;
+}
+
+export interface CreateGameInput {
+  name: string;
+  description?: string;
+  image?: string;
+}
+
+export interface CreateGameActionResponse {
+  success: boolean;
+  message: string;
+  errors?: {
+    [K in keyof CreateGameInput]?: string[];
+  };
+  inputs?: {
+    [K in keyof CreateGameInput]?: string | '';
+  };
+  game?: Game | null;
+}
+
+export interface DeleteGameActionResponse {
+  success: boolean;
+  message: string;
 }

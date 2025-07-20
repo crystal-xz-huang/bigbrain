@@ -89,7 +89,7 @@ export const AvatarButton = forwardRef(function AvatarButton(
 
 export function AvatarDefault( { className } : { className?: string }) {
   return (
-    <span className={clsx('inline-block overflow-hidden rounded-full bg-zinc-800 dark:bg-zinc-100 size-10', className)}>
+    <span className={clsx('inline-block overflow-hidden rounded-full bg-zinc-800 dark:bg-zinc-100', className)}>
       <svg
         fill="currentColor"
         viewBox="0 0 24 24"
@@ -127,7 +127,6 @@ export function AvatarUser({
       className={clsx([
         className,
         user.image && 'bg-zinc-900 text-white dark:bg-white dark:text-black',
-        'size-10',
       ])}
       alt={user.name || ''}
       {...(user.image ? { src: user.image } : { initials: initials })}

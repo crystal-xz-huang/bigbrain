@@ -21,15 +21,10 @@ import {
 import type { User } from 'next-auth';
 import { signOut } from 'next-auth/react';
 
-function ProfileDropdownMenu({
-  user,
-  ...props
-}: {
-  user: User;
-} & React.ComponentProps<typeof DropdownMenu>) {
+function ProfileDropdownMenu({...props}){
   return (
     <DropdownMenu className="min-w-64" {...props}>
-      <DropdownItem href={routes.profile(user.id || '')}>
+      <DropdownItem href={routes.profile}>
         <UserIcon />
         <DropdownLabel>My profile</DropdownLabel>
       </DropdownItem>
@@ -54,9 +49,9 @@ export function NavbarProfileDropdown({ user }: { user: User }) {
   return (
     <Dropdown>
       <DropdownButton as={NavbarItem} aria-label="Account menu">
-        <AvatarUser user={user} />
+        <AvatarUser user={user} className='size-full'/>
       </DropdownButton>
-      <ProfileDropdownMenu user={user} anchor="bottom end" />
+      <ProfileDropdownMenu anchor="bottom end" />
     </Dropdown>
   );
 }
@@ -66,7 +61,7 @@ export function SidebarProfileDropdown({ user }: { user: User }) {
     <Dropdown>
       <DropdownButton as={SidebarItem}>
         <span className="flex min-w-0 items-center gap-3">
-          <AvatarUser user={user} />
+          <AvatarUser user={user} className='size-10'/>
           <span className="min-w-0">
             <span className="block truncate text-sm/5 font-medium text-zinc-950 dark:text-white">
               {user.name}
@@ -78,7 +73,7 @@ export function SidebarProfileDropdown({ user }: { user: User }) {
         </span>
         <ChevronUpIcon />
       </DropdownButton>
-      <ProfileDropdownMenu user={user} anchor="top start" />
+      <ProfileDropdownMenu anchor="top start" />
     </Dropdown>
   );
 }

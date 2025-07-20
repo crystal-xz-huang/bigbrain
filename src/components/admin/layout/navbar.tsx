@@ -1,6 +1,6 @@
 'use client';
 
-import { actions, mainNavigation } from '@/components/dashboard/nav-links';
+import { actions, mainNavigation } from '@/components/admin/layout/nav-links';
 import { Branding } from '@/components/ui/branding';
 import { Link } from '@/components/ui/link';
 import {
@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/navbar';
 import { useNavLinks } from '@/hooks/navigation';
 import type { User } from 'next-auth';
-import { NavbarProfileDropdown } from './profile-dropdown';
+import { NavbarProfileDropdown } from '@/components/admin/layout/dropdown';
 
 export default function DashboardNavbar({ user }: { user: User }) {
   const navigation = useNavLinks(mainNavigation);

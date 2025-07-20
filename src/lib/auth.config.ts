@@ -25,17 +25,22 @@ export const authConfig = {
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
-      // Redirect unauthenticated users to the login page,
-      // otherwise allow access to the /admin/* pages
       const isLoggedIn = !!auth?.user;
-      const isOnAdminRoute = nextUrl.pathname.startsWith('/admin');
-      if (isOnAdminRoute) {
+      const isAdminRoute = nextUrl.pathname.startsWith('/admin');
+      const isAuthRoute = nextUrl.pathname.startsWith('/auth');
+
+      // Protect '/admin' routes
+      if (isAdminRoute) {
         if (isLoggedIn) return true;
         return false;
-      } else if (isLoggedIn) {
-        // redirect logged-in users to the dashboard
+      }
+
+      // Redirect logged-in users from auth routes to the dashboard
+      if (isLoggedIn && isAuthRoute) {
         return Response.redirect(new URL(routes.dashboard, nextUrl));
       }
+
+      // Allow access to all other routes
       return true;
     },
     // Add user ID to the token and session

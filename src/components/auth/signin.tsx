@@ -29,13 +29,11 @@ export default function SignIn() {
   );
 
   useEffect(() => {
-    if (state.success === true && state.user) {
-
+    if (state.success && state.user) {
       toast.success({
         message: 'Successfully signed in',
         description: `Welcome back, ${state.user.name}!`,
       });
-
       router.push(callbackUrl);
     }
   }, [state.success, state.user]);

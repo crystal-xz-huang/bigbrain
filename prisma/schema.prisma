@@ -37,21 +37,6 @@ model Session {
   @@map("sessions")
 }
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  passwordHash  String?   @map("password_hash")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  emailVerified DateTime? @map("email_verified")
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-
-  @@map("users")
-}
-
 model VerificationToken {
   identifier String
   token      String
@@ -60,3 +45,93 @@ model VerificationToken {
   @@unique([identifier, token])
   @@map("verification_tokens")
 }
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  username      String?   @unique
+  email         String?   @unique
+  passwordHash  String?   @map("password_hash")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  games         Game[]    @relation("owner")
+  bio           String?
+
+  @@map("users")
+}
+
+model Game {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  image       String?
+  ownerId     String
+  owner       User       @relation("owner", fields: [ownerId], references: [id])
+  questions   Question[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  active      String?    @unique // The ID of the active session for this game. If no active session, it's null
+
+  @@unique([id, ownerId])
+}
+
+model Question {
+  id       String       @id @default(cuid())
+  gameId   String
+  game     Game         @relation(fields: [gameId], references: [id])
+  name     String
+  type     QuestionType
+  duration Int
+  points   Int
+  mediaUrl String? // optional: for images or videos
+  answers  Answer[]
+}
+
+model Answer {
+  id         String   @id @default(cuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id])
+  name       String
+  isCorrect  Boolean
+}
+
+enum QuestionType {
+  SINGLE
+  MULTIPLE
+  TRUE_FALSE
+}
+
+// model GameSession {
+//   id                         String        @id @default(cuid())
+//   gameId                     String
+//   game                       Game          @relation(fields: [gameId], references: [id])
+//   hostId                     String
+//   host                       User          @relation(fields: [hostId], references: [id])
+//   status                     SessionStatus @default(LOBBY)
+//   position                   Int           @default(0)
+//   isoTimeLastQuestionStarted DateTime?     @map("iso_time_last_question_started")
+//   createdAt                  DateTime      @default(now())
+//   updatedAt                  DateTime      @updatedAt
+//   players                    Player[]
+// }
+
+// enum SessionStatus {
+//   LOBBY // has not started yet
+//   IN_PROGRESS // actively on a question
+//   REVIEW // question time is up, showing results
+//   FINISHED // all questions done
+// }
+
+// model Player {
+//   id        String      @id @default(cuid())
+//   sessionId String
+//   session   GameSession @relation(fields: [sessionId], references: [id])
+//   userId    String
+//   user      User        @relation(fields: [userId], references: [id])
+//   joinedAt  DateTime    @default(now())
+//   score     Int         @default(0)
+// }

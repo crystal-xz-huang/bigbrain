@@ -5,7 +5,7 @@ import {
   actions,
   mainNavigation,
   secondaryNavigation,
-} from '@/components/dashboard/nav-links';
+} from '@/components/admin/layout/nav-links';
 import { Link } from '@/components/ui/link';
 import {
   Sidebar,
@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useNavLinks } from '@/hooks/navigation';
 import type { User } from 'next-auth';
-import { SidebarProfileDropdown } from './profile-dropdown';
+import { SidebarProfileDropdown } from './dropdown';
 
 export default function DashboardSidebar({ user }: { user: User }) {
   const mainLinks = useNavLinks(mainNavigation);

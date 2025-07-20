@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { Button, ButtonLoading } from '@/components/ui/button';
 import { DividerText } from '@/components/ui/divider';
 import { ErrorMessage, Field, Label } from '@/components/ui/fieldset';
 import { Input, InputPassword } from '@/components/ui/form';
@@ -12,7 +12,6 @@ interface EmailSignUpProps {
   state: SignUpActionResponse | undefined;
   action: (formData: FormData) => void | Promise<void>;
   pending: boolean;
-  // callbackUrl: string;
 }
 
 export default function EmailSignUp({
@@ -20,6 +19,8 @@ export default function EmailSignUp({
   action,
   pending,
 }: EmailSignUpProps) {
+  const SubmitButton = pending ? ButtonLoading : Button;
+
   return (
     <>
       <DividerText>Or continue with Email</DividerText>
@@ -109,16 +110,9 @@ export default function EmailSignUp({
           )}
         </Field>
 
-        {/* <input type="hidden" name="redirectTo" value={callbackUrl} /> */}
-
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={pending}
-          aria-disabled={pending}
-        >
+        <SubmitButton type="submit" className="w-full">
           {pending ? 'Signing up...' : 'Sign up'}
-        </Button>
+        </SubmitButton>
 
         <Text>
           Already have an account?{' '}

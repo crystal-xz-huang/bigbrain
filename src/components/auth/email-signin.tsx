@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { Button, ButtonLoading } from '@/components/ui/button';
 import { DividerText } from '@/components/ui/divider';
 import { ErrorMessage, Field, Label } from '@/components/ui/fieldset';
 import { Input, InputPassword } from '@/components/ui/form';
@@ -20,6 +20,9 @@ export default function EmailSignIn({
   action,
   pending,
 }: EmailSignInProps) {
+
+  const SubmitButton = pending ? ButtonLoading : Button;
+
   return (
     <>
       <DividerText>Or log in with your Email</DividerText>
@@ -67,14 +70,9 @@ export default function EmailSignIn({
           )}
         </Field>
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={pending}
-          aria-disabled={pending}
-        >
-          {pending ? 'Logging in...' : 'Log in'}
-        </Button>
+        <SubmitButton type="submit" className="w-full">
+          {pending ? 'Logging in...' : 'Log In'}
+        </SubmitButton>
 
         <Text>
           Don’t have an account?{' '}
