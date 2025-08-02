@@ -1,5 +1,4 @@
 import * as Headless from '@headlessui/react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import React, { forwardRef } from 'react';
 import { Link } from './link';
@@ -158,6 +157,10 @@ const styles = {
       'text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-rose-500)] [--btn-border:var(--color-rose-600)]/90',
       '[--btn-icon:var(--color-rose-300)] data-active:[--btn-icon:var(--color-rose-200)] data-hover:[--btn-icon:var(--color-rose-200)]',
     ],
+    accent: [
+      'text-accent-content [--btn-bg:var(--color-accent)] [--btn-border:var(--color-accent)]/90 [--btn-hover-overlay:var(--color-black)]/10',
+      '[--btn-icon:var(--color-accent-content)] data-active:[--btn-icon:var(--color-accent-content)]/80 data-hover:[--btn-icon:var(--color-accent-content)]/80',
+    ]
   },
 };
 
@@ -176,14 +179,14 @@ export const Button = forwardRef(function Button(
   { color, outline, plain, className, children, ...props }: ButtonProps,
   ref: React.ForwardedRef<HTMLElement>
 ) {
-  let classes = clsx(
+  const classes = clsx(
+    className,
     styles.base,
     outline
       ? styles.outline
       : plain
       ? styles.plain
       : clsx(styles.solid, styles.colors[color ?? 'dark/zinc']),
-    className
   );
 
   return 'href' in props ? (

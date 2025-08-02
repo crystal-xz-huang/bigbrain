@@ -3,23 +3,111 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter), sans-serif;
-  --font-mono: var(--font-roboto-mono);
+  --base-100: oklch(97.788% .004 56.375);
+  --base-200: oklch(93.982% .007 61.449);
+  --base-300: oklch(91.586% .006 53.44);
+  --base-400: oklch(89.179% .006 48.514);
+  --base-content: oklch(23.574% .066 313.189);
+
+  --correct: rgb(0 167 109);
+  --false: rgb(213 69 108);
+
+  --neutral: oklch(39.445% .032 275.524);
+  --neutral-content: oklch(87.889% .006 275.524);
+
+  --accent: oklch(89% .061 343.231);
+  --accent-content: oklch(45% .187 3.815);
+  --info: oklch(68% .169 237.323);
+  --info-content: oklch(29% .066 243.157);
+  --success: oklch(69% .17 162.48);
+  --success-content: oklch(26% .051 172.552);
+  --warning: oklch(79% .184 86.047);
+  --warning-content: oklch(28% .066 53.813);
+  --error: oklch(71% .194 13.428);
+  --error-content: oklch(27% .105 12.094);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+
+    --info: oklch(74% .16 232.661);
+    --info-content: oklch(29% .066 243.157);
+    --error: oklch(71% .194 13.428);
+    --error-content: oklch(27% .105 12.094);
+    --success: oklch(77% .152 181.912);
+    --success-content: oklch(27% .046 192.524);
+    --warning: oklch(90% .182 98.111);
+    --warning-content: oklch(42% .095 57.708);
   }
 }
 
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-nunito), sans-serif;
+  --font-mono: var(--font-roboto-mono);
+
+  --color-correct: var(--correct);
+  --color-false: var(--false);
+
+  --color-base-100: var(--base-100);
+  --color-base-200: var(--base-200);
+  --color-base-300: var(--base-300);
+  --color-base-400: var(--base-400);
+  --color-base-content: var(--base-content);
+  --color-accent: var(--accent);
+  --color-accent-content: var(--accent-content);
+  --color-neutral: var(--neutral);
+  --color-neutral-content: var(--neutral-content);
+  --color-info: var(--info);
+  --color-info-content: var(--info-content);
+  --color-success: var(--success);
+  --color-success-content: var(--success-content);
+  --color-warning: var(--warning);
+  --color-warning-content: var(--warning-content);
+  --color-error: var(--error);
+  --color-error-content: var(--error-content);
+
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+}
+
+.shadow-inner-hard-1 {
+  --tw-shadow: inset 0 0.25rem 0 0 rgba(0, 0, 0, .1);
+  --tw-shadow-colored: inset 0 0.25rem 0 0 var(--tw-shadow-color)
+}
+
+.shadow-inner-soft-1 {
+  --tw-shadow: inset 0 0.25rem 0.25rem 0 rgba(0, 0, 0, .3);
+  --tw-shadow-colored: inset 0 0.25rem 0.25rem 0 var(--tw-shadow-color)
+}
+
+.shadow-inner-hard-1,
+.shadow-inner-soft-1 {
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}
+
+.shadow-hard-0 {
+  --tw-shadow: 0 0rem 0 0 rgba(0, 0, 0, .1);
+  --tw-shadow-colored: 0 0rem 0 0 var(--tw-shadow-color)
+}
+
+.shadow-hard-0\.5 {
+  --tw-shadow: 0 0.125rem 0 0 rgba(0, 0, 0, .1);
+  --tw-shadow-colored: 0 0.125rem 0 0 var(--tw-shadow-color)
+}
+
+.shadow-hard-0,
+.shadow-hard-0\.5 {
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}
+
 body {
+  font-family: var(--font-inter);
   background: var(--background);
   color: var(--foreground);
 }

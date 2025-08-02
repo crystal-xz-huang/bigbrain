@@ -46,92 +46,128 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  username      String?   @unique
-  email         String?   @unique
-  passwordHash  String?   @map("password_hash")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  emailVerified DateTime? @map("email_verified")
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  games         Game[]    @relation("owner")
-  bio           String?
-
-  @@map("users")
-}
-
-model Game {
-  id          String     @id @default(cuid())
-  name        String
-  description String?
-  image       String?
-  ownerId     String
-  owner       User       @relation("owner", fields: [ownerId], references: [id])
-  questions   Question[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt @map("updated_at")
-  active      String?    @unique // The ID of the active session for this game. If no active session, it's null
-
-  @@unique([id, ownerId])
-}
-
-model Question {
-  id       String       @id @default(cuid())
-  gameId   String
-  game     Game         @relation(fields: [gameId], references: [id])
-  name     String
-  type     QuestionType
-  duration Int
-  points   Int
-  mediaUrl String? // optional: for images or videos
-  answers  Answer[]
-}
-
-model Answer {
-  id         String   @id @default(cuid())
-  questionId String
-  question   Question @relation(fields: [questionId], references: [id])
-  name       String
-  isCorrect  Boolean
+enum Role {
+  PLAYER
+  ADMIN
 }
 
 enum QuestionType {
   SINGLE
   MULTIPLE
-  TRUE_FALSE
+  TYPE_ANSWER
 }
 
-// model GameSession {
-//   id                         String        @id @default(cuid())
-//   gameId                     String
-//   game                       Game          @relation(fields: [gameId], references: [id])
-//   hostId                     String
-//   host                       User          @relation(fields: [hostId], references: [id])
-//   status                     SessionStatus @default(LOBBY)
-//   position                   Int           @default(0)
-//   isoTimeLastQuestionStarted DateTime?     @map("iso_time_last_question_started")
-//   createdAt                  DateTime      @default(now())
-//   updatedAt                  DateTime      @updatedAt
-//   players                    Player[]
-// }
+enum SessionStatus {
+  LOBBY
+  IN_PROGRESS
+  REVIEW
+  FINISHED
+}
 
-// enum SessionStatus {
-//   LOBBY // has not started yet
-//   IN_PROGRESS // actively on a question
-//   REVIEW // question time is up, showing results
-//   FINISHED // all questions done
-// }
+model User {
+  // authentication fields
+  id            String        @id @default(cuid())
+  name          String?
+  email         String?       @unique
+  emailVerified DateTime?     @map("email_verified")
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  // additional fields
+  passwordHash  String?       @map("password_hash")
+  role          Role          @default(ADMIN)
+  games         Game[]        @relation("owner")
+  gameSessions  GameSession[] @relation("host")
 
-// model Player {
-//   id        String      @id @default(cuid())
-//   sessionId String
-//   session   GameSession @relation(fields: [sessionId], references: [id])
-//   userId    String
-//   user      User        @relation(fields: [userId], references: [id])
-//   joinedAt  DateTime    @default(now())
-//   score     Int         @default(0)
-// }
+  @@map("users")
+}
+
+model Player {
+  id        String         @id @default(cuid())
+  name      String
+  role      Role           @default(PLAYER)
+  sessionId String
+  session   GameSession    @relation(fields: [sessionId], references: [id])
+  joinedAt  DateTime       @default(now())
+  score     Int            @default(0)
+  answers   PlayerAnswer[]
+
+  @@map("players")
+}
+
+model Game {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  image       String?
+  ownerId     String
+  owner       User          @relation("owner", fields: [ownerId], references: [id])
+  questions   Question[]
+  sessions    GameSession[] @relation("game_sessions")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  active      String?       @unique // id of the active session, or null if no session is active
+
+  @@unique([id, ownerId])
+}
+
+model Question {
+  id            String           @id @default(cuid())
+  gameId        String
+  game          Game             @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  title         String
+  type          QuestionType
+  duration      Int
+  points        Int
+  answers       QuestionAnswer[]
+  playerAnswers PlayerAnswer[]
+
+  createdAt DateTime @default(now())
+}
+
+model QuestionAnswer {
+  id         String           @id @default(cuid())
+  questionId String
+  question   Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  title      String
+  correct    Boolean
+  selections SelectedAnswer[]
+
+  createdAt DateTime @default(now())
+}
+
+model PlayerAnswer {
+  id          String           @id @default(cuid())
+  playerId    String
+  player      Player           @relation(fields: [playerId], references: [id])
+  questionId  String
+  question    Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  submittedAt DateTime         @default(now())
+  selections  SelectedAnswer[]
+}
+
+model SelectedAnswer {
+  id               String         @id @default(cuid())
+  playerAnswerId   String
+  playerAnswer     PlayerAnswer   @relation(fields: [playerAnswerId], references: [id])
+  questionAnswerId String
+  questionAnswer   QuestionAnswer @relation(fields: [questionAnswerId], references: [id])
+
+  @@unique([playerAnswerId, questionAnswerId]) // prevent duplicate selections
+}
+
+model GameSession {
+  id                         String        @id @default(cuid())
+  code                       String        @unique
+  gameId                     String
+  game                       Game          @relation("game_sessions", fields: [gameId], references: [id], onDelete: Cascade)
+  hostId                     String
+  host                       User          @relation("host", fields: [hostId], references: [id], onDelete: Cascade)
+  status                     SessionStatus @default(LOBBY)
+  createdAt                  DateTime      @default(now())
+  position                   Int           @default(0)
+  isoTimeLastQuestionStarted DateTime?
+  players                    Player[]
+}

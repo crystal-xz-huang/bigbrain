@@ -13,7 +13,7 @@ import { prisma } from '@/lib/prisma';
 
 // validation
 import { signInSchema } from '@/lib/zod';
-import { getUser } from '@/lib/data';
+import { fetchUserByCredentials } from '@/lib/data';
 
 import { ZodError } from 'zod';
 
@@ -25,7 +25,7 @@ const providers: Provider[] = [
         // Validate the credentials using Zod schema
         const { email, password } = await signInSchema.parseAsync(credentials);
         // Return a User or null
-        return await getUser(email, password);
+        return await fetchUserByCredentials(email, password);
       } catch (error) {
         // Handle validation errors
         if (error instanceof ZodError) {

@@ -3,7 +3,7 @@
 import { Button, ButtonLoading } from '@/components/ui/button';
 import { DividerText } from '@/components/ui/divider';
 import { ErrorMessage, Field, Label } from '@/components/ui/fieldset';
-import { Input, InputPassword } from '@/components/ui/form';
+import { Input, PasswordInput } from '@/components/ui/styled/form';
 import { Strong, Text, TextLink } from '@/components/ui/text';
 import { routes } from '@/lib/routes';
 import { SignInActionResponse } from '@/lib/types';
@@ -20,7 +20,6 @@ export default function EmailSignIn({
   action,
   pending,
 }: EmailSignInProps) {
-
   const SubmitButton = pending ? ButtonLoading : Button;
 
   return (
@@ -52,7 +51,7 @@ export default function EmailSignIn({
 
         <Field>
           <Label htmlFor="password">Password</Label>
-          <InputPassword
+          <PasswordInput
             id="password"
             name="password"
             aria-describedby="password-error"

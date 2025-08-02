@@ -1,7 +1,7 @@
 import { ToastProvider } from '@/hooks/toast';
 import type { Metadata } from 'next';
 import { SessionProvider } from 'next-auth/react';
-import { Inter, Roboto_Mono } from 'next/font/google';
+import { Inter, Roboto_Mono, Nunito } from 'next/font/google';
 import './globals.css';
 
 const inter = Inter({
@@ -14,6 +14,12 @@ const roboto_mono = Roboto_Mono({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-roboto-mono',
+});
+
+const nunito = Nunito({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-nunito',
 });
 
 export const metadata: Metadata = {
@@ -31,7 +37,7 @@ export default function RootLayout({
       lang="en"
       className="bg-white lg:bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950"
     >
-      <body className={`${inter.variable} ${roboto_mono.variable} antialiased`}>
+      <body className={`${inter.variable} ${roboto_mono.variable} ${nunito.variable} antialiased`}>
         <SessionProvider>
           <ToastProvider>{children}</ToastProvider>
         </SessionProvider>

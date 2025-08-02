@@ -1,6 +1,5 @@
 'use client';
 
-import { auth } from '@/auth';
 import { Button } from '@/components/ui/button';
 import {
   Description,
@@ -9,12 +8,10 @@ import {
   Label,
   Legend,
 } from '@/components/ui/fieldset';
-import { Input, InputGroup } from '@/components/ui/input';
+import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
-import Form from 'next/form';
-import Image from 'next/image';
 import { Textarea } from '@/components/ui/textarea';
-import { InputPassword, InputBirthday } from '@/components/ui/form';
+import Form from 'next/form';
 
 export default function Integrations() {
   return (
@@ -27,7 +24,6 @@ export default function Integrations() {
 
         <div className="md:col-span-2">
           <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
-
             {/* Username */}
             <Field className="col-span-full">
               <Label htmlFor="name">Username</Label>

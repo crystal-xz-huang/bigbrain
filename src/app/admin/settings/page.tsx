@@ -1,11 +1,7 @@
 import { auth } from '@/auth';
 import { Button } from '@/components/ui/button';
-import {
-  Fieldset,
-  Legend
-} from '@/components/ui/fieldset';
+import { Fieldset, Legend } from '@/components/ui/fieldset';
 import { Text } from '@/components/ui/text';
-import { PageHeading } from '@/components/admin/layout';
 import AccountForm from '@/components/admin/settings/account';
 import ProfileForm from '@/components/admin/settings/profile';
 import type { Metadata } from 'next';
@@ -21,8 +17,6 @@ export default async function Settings() {
 
   return (
     <>
-      <PageHeading heading="Settings"/>
-
       {/* Settings forms */}
       <div className="divide-y divide-white/5">
         {/* Profile Form */}

@@ -3,7 +3,7 @@
 import { Button, ButtonLoading } from '@/components/ui/button';
 import { DividerText } from '@/components/ui/divider';
 import { ErrorMessage, Field, Label } from '@/components/ui/fieldset';
-import { Input, InputPassword } from '@/components/ui/form';
+import { Input, PasswordInput } from '@/components/ui/styled/form';
 import { Strong, Text, TextLink } from '@/components/ui/text';
 import { routes } from '@/lib/routes';
 import { SignUpActionResponse } from '@/lib/types';
@@ -69,7 +69,7 @@ export default function EmailSignUp({
 
         <Field>
           <Label htmlFor="password">Password</Label>
-          <InputPassword
+          <PasswordInput
             id="password"
             name="password"
             aria-describedby="password-error"
@@ -90,7 +90,7 @@ export default function EmailSignUp({
 
         <Field>
           <Label htmlFor="confirmPassword">Confirm Password</Label>
-          <InputPassword
+          <PasswordInput
             id="confirmPassword"
             name="confirmPassword"
             aria-describedby="confirmPassword-error"

@@ -9,6 +9,7 @@ import clsx from 'clsx';
 import type React from 'react';
 import { Button, ButtonColor, ButtonLoading } from './button';
 import { Text } from './text';
+import Form from 'next/form';
 
 const sizes = {
   xs: 'sm:max-w-xs',
@@ -124,63 +125,67 @@ interface DialogWithIconProps
   variant?: DialogVariant;
   open: boolean;
   onClose: () => void;
-  onAction: () => void;
+  action: (formData: FormData) => void;
   title: React.ReactNode;
   description?: React.ReactNode;
   body?: React.ReactNode;
   actionText?: string;
   disabled?: boolean;
   pending?: boolean;
+  children?: React.ReactNode;
 }
 
 export function DialogWithIcon({
   variant = 'info',
   open,
   onClose,
-  onAction,
+  action,
   title,
   description,
   body,
   actionText,
   disabled = false,
   pending = false,
+  children,
   ...props
 }: DialogWithIconProps) {
-
-  const styles: Record<DialogVariant, {
-    buttonColor: ButtonColor;
-    background: string;
-    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-    iconColor: string;
-  }> = {
+  const styles: Record<
+    DialogVariant,
+    {
+      buttonColor: ButtonColor;
+      icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+      iconColor: string;
+      ring: string;
+    }
+  > = {
     error: {
       buttonColor: 'red',
-      background: 'bg-red-100',
       icon: ExclamationTriangleIcon,
       iconColor: 'text-red-600',
+      ring: 'bg-red-100 border-red-500/5 ring-red-500/10',
     },
     info: {
       buttonColor: 'blue',
-      background: 'bg-blue-100',
       icon: InformationCircleIcon,
       iconColor: 'text-blue-600',
+      ring: 'bg-blue-100 border-blue-500/5 ring-blue-500/10',
     },
     success: {
       buttonColor: 'lime',
-      background: 'bg-green-100',
       icon: CheckIcon,
       iconColor: 'text-green-600',
+      ring: 'bg-green-100 border-green-500/5 ring-green-500/10',
     },
     warning: {
       buttonColor: 'amber',
-      background: 'bg-yellow-100',
       icon: ExclamationTriangleIcon,
       iconColor: 'text-yellow-600',
+      ring: 'bg-yellow-100 border-yellow-500/5 ring-yellow-500/10',
     },
   };
 
   const Icon = styles[variant].icon;
-  const ActionButton = pending ? ButtonLoading : Button;
+  const SubmitButton = pending ? ButtonLoading : Button;
 
   return (
     <Headless.Dialog
@@ -200,11 +205,11 @@ export function DialogWithIcon({
         <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
           <Headless.DialogPanel
             transition
-            className="relative transform overflow-hidden rounded-lg bg-white dark:bg-zinc-900 px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+            className="relative transform overflow-hidden rounded-lg bg-white dark:bg-zinc-800 px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
           >
             {/* Close Button */}
             <div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">
-              <Button plain onClick={onClose} disabled={disabled}>
+              <Button plain onClick={onClose} disabled={disabled || pending}>
                 <span className="sr-only">Close</span>
                 <XMarkIcon aria-hidden="true" className="size-6 stroke-2" />
               </Button>
@@ -214,13 +219,13 @@ export function DialogWithIcon({
               {/* Icon */}
               <div
                 className={clsx(
-                  'mx-auto flex size-12 shrink-0 items-center justify-center rounded-full sm:mx-0 sm:size-10',
-                  styles[variant].background
+                  'mx-auto flex size-12 shrink-0 items-center justify-center rounded-full sm:mx-0 sm:size-10 border-6 ring-1',
+                  styles[variant].ring,
                 )}
               >
                 <Icon
                   aria-hidden="true"
-                  className={clsx('size-6', styles[variant].iconColor)}
+                  className={clsx('m-auto size-5', styles[variant].iconColor)}
                 />
               </div>
               {/* Title and Description */}
@@ -231,26 +236,29 @@ export function DialogWithIcon({
               </div>
             </div>
             {/* Dialog Actions */}
-            <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-2">
-              <ActionButton
-                type="button"
+            <Form
+              action={action}
+              className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-2"
+            >
+              {children}
+              <SubmitButton
+                type="submit"
                 className="inline-flex w-full justify-center sm:ml-3 sm:w-auto"
                 color={styles[variant].buttonColor}
-                onClick={onAction}
-                disabled={disabled}
+                disabled={pending}
               >
                 {actionText || 'Confirm'}
-              </ActionButton>
+              </SubmitButton>
               <Button
                 plain
                 type="button"
                 className="mt-3 inline-flex w-full justify-center sm:mt-0 sm:w-auto "
                 onClick={onClose}
-                disabled={disabled}
+                disabled={pending}
               >
                 Cancel
               </Button>
-            </div>
+            </Form>
           </Headless.DialogPanel>
         </div>
       </div>

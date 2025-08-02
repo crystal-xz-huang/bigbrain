@@ -191,7 +191,7 @@ export function DropdownMenuTrigger({
   return (
     <Headless.MenuButton
       data-slot="dropdown-menu-trigger"
-      className={clsx('cursor-pointer text-zinc-500 dark:text-zinc-400 hover:text-zinc-950', className)}
+      className={clsx('cursor-pointer text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:data-hover:text-white', className)}
       {...props}
     />
   );

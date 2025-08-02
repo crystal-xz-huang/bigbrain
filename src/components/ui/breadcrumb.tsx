@@ -79,7 +79,7 @@ function BreadcrumbLink({
   return (
     <Link
       data-slot="breadcrumb-link"
-      className={clsx("hover:text-zinc-950 dark:text-white transition-colors", className)}
+      className={clsx("text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:data-hover:text-white", className)}
       {...props}
     />
   )
@@ -125,7 +125,7 @@ function BreadcrumbEllipsis({
       data-slot="breadcrumb-ellipsis"
       role="presentation"
       aria-hidden="true"
-      className={clsx("flex size-9 items-center justify-center", className)}
+      className={clsx("flex size-9 items-center justify-center ", className)}
       {...props}
     >
       <EllipsisHorizontalIcon className="size-4" />
