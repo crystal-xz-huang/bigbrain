@@ -2,8 +2,8 @@
 
 import { actions, mainNavigation } from '@/components/navigation/constants';
 import { NavbarProfileDropdown } from '@/components/navigation/profile-dropdown';
-import { Branding } from '@/components/ui/branding';
 import { Link } from '@/components/ui/link';
+import { Logo } from '@/components/ui/logo';
 import {
   Navbar,
   NavbarItem,
@@ -19,8 +19,8 @@ export default function DashboardNavbar({ user }: { user: User }) {
 
   return (
     <Navbar>
-      <Link href="#" aria-label="Home" className="px-2">
-        <Branding />
+      <Link href="/" aria-label="Home" className="px-2 sidebar-icon h-9">
+        <Logo />
       </Link>
       <NavbarSection className="max-lg:hidden">
         {/* Navigation items */}

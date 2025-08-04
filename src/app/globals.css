@@ -254,5 +254,5 @@ body {
 }
 
 .sidebar-icon {
-  @apply size-9 flex items-center justify-center text-zinc-500 hover:text-zinc-950 hover:bg-zinc-950/5 focus-visible:bg-zinc-950/5 focus-visible:text-zinc-950 rounded-lg dark:text-zinc-400 dark:hover:bg-white/5 dark:focus-visible:bg-white/5 dark:hover:text-white dark:focus-visible:text-white;
+  @apply flex items-center justify-center text-zinc-500 hover:text-zinc-950 hover:bg-zinc-950/5 focus-visible:bg-zinc-950/5 focus-visible:text-zinc-950 rounded-lg dark:text-zinc-400 dark:hover:bg-white/5 dark:focus-visible:bg-white/5 dark:hover:text-white dark:focus-visible:text-white;
 }

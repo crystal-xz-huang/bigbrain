@@ -5,6 +5,7 @@ import {
   secondaryNavigation,
 } from '@/components/navigation/constants';
 import { Link } from '@/components/ui/link';
+import { Logo } from '@/components/ui/logo';
 import {
   Sidebar,
   SidebarBody,
@@ -21,10 +22,8 @@ import {
 import { useNavLinks } from '@/hooks/navigation';
 import { useSidebar } from '@/hooks/sidebar';
 import { PlusIcon } from '@heroicons/react/20/solid';
-import BigBrainLogo from '@public/bigbrain-logo.svg';
 import clsx from 'clsx';
 import type { User } from 'next-auth';
-import Image from 'next/image';
 import { SidebarProfileDropdown } from './profile-dropdown';
 
 export default function DashboardSidebar({ user }: { user: User }) {
@@ -40,9 +39,10 @@ export default function DashboardSidebar({ user }: { user: User }) {
           isCollapsed ? 'flex-col' : 'flex-row'
         )}
       >
-        <Link href="/" aria-label="Home" className="sidebar-icon">
-          <Image src={BigBrainLogo} alt="Big Brain Logo" className="icon" />
+        <Link href="/" aria-label="Home" className="px-2 sidebar-icon h-9">
+          <Logo className={clsx(isCollapsed && 'sr-only hidden')}/>
         </Link>
+
         <SidebarCloseButton
           aria-label={isCollapsed ? 'Open sidebar' : 'Close sidebar'}
           title={isCollapsed ? 'Open sidebar' : 'Close sidebar'}

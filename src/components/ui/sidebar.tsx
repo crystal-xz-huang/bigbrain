@@ -146,7 +146,7 @@ export function SidebarCloseButton({ className, ...props }: React.ComponentProps
   return (
     <Headless.Button
       {...props}
-      className={clsx(className, "sidebar-icon cursor-pointer")}
+      className={clsx(className, "sidebar-icon cursor-pointer size-9")}
     >
       <svg
         width={20}
