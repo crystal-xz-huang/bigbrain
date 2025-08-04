@@ -1,7 +1,8 @@
 'use server';
 
-import { auth, signIn, signOut } from '@/auth';
+import { signIn, signOut } from '@/auth';
 import {
+  cloneGame,
   createGame,
   createQuestion,
   createUser,
@@ -9,12 +10,12 @@ import {
   deleteQuestion,
   fetchQuestionsByGameId,
   fetchUserByEmail,
-  updateGame
+  updateGame,
 } from '@/lib/data';
-import { AccessError } from '@/lib/error';
+import { getAuthUser } from '@/lib/service';
 import {
+  ActionResponse,
   AuthResponse,
-  AuthUser,
   CreateGameActionResponse,
   CreateQuestionActionResponse,
   DeleteGameActionResponse,
@@ -22,35 +23,51 @@ import {
   SignInActionResponse,
   SignOutActionResponse,
   SignUpActionResponse,
-  UpdateGameActionResponse
+  UpdateGameActionResponse,
 } from '@/lib/types';
 import {
   createGameSchema,
   groupQuestionErrors,
   signInSchema,
-  signUpSchema,
-  updateGameSchema
+  updateGameSchema,
 } from '@/lib/zod';
 import { QuestionType } from '@prisma/client';
 import { AuthError } from 'next-auth';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { z } from 'zod';
 import { routes } from './routes';
 
 /***************************************************************
                      Helper Functions
 ***************************************************************/
-async function fetchCurrentUser(): Promise<AuthUser> {
-  const session = await auth();
-  const user = await fetchUserByEmail(session?.user?.email || '');
-  if (!user) throw new AccessError('Unauthorized access');
-  return user;
-}
+
+const parseFormData = async (formData: FormData, schema: z.ZodSchema) => {
+  const data = Object.fromEntries(formData);
+  const parsed = schema.safeParse(data);
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: 'Please fix the errors in the form.',
+      errors: parsed.error.flatten().fieldErrors,
+      inputs: data,
+    };
+  }
+  return {
+    success: true,
+    data: parsed.data,
+    raw: data,
+  };
+};
+
+/***************************************************************
+                     Auth Functions
+***************************************************************/
 
 async function authenticate(
   email: string,
   password: string
 ): Promise<AuthResponse> {
-  // Attempt to sign in with the validated credentials
   try {
     await signIn('credentials', {
       email,
@@ -87,28 +104,12 @@ async function authenticate(
   }
 }
 
-/***************************************************************
-                     Auth Functions
-***************************************************************/
-
 export async function signInAction(
   _: SignInActionResponse | null,
   formData: FormData
 ): Promise<SignInActionResponse> {
-  const data = Object.fromEntries(formData);
-  const parsed = signInSchema.safeParse(data);
-
-  // If form validation fails, return errors early. Otherwise, continue.
-  if (!parsed.success) {
-    return {
-      success: false,
-      message: 'Please fix the errors in the form.',
-      errors: parsed.error.flatten().fieldErrors,
-      inputs: data,
-    };
-  }
-
-  // Attempt to sign in with the validated credentials
+  const parsed = await parseFormData(formData, signInSchema);
+  if (!parsed.success) return parsed as SignInActionResponse;
   const { email, password } = parsed.data;
   return await authenticate(email, password);
 }
@@ -117,18 +118,8 @@ export async function signUpAction(
   _: SignUpActionResponse | null,
   formData: FormData
 ): Promise<SignUpActionResponse> {
-  const data = Object.fromEntries(formData);
-  const parsed = signUpSchema.safeParse(data);
-
-  // If form validation fails, return errors early. Otherwise, continue.
-  if (!parsed.success) {
-    return {
-      success: false,
-      message: 'Please fix the errors in the form.',
-      errors: parsed.error.flatten().fieldErrors,
-      inputs: data,
-    };
-  }
+  const parsed = await parseFormData(formData, signInSchema);
+  if (!parsed.success) return parsed as SignUpActionResponse;
 
   // Check if user already exists
   const { name, email, password } = parsed.data;
@@ -153,10 +144,9 @@ export async function signOutAction(): Promise<SignOutActionResponse> {
       message: 'Successfully signed out',
     };
   } catch (err) {
-    console.error('Sign out error:', err);
     return {
       success: false,
-      message: 'There was a problem signing out. Please try again.',
+      message: (err as Error).message || 'There was a problem signing out.',
     };
   }
 }
@@ -169,22 +159,13 @@ export async function createGameAction(
   _: CreateGameActionResponse | null,
   formData: FormData
 ): Promise<CreateGameActionResponse> {
-  const data = Object.fromEntries(formData);
-  const parsed = createGameSchema.safeParse(data);
-  if (!parsed.success) {
-    return {
-      success: false,
-      message: 'Please fix the errors in the form.',
-      errors: parsed.error.flatten().fieldErrors,
-      inputs: data,
-    };
-  }
+  const parsed = await parseFormData(formData, createGameSchema);
+  if (!parsed.success) return parsed as CreateGameActionResponse;
 
   try {
     const { name } = parsed.data;
-    const user = await fetchCurrentUser();
-    await createGame(name, user.id);
-    revalidatePath(routes.games);
+    const user = await getAuthUser();
+    await createGame(user.id, name);
     return {
       success: true,
       message: `Game created successfully!`,
@@ -193,26 +174,22 @@ export async function createGameAction(
     return {
       success: false,
       message:
-        (err as Error).message ||
-        'There was a problem creating the game. Please try again.',
-      inputs: data,
+        (err as Error).message || 'There was a problem creating the game.',
+      inputs: parsed.raw,
     };
   }
 }
 
 export async function deleteGameAction(
   gameId: string,
-  _: CreateGameActionResponse | null,
-  _formData: FormData
+  _prevState: CreateGameActionResponse | null,
+  formData: FormData
 ): Promise<DeleteGameActionResponse> {
+  const redirectTo = formData.get('redirectTo') as string;
+
   try {
-    const user = await fetchCurrentUser();
-    await deleteGame(gameId, user.id);
-    revalidatePath(routes.games);
-    return {
-      success: true,
-      message: 'Game deleted successfully.',
-    };
+    const user = await getAuthUser();
+    await deleteGame(user.id, gameId);
   } catch (err) {
     return {
       success: false,
@@ -221,6 +198,16 @@ export async function deleteGameAction(
         'There was a problem deleting the game. Please try again.',
     };
   }
+
+  if (redirectTo) {
+    revalidatePath(redirectTo);
+    redirect(redirectTo);
+  }
+
+  return {
+    success: true,
+    message: 'Game deleted successfully.',
+  };
 }
 
 export async function updateGameAction(
@@ -228,9 +215,7 @@ export async function updateGameAction(
   _: UpdateGameActionResponse | null,
   formData: FormData
 ): Promise<UpdateGameActionResponse> {
-  console.log('Updating game with ID:', gameId);
   const data = Object.fromEntries(formData);
-  console.log('Form data:', data);
   const parsed = updateGameSchema.safeParse({
     ...data,
     questions: JSON.parse(data.questions as string),
@@ -238,10 +223,9 @@ export async function updateGameAction(
 
   if (!parsed.success) {
     const fieldErrors = parsed.error.flatten().fieldErrors;
-
     return {
       success: false,
-      message: 'Please fix the errors in the form.',
+      message: 'This game is incomplete. Please fix the errors in the form.',
       errors: {
         ...fieldErrors,
         questions: groupQuestionErrors(parsed.error),
@@ -249,27 +233,44 @@ export async function updateGameAction(
     };
   }
 
-  try {
-    const user = await fetchCurrentUser();
-    const game = await updateGame(gameId, user.id, parsed.data);
-    return {
-      success: true,
-      message: 'Game updated successfully.',
-      game: game,
-    };
-  } catch (err) {
+  const user = await getAuthUser();
+  const game = await updateGame(user.id, gameId, parsed.data);
+  const redirectTo = formData.get('redirectTo') as string;
+
+  if (!game) {
     return {
       success: false,
-      message:
-        (err as Error).message ||
-        'There was a problem updating the game. Please try again.',
+      message: 'There was a problem updating the game.',
     };
   }
+
+  if (redirectTo) {
+    revalidatePath(redirectTo);
+    redirect(redirectTo);
+  }
+
+  return {
+    success: true,
+    message: 'Game updated successfully.',
+    game: game,
+  };
 }
 
-/***************************************************************
-                     Question Functions
-***************************************************************/
+export async function cloneGameAction(
+  gameId: string,
+  _prevState: ActionResponse | null,
+  _formData: FormData
+): Promise<ActionResponse> {
+  const game = await cloneGame(gameId);
+  if (!game) {
+    return {
+      success: false,
+      message: 'There was a problem cloning the game. Please try again.',
+    };
+  }
+  revalidatePath(routes.game.edit(game.id));
+  redirect(routes.game.edit(game.id));
+}
 
 export async function createQuestionAction(
   gameId: string,
@@ -277,15 +278,16 @@ export async function createQuestionAction(
   formData: FormData
 ): Promise<CreateQuestionActionResponse> {
   const type = formData.get('type') as QuestionType;
+
   try {
-    const user = await fetchCurrentUser();
-    await createQuestion(gameId, type, user.id);
-    // Fetch the updated questions
+    const user = await getAuthUser();
+    const question = await createQuestion(user.id, gameId, type);
     const updatedQuestions = await fetchQuestionsByGameId(gameId);
     return {
       success: true,
       message: 'Question created successfully.',
       questions: updatedQuestions,
+      question: question,
     };
   } catch (err) {
     return {
@@ -303,8 +305,8 @@ export async function deleteQuestionAction(
   _formData: FormData
 ): Promise<DeleteQuestionActionResponse> {
   try {
-    const user = await fetchCurrentUser();
-    await deleteQuestion(questionId, user.id);
+    const user = await getAuthUser();
+    await deleteQuestion(user.id, questionId);
     return {
       success: true,
       message: 'Question deleted successfully.',

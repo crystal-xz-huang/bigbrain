@@ -44,7 +44,7 @@ export type SignUpFormInput = z.infer<typeof signUpSchema>;
                       Game Creation
 ***************************************************************/
 const answerSchema = object({
-  title: z.string().max(75, 'Answer must be less than 75 characters'), // allow empty for now
+  title: z.string().trim().max(75, 'Answer must be less than 75 characters'), // allow empty for now
   correct: z.coerce.boolean(),
 });
 
@@ -53,6 +53,7 @@ const questionSchema = object({
   type: z.nativeEnum(QuestionType),
   duration: z.number().int().min(5, 'Duration must be at least 5 seconds'),
   points: z.number().int().min(0, 'Points must be a non-negative integer'),
+  hint: z.string().trim().max(120, 'Hint must be less than 120 characters').optional(),
   answers: z.array(answerSchema),
 }).superRefine((data, ctx) => {
   const validAnswers = data.answers.filter(a => a.title.trim() !== '');

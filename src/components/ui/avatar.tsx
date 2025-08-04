@@ -8,7 +8,7 @@ import { Link } from './link'
 import { getInitials, isEmptyString } from '@/lib/utils'
 import type { User } from 'next-auth'
 
-type AvatarProps = {
+export type AvatarProps = {
   src?: string | null
   square?: boolean
   initials?: string
@@ -87,13 +87,13 @@ export const AvatarButton = forwardRef(function AvatarButton(
   )
 })
 
-export function AvatarDefault( { className } : { className?: string }) {
+export function AvatarDefault( { className, ...props } : { className?: string }) {
   return (
-    <span className={clsx('inline-block overflow-hidden rounded-full bg-zinc-800 dark:bg-zinc-100', className)}>
+    <span className={clsx('inline-block overflow-hidden rounded-full bg-zinc-800 dark:bg-zinc-100', className)} {...props}>
       <svg
         fill="currentColor"
         viewBox="0 0 24 24"
-        className="size-full text-zinc-100 dark:text-zinc-500"
+        className="text-zinc-100 dark:text-zinc-500"
       >
         <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
       </svg>

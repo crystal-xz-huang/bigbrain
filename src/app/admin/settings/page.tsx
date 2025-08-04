@@ -2,8 +2,8 @@ import { auth } from '@/auth';
 import { Button } from '@/components/ui/button';
 import { Fieldset, Legend } from '@/components/ui/fieldset';
 import { Text } from '@/components/ui/text';
-import AccountForm from '@/components/admin/settings/account';
-import ProfileForm from '@/components/admin/settings/profile';
+import AccountForm from '@/components/settings/account';
+import ProfileForm from '@/components/settings/profile';
 import type { Metadata } from 'next';
 import Form from 'next/form';
 

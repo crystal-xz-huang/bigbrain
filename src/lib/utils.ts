@@ -1,4 +1,5 @@
-import type { Question } from '@prisma/client';
+import { Question, QuestionType } from '@prisma/client';
+import type { Answer, GameWithQuestions, QuestionWithAnswers } from '@/lib/types';
 
 /***************************************************************
                       Data Input
@@ -74,12 +75,12 @@ const timeAgo = (timestamp: string | number | Date) => {
   const date = new Date(timestamp);
   const diff = now.getTime() - date.getTime();
 
-  return{
-    seconds: Math.floor((diff) / 1000),
-    minutes: Math.floor((diff) / (1000 * 60)),
-    hours: Math.floor((diff) / (1000 * 60 * 60)),
-    days: Math.floor((diff) / (1000 * 60 * 60 * 24)),
-    weeks: Math.floor((diff) / (1000 * 60 * 60 * 24 * 7)),
+  return {
+    seconds: Math.floor(diff / 1000),
+    minutes: Math.floor(diff / (1000 * 60)),
+    hours: Math.floor(diff / (1000 * 60 * 60)),
+    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+    weeks: Math.floor(diff / (1000 * 60 * 60 * 24 * 7)),
   };
 };
 
@@ -122,12 +123,27 @@ export const formatTime = (total: number) => {
 /***************************************************************
                      User
 ***************************************************************/
+
 export const getInitials = (name: string) => {
   if (!name) return '';
   const names = name.split(' ');
   const initials = names.map((n) => n[0]).join('');
   return initials.toUpperCase();
 };
+
+export const generateUserStats = (stats: { joinedAt: Date | undefined; totalGames: number}) => {
+  return [
+    {
+      label: 'joined',
+      value:
+        stats?.joinedAt?.toLocaleString('default', {
+          month: 'short',
+          year: 'numeric',
+        }) || 'N/A',
+    },
+    { label: 'games', value: stats?.totalGames || 0 },
+  ];
+}
 
 /***************************************************************
                      Game
@@ -154,6 +170,110 @@ export const totalNumberOfQuestions = (questions: Question[]) => {
   if (!questions || questions.length === 0) return 0;
   return questions.length;
 };
+
+/**
+ * Creates a new answer object with a unique ID.
+ * @param questionId - The ID of the question this answer belongs to
+ * @param correct - Whether the answer is correct
+ * @param title - The title of the answer
+ * @returns A new answer object
+ */
+export const newAnswer = (
+  questionId: string,
+  correct: boolean,
+  title: string = ''
+) => {
+  return {
+    id: uid(),
+    title,
+    questionId,
+    correct,
+  };
+};
+
+/**
+ * Generates answers for a question based on its type.
+ * @param question - The question object
+ * @param type - The new type to change to
+ * @return {Answer[]}
+ */
+export const generateAnswersForQuestionType = (
+  question: QuestionWithAnswers,
+  type: QuestionType
+) => {
+  switch (type) {
+    case QuestionType.SINGLE:
+      // Ensure 1 correct answer and 3 false answers
+      let correctAnswer = question.answers.find((a) => a.correct);
+      const falseAnswers = question.answers.filter((a) => !a.correct);
+
+      if (!correctAnswer) correctAnswer = newAnswer(question.id, true);
+      if (falseAnswers.length !== 3) {
+        while (falseAnswers.length < 3) {
+          falseAnswers.push(newAnswer(question.id, false));
+        }
+        falseAnswers.splice(3);
+      }
+
+      return [correctAnswer, ...falseAnswers];
+      break;
+
+    case QuestionType.MULTIPLE:
+      // Ensure exactly 4 answers with at least one correct
+      const a = question.answers.slice(0, 4);
+      while (a.length < 4) {
+        a.push(newAnswer(question.id, false));
+      }
+      if (!a.some((a) => a.correct)) a[0].correct = true;
+
+      return a;
+      break;
+
+    case QuestionType.TYPE_ANSWER:
+      const totalCount = question.answers.length;
+      const validAnswers = question.answers.filter(
+        (a) => !isEmptyString(a.title)
+      );
+
+      let updatedAnswers;
+      if (validAnswers.length === 0 && totalCount > 0) {
+        updatedAnswers = question.answers.slice(0, 1);
+      } else if (validAnswers.length === 0 && totalCount === 0) {
+        updatedAnswers = [newAnswer(question.id, true)];
+      } else {
+        updatedAnswers = validAnswers;
+      }
+      return updatedAnswers;
+      break;
+
+    default:
+      console.error('Invalid question type:', type);
+      return question.answers;
+      break;
+  }
+};
+
+export const isInvalidGame = (game: GameWithQuestions) => {
+  return (
+    !game.questions ||
+    game.questions.length === 0 ||
+    game.questions.some((q) => !q.answers || q.answers.length === 0 || q.answers.some((a) => !a.title))
+  )
+}
+
+export const generateErrorMessage = (game: GameWithQuestions) => {
+  if (!game.questions || game.questions.length === 0) {
+    return 'Missing questions';
+  }
+  const answerCount = game.questions.filter(
+      (q) => !q.answers || q.answers.length === 0 || q.answers.some((a) => !a.title)
+  ).length;
+
+  if (answerCount > 0) {
+    return `${answerCount} answer${pluralSuffix(answerCount)} missing`;
+  }
+  return '';
+}
 
 /***************************************************************
                      Pagination

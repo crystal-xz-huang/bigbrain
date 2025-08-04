@@ -1,5 +1,6 @@
-import { AccessError, DatabaseError, InputError } from '@/lib/error';
+import { AccessError, InputError } from '@/lib/error';
 import { prisma } from '@/lib/prisma';
+import { assertOwnsGame, getAuthUser } from '@/lib/service';
 import type {
   AuthUser,
   GameWithQuestions,
@@ -23,21 +24,16 @@ const newSessionCode = async (): Promise<string> => {
   return generateId(existingCodes, 999999);
 };
 
-const assertOwnsGame = async (
-  gameId: string,
-  userId: string
-): Promise<void> => {
-  const game = await prisma.game.findUnique({
-    where: { id: gameId },
-  });
-  if (!game) throw new InputError('Invalid game ID');
-  if (game.ownerId !== userId)
-    throw new AccessError('Admin does not own this Game');
-};
-
 /***************************************************************
                       Auth Functions
 ***************************************************************/
+
+export async function fetchAuthUser(): Promise<AuthUser> {
+  const user = await getAuthUser();
+  const dbUser = await fetchUserByEmail(user.email as string);
+  if (!dbUser) throw new AccessError('User not found');
+  return dbUser;
+}
 
 export async function fetchUserByCredentials(
   email: string,
@@ -101,47 +97,151 @@ export async function fetchUserStats(user: User) {
 ***************************************************************/
 
 export async function createGame(
-  name: string,
-  userId: string
+  userId: string | undefined,
+  gameName: string
 ): Promise<Game | null> {
   try {
     const game = await prisma.game.create({
       data: {
-        name,
-        ownerId: userId,
+        name: gameName as string,
+        ownerId: userId as string,
       },
     });
     return game;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new DatabaseError('Failed to create game');
+    throw new Error('Failed to create game');
   }
 }
 
 export async function deleteGame(
-  gameId: string,
-  userId: string
+  userId: string | undefined,
+  gameId: string
 ): Promise<void> {
   try {
-    await assertOwnsGame(gameId, userId);
-    await prisma.game.delete({ where: { id: gameId, ownerId: userId } });
+    await assertOwnsGame(userId as string, gameId);
+    await prisma.game.delete({
+      where: { id: gameId, ownerId: userId as string },
+    });
   } catch (error) {
     console.error('Database Error:', error);
-    throw new DatabaseError('Failed to delete game');
+    throw new Error('Failed to delete game');
+  }
+}
+
+export async function saveGame(
+  userId: string | undefined,
+  gameId: string,
+  data: UpdateGameFormData
+): Promise<GameWithQuestions | null> {
+  try {
+    await assertOwnsGame(userId as string, gameId);
+
+    // Update game
+    const game = await prisma.game.update({
+      where: { id: gameId, ownerId: userId as string },
+      data: {
+        name: data.name,
+        description: data.description,
+        image: data.image as string,
+      },
+    });
+
+    // Fetch existing questions
+    const existingQuestions = await prisma.question.findMany({
+      where: { gameId },
+      include: { answers: true },
+    });
+    const questionMap = new Map(existingQuestions.map((q) => [q.id, q]));
+
+    for (const q of data.questions) {
+      // Skip if no ID is provided
+      if (!q.id) continue;
+      const existing = questionMap.get(q.id);
+      if (!existing) continue;
+
+      // Update non-empty fields
+      await prisma.question.update({
+        where: { id: q.id },
+        data: {
+          title: q.title,
+          type: q.type,
+          duration: q.duration,
+          points: q.points,
+          hint: q.hint || existing.hint,
+        },
+      });
+
+      // Update answers
+      const answerMap = new Map(existing.answers.map((a) => [a.id, a]));
+
+      for (const a of q.answers || []) {
+        if (!a.id) {
+          // New answer
+          await prisma.questionAnswer.create({
+            data: {
+              questionId: q.id,
+              title: a.title || '',
+              correct: !!a.correct,
+            },
+          });
+        } else {
+          const existingAnswer = answerMap.get(a.id);
+          if (!existingAnswer) continue;
+
+          await prisma.questionAnswer.update({
+            where: { id: a.id },
+            data: {
+              title: a.title || existingAnswer.title,
+              correct:
+                typeof a.correct === 'boolean'
+                  ? a.correct
+                  : existingAnswer.correct,
+            },
+          });
+        }
+      }
+    }
+
+    // Create new questions and answers
+    for (const question of data.questions) {
+      await prisma.question.create({
+        data: {
+          gameId,
+          title: question.title,
+          type: question.type,
+          duration: question.duration,
+          points: question.points,
+          hint: question.hint,
+          answers: {
+            create: question.answers.map((answer) => ({
+              title: answer.title,
+              correct: answer.correct,
+            })),
+          },
+        },
+      });
+    }
+
+    // Return the updated game
+    return game;
+  } catch (error) {
+    console.error('Database Error:', error);
+    return null;
   }
 }
 
 export async function updateGame(
+  userId: string | undefined,
   gameId: string,
-  userId: string,
   data: UpdateGameFormData
 ): Promise<GameWithQuestions | null> {
   try {
-    await assertOwnsGame(gameId, userId);
+    await assertOwnsGame(userId as string, gameId);
 
     // Update game
     const game = await prisma.game.update({
-      where: { id: gameId, ownerId: userId },
+      where: { id: gameId, ownerId: userId as string },
       data: {
         name: data.name,
         description: data.description,
@@ -163,11 +263,12 @@ export async function updateGame(
           type: question.type,
           duration: question.duration,
           points: question.points,
+          hint: question.hint,
           answers: {
             create: question.answers
-              .filter((answer) => answer.title.trim() !== '')
+              .filter((a) => a.title.trim() !== '') // Filter out empty answers
               .map((answer) => ({
-                title: answer.title.trim(),
+                title: answer.title,
                 correct: answer.correct,
               })),
           },
@@ -179,7 +280,61 @@ export async function updateGame(
     return game;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new DatabaseError('Failed to update game');
+    return null;
+  }
+}
+
+export async function cloneGame(
+  gameId: string
+): Promise<GameWithQuestions | null> {
+  try {
+    const game = await prisma.game.findUnique({
+      where: { id: gameId },
+      include: {
+        questions: {
+          include: {
+            answers: true,
+          },
+        },
+      },
+    });
+
+    if (!game) return null;
+
+    // Create a new game with the same details
+    const clonedGame = await prisma.game.create({
+      data: {
+        name: `${game.name} (Copy)`,
+        description: game.description,
+        image: game.image,
+        ownerId: game.ownerId,
+      },
+    });
+
+    // Clone questions and answers
+    for (const question of game.questions) {
+      await prisma.question.create({
+        data: {
+          gameId: clonedGame.id,
+          title: question.title,
+          type: question.type,
+          duration: question.duration,
+          points: question.points,
+          hint: question.hint,
+          answers: {
+            create: question.answers.map((answer) => ({
+              title: answer.title,
+              correct: answer.correct,
+            })),
+          },
+        },
+      });
+    }
+
+    return fetchGameById(clonedGame.id);
+  } catch (error) {
+    console.error('Database Error:', error);
+    return null;
   }
 }
 
@@ -274,8 +429,8 @@ export async function fetchGamesPages(
                       Game Question Functions
 ***************************************************************/
 const assertOwnsQuestion = async (
-  questionId: string,
-  userId: string
+  userId: string | undefined,
+  questionId: string
 ): Promise<void> => {
   const question = await prisma.question.findUnique({
     where: { id: questionId },
@@ -285,18 +440,18 @@ const assertOwnsQuestion = async (
   const game = await prisma.game.findUnique({
     where: { id: question.gameId },
   });
-  if (!game) throw new InputError('Game not found');
+  if (!game) throw new InputError('Game not found for question');
   if (game.ownerId !== userId)
     throw new AccessError('Cannot modify games owned by other admins');
 };
 
 export async function createQuestion(
+  userId: string | undefined,
   gameId: string,
-  type: QuestionType,
-  userId: string
-): Promise<void> {
+  type: QuestionType
+): Promise<QuestionWithAnswers | null> {
   try {
-    assertOwnsGame(gameId, userId);
+    assertOwnsGame(userId as string, gameId);
 
     let defaultAnswers;
 
@@ -324,39 +479,45 @@ export async function createQuestion(
         break;
 
       default:
-        throw new InputError('Unsupported question type');
+        throw new InputError('Invalid question type');
     }
 
-    await prisma.question.create({
+    const question = await prisma.question.create({
       data: {
         gameId,
         type: type,
         title: '',
+        hint: '',
         duration: 20,
         points: 1,
         answers: {
           create: defaultAnswers,
         },
       },
+      include: {
+        answers: true,
+      },
     });
+
+    return question;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new DatabaseError('Failed to create question');
+    throw new Error('Failed to create question');
   }
 }
 
 export async function deleteQuestion(
-  questionId: string,
-  userId: string
+  userId: string | undefined,
+  questionId: string
 ): Promise<void> {
   try {
-    await assertOwnsQuestion(questionId, userId);
+    await assertOwnsQuestion(userId as string, questionId);
     await prisma.question.delete({
       where: { id: questionId },
     });
   } catch (error) {
     console.error('Database Error:', error);
-    throw new DatabaseError('Failed to delete question');
+    throw new Error('Failed to delete question');
   }
 }
 
@@ -374,7 +535,7 @@ export async function fetchQuestionsByGameId(
     return questions;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new DatabaseError('Failed to fetch questions');
+    throw new Error('Failed to fetch questions');
   }
 }
 

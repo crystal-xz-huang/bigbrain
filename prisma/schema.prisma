@@ -123,8 +123,8 @@ model Question {
   points        Int
   answers       QuestionAnswer[]
   playerAnswers PlayerAnswer[]
-
-  createdAt DateTime @default(now())
+  hint          String?
+  createdAt     DateTime         @default(now())
 }
 
 model QuestionAnswer {

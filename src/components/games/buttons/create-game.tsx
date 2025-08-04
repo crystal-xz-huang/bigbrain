@@ -1,6 +1,6 @@
 'use client';
 
-import CreateGameTrigger from '@/components/games/triggers/create-game';
+import CreateGameTrigger from '@/components/games/buttons/triggers/create-game';
 import { Button } from '@/components/ui/button';
 import { PlusIcon } from '@heroicons/react/16/solid';
 

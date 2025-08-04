@@ -4,8 +4,13 @@ import { MagnifyingGlassIcon } from '@heroicons/react/16/solid';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { Input, InputGroup } from '@/components/ui/input';
 import { useDebouncedCallback } from 'use-debounce';
+import * as Headless from '@headlessui/react';
 
-export function Search({ placeholder }: { placeholder: string }) {
+export function Search({
+  placeholder,
+  className,
+  ...props
+}: { placeholder?: string; className?: string } & Omit<Headless.InputProps, 'as' | 'placeholder' | 'type' | 'onChange' | 'defaultValue'>) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
@@ -27,6 +32,8 @@ export function Search({ placeholder }: { placeholder: string }) {
     <InputGroup>
       <MagnifyingGlassIcon aria-hidden="true" />
       <Input
+        {...props}
+        className={className}
         name="search"
         type="search"
         placeholder={placeholder}

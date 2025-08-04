@@ -19,9 +19,5 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   }
 
   // Render the form with the fetched data (invoice and customers)
-  return (
-    <>
-      <Form game={game} />
-    </>
-  );
+  return <Form game={game} />;
 }

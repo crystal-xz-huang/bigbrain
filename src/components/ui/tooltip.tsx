@@ -67,9 +67,6 @@ const styles = {
     secondary: [
       'bg-secondary text-secondary-content',
     ],
-    accent: [
-      'bg-accent text-accent-content',
-    ],
     neutral: [
       'bg-neutral text-neutral-content',
     ],
@@ -123,7 +120,7 @@ function TooltipContent({
   position = 'top',
   ...props
 }: React.ComponentProps<"div"> & {
-  color?: 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error';
+  color?: 'primary' | 'secondary' | 'neutral' | 'info' | 'success' | 'warning' | 'error';
   position?: "top" | "bottom" | "left" | "right"
 }) {
   const context = React.useContext(TooltipContext)

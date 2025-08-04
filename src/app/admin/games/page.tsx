@@ -1,12 +1,14 @@
-import CreateGameButton from '@/components/games/buttons/create-game';
-import List from '@/components/games/list';
-import Pagination from '@/components/games/pagination';
 import { Container, Heading } from '@/components/ui/page';
 import { Search } from '@/components/ui/search';
+import { CardsListSkeleton } from '@/components/ui/skeletons';
 import { fetchGamesPages } from '@/lib/data';
 import { requireUser } from '@/lib/session';
 import { Metadata } from 'next';
 import { Suspense } from 'react';
+
+import CreateGameButton from '@/components/games/buttons/create-game';
+import List from '@/components/games/list';
+import Pagination from '@/components/games/pagination';
 
 export const metadata: Metadata = {
   title: 'Games',
@@ -32,18 +34,14 @@ export default async function GamesPage(props: {
       <Container>
         {/* Section Heading */}
         <div className="flex items-center justify-between gap-2 mb-6">
-          <Search placeholder="Search games..." />
+          <Search placeholder="Search games..." className='min-w-64 flex-1' />
           <CreateGameButton />
         </div>
         {/* Section Content */}
         <div className="w-full h-full flex flex-col gap-6 justify-between">
-          <Suspense
-            key={query + currentPage}
-            fallback={<div>Loading games...</div>}
-          >
+          <Suspense key={query + currentPage} fallback={<CardsListSkeleton />}>
             <List query={query} currentPage={currentPage} />
           </Suspense>
-
           <Pagination totalPages={totalPages} />
         </div>
       </Container>

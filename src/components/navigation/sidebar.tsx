@@ -1,15 +1,14 @@
 'use client';
 
 import {
-  actions,
   mainNavigation,
   secondaryNavigation,
 } from '@/components/navigation/constants';
-import { Branding } from '@/components/ui/branding';
 import { Link } from '@/components/ui/link';
 import {
   Sidebar,
   SidebarBody,
+  SidebarCloseButton,
   SidebarDivider,
   SidebarFooter,
   SidebarHeader,
@@ -20,41 +19,37 @@ import {
   SidebarSpacer,
 } from '@/components/ui/sidebar';
 import { useNavLinks } from '@/hooks/navigation';
+import { useSidebar } from '@/hooks/sidebar';
+import { PlusIcon } from '@heroicons/react/20/solid';
+import BigBrainLogo from '@public/bigbrain-logo.svg';
+import clsx from 'clsx';
 import type { User } from 'next-auth';
-import { SidebarProfileDropdown } from './dropdown';
+import Image from 'next/image';
+import { SidebarProfileDropdown } from './profile-dropdown';
 
 export default function DashboardSidebar({ user }: { user: User }) {
   const mainLinks = useNavLinks(mainNavigation);
   const secondaryLinks = useNavLinks(secondaryNavigation);
+  const { isCollapsed, toggleCollapse } = useSidebar();
 
   return (
-    <Sidebar>
-      <SidebarHeader>
-        <Link href="#" aria-label="Home" className="px-2">
-          <Branding />
+    <Sidebar className={clsx(isCollapsed && 'w-16')}>
+      <SidebarHeader
+        className={clsx(
+          'flex items-center justify-between',
+          isCollapsed ? 'flex-col' : 'flex-row'
+        )}
+      >
+        <Link href="/" aria-label="Home" className="sidebar-icon">
+          <Image src={BigBrainLogo} alt="Big Brain Logo" className="icon" />
         </Link>
+        <SidebarCloseButton
+          aria-label={isCollapsed ? 'Open sidebar' : 'Close sidebar'}
+          title={isCollapsed ? 'Open sidebar' : 'Close sidebar'}
+          onClick={toggleCollapse}
+        />
       </SidebarHeader>
-      <SidebarBody>
-        <SidebarSection>
-          <SidebarHeading>Quick Actions</SidebarHeading>
-          {/* Action buttons */}
-          {actions.map((action) => {
-            const LinkIcon = action.icon;
-            return (
-              <SidebarItem
-                key={action.label}
-                href={action.url}
-                aria-label={action.label}
-              >
-                {LinkIcon && <LinkIcon />}
-                <SidebarLabel className="hidden md:block">
-                  {action.label}
-                </SidebarLabel>
-              </SidebarItem>
-            );
-          })}
-        </SidebarSection>
-        <SidebarDivider />
+      <SidebarBody className={clsx(isCollapsed && 'items-center')}>
         <SidebarSection>
           {/* Navigation items */}
           {mainLinks.map((link) => {
@@ -66,11 +61,27 @@ export default function DashboardSidebar({ user }: { user: User }) {
                 current={link.current}
               >
                 {LinkIcon && <LinkIcon />}
-                <SidebarLabel>{link.label}</SidebarLabel>
+                <SidebarLabel className={clsx(isCollapsed && 'sr-only hidden')}>
+                  {link.label}
+                </SidebarLabel>
               </SidebarItem>
             );
           })}
         </SidebarSection>
+        <SidebarDivider className={clsx(isCollapsed && 'w-full')} />
+        <SidebarSection>
+          <SidebarHeading className={clsx(isCollapsed && 'sr-only hidden')}>
+            Quick Actions
+          </SidebarHeading>
+          <SidebarItem href="#">
+            <PlusIcon />
+            <SidebarLabel className={clsx(isCollapsed && 'sr-only hidden')}>
+              New game
+            </SidebarLabel>
+          </SidebarItem>
+        </SidebarSection>
+        <SidebarDivider className={clsx(isCollapsed && 'w-full')} />
+
         <SidebarSpacer />
         <SidebarSection>
           {/* Secondary navigation items */}
@@ -83,15 +94,16 @@ export default function DashboardSidebar({ user }: { user: User }) {
                 current={link.current}
               >
                 {LinkIcon && <LinkIcon />}
-                <SidebarLabel>{link.label}</SidebarLabel>
+                <SidebarLabel className={clsx(isCollapsed && 'sr-only hidden')}>
+                  {link.label}
+                </SidebarLabel>
               </SidebarItem>
             );
           })}
         </SidebarSection>
       </SidebarBody>
-      <SidebarFooter>
-        {/* Profile dropdown */}
-        <SidebarProfileDropdown user={user} />
+      <SidebarFooter className={clsx(isCollapsed && 'items-center')}>
+        <SidebarProfileDropdown user={user} isCollapsed={isCollapsed} />
       </SidebarFooter>
     </Sidebar>
   );

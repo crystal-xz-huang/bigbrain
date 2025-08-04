@@ -1,12 +1,18 @@
-import { CreateGame } from '@/components/dashboard/cta';
-import UserGames from '@/components/dashboard/user-games';
-import UserProfile from '@/components/dashboard/user-profile';
 import {
-  Container,
-  Heading
-} from '@/components/ui/page';
+  BannerGroup,
+  CreateGameBanner,
+  JoinGameBanner,
+} from '@/components/dashboard/banners';
+import {
+  ProfileBannerSkeleton,
+  UserGamesSkeleton,
+} from '@/components/dashboard/skeletons';
+import { Container, Heading } from '@/components/ui/page';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
+
+import UserGames from '@/components/dashboard/user-games';
+import UserProfile from '@/components/dashboard/user-profile';
 
 export const metadata: Metadata = {
   title: {
@@ -21,11 +27,16 @@ export default function DashboardPage() {
       <Heading>Dashboard</Heading>
       <Container>
         <div className="flex flex-col space-y-6">
-          <Suspense fallback={<div>Loading user info...</div>}>
+          <Suspense fallback={<ProfileBannerSkeleton />}>
             <UserProfile />
           </Suspense>
-          <CreateGame />
-          <Suspense fallback={<div>Loading user games...</div>}>
+
+          <BannerGroup>
+            <CreateGameBanner />
+            <JoinGameBanner />
+          </BannerGroup>
+
+          <Suspense fallback={<UserGamesSkeleton />}>
             <UserGames />
           </Suspense>
         </div>

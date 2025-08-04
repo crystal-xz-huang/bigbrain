@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import SignUp from '@/components/auth/signup';
+import SignUp from '@/components/ui/auth/signup';
 
 export const metadata: Metadata = {
   title: 'Sign Up',

@@ -162,7 +162,7 @@ export function DialogWithIcon({
       buttonColor: 'red',
       icon: ExclamationTriangleIcon,
       iconColor: 'text-red-600',
-      ring: 'bg-red-100 border-red-500/5 ring-red-500/10',
+      ring: 'bg-red-500/20 border-red-500/10 ring-red-500/10',
     },
     info: {
       buttonColor: 'blue',
@@ -198,14 +198,14 @@ export function DialogWithIcon({
         transition
         className={clsx(
           'fixed inset-0 transition-opacity data-closed:opacity-0 data-enter:duration-500 data-enter:ease-out data-leave:duration-400 data-leave:ease-in',
-          'bg-zinc-950/25 dark:bg-zinc-950/50'
+          'bg-zinc-950/25 dark:bg-zinc-950/70'
         )}
       />
       <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
           <Headless.DialogPanel
             transition
-            className="relative transform overflow-hidden rounded-lg bg-white dark:bg-zinc-800 px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+            className="relative transform overflow-hidden rounded-lg bg-white dark:bg-[#353535] px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
           >
             {/* Close Button */}
             <div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">

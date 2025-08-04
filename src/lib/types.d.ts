@@ -136,11 +136,14 @@ export interface UpdateGameFormData {
   description?: string;
   image?: string;
   questions: {
+    id: string;
     title: string;
     type: QuestionType;
     duration: number;
     points: number;
+    hint?: string;
     answers: {
+      id: string;
       title: string;
       correct: boolean;
     }[];
@@ -159,10 +162,16 @@ export interface UpdateGameActionResponse extends ActionResponse {
 /***************************************************************
                      Question Types
 ***************************************************************/
-export type Answer = QuestionAnswer;
+export interface Answer extends QuestionAnswer {
+  id: string;
+  title: string;
+  questionId: string;
+  correct: boolean;
+  createdAt?: Date;
+}
 
 export type QuestionWithAnswers = Question & {
-  answers: QuestionAnswer[];
+  answers: QuestionAnswer[] | Answer[];
 };
 
 export type GameWithQuestions = Game & {
@@ -173,6 +182,7 @@ export interface CreateQuestionActionResponse extends ActionResponse {
   success: boolean;
   message: string;
   questions?: QuestionWithAnswers[] | null;
+  question?: QuestionWithAnswers | null;
 }
 
 export interface DeleteQuestionActionResponse extends ActionResponse {

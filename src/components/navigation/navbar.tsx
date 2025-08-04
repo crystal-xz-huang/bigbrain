@@ -1,7 +1,7 @@
 'use client';
 
 import { actions, mainNavigation } from '@/components/navigation/constants';
-import { NavbarProfileDropdown } from '@/components/navigation/dropdown';
+import { NavbarProfileDropdown } from '@/components/navigation/profile-dropdown';
 import { Branding } from '@/components/ui/branding';
 import { Link } from '@/components/ui/link';
 import {

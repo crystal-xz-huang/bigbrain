@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/toast';
 import { createQuestionAction } from '@/lib/actions';
 import type {
   CreateQuestionActionResponse,
-  QuestionWithAnswers
+  QuestionWithAnswers,
 } from '@/lib/types';
 import * as Headless from '@headlessui/react';
 import { PlusIcon } from '@heroicons/react/24/outline';
@@ -27,6 +27,7 @@ import Form from 'next/form';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
+import { routes } from '@/lib/routes';
 
 const buttons = [
   {
@@ -46,7 +47,7 @@ const buttons = [
     description: 'Type the correct answer',
     image: TypeAnswerImage,
     type: QuestionType.TYPE_ANSWER,
-  }
+  },
 ];
 
 const initialState: CreateQuestionActionResponse = {
@@ -57,9 +58,12 @@ const initialState: CreateQuestionActionResponse = {
 export default function AddQuestion({
   gameId,
   setQuestions,
+  className,
+  ...props
 }: {
   gameId: string;
   setQuestions?: (questions: QuestionWithAnswers[]) => void;
+  className?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const createQuestion = createQuestionAction.bind(null, gameId);
@@ -74,8 +78,13 @@ export default function AddQuestion({
         description: state.message,
       });
       setIsOpen(false);
-      setQuestions?.(state.questions); // update local state in parent
-      router.refresh(); // refresh the current page
+      if (!setQuestions) {
+        router.refresh();
+      } else {
+        setQuestions(state.questions);
+        const newQuestion = state.questions[state.questions.length - 1];
+        router.push(routes.game.question.edit(gameId, newQuestion.id));
+      }
     } else if (!state.success && state.message) {
       toast.error({
         message: 'Error',
@@ -89,14 +98,15 @@ export default function AddQuestion({
     <>
       <Button
         outline
-        disabled={pending}
+        {...props}
         title="Add question"
-        className="!text-cyan-400 !dark:text-cyan-300"
+        disabled={pending}
+        className={className}
         onClick={() => setIsOpen(true)}
       >
         <PlusIcon
           aria-hidden="true"
-          className="!stroke-4 !stroke-cyan-400 !dark:stroke-cyan-300"
+          className="!stroke-4 !stroke-current !dark:stroke-current"
         />
         Add question
       </Button>
