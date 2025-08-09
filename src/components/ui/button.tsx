@@ -168,6 +168,22 @@ const styles = {
       'text-primary-content [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-primary-300)] [--btn-border:var(--color-primary-400)]/90',
       '[--btn-icon:var(--color-primary-300)] data-active:[--btn-icon:var(--color-primary-200)] data-hover:[--btn-icon:var(--color-primary-200)]',
     ],
+    success: [
+      'text-success-content [--btn-hover-overlay:var(--color-white)]/20 [--btn-bg:var(--color-success)] [--btn-border:var(--color-success)]/90',
+      '[--btn-icon:var(--color-success-content)]/60 data-active:[--btn-icon:var(--color-success-content)]/80 data-hover:[--btn-icon:var(--color-white)]/80',
+    ],
+    warning: [
+      'text-warning-content [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-warning)] [--btn-border:var(--color-warning)]/90',
+      '[--btn-icon:var(--color-orange-300)] data-active:[--btn-icon:var(--color-orange-200)] data-hover:[--btn-icon:var(--color-orange-200)]',
+    ],
+    info: [
+      'text-info-content [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-info)] [--btn-border:var(--color-info)]/90',
+      '[--btn-icon:var(--color-blue-400)] data-active:[--btn-icon:var(--color-blue-300)] data-hover:[--btn-icon:var(--color-blue-300)]',
+    ],
+    error: [
+      'text-error-content [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-error)] [--btn-border:var(--color-error)]/90',
+      '[--btn-icon:var(--color-red-300)] data-active:[--btn-icon:var(--color-red-200)] data-hover:[--btn-icon:var(--color-red-200)]',
+    ],
   },
 };
 
@@ -247,30 +263,40 @@ export function TouchTarget({ children }: { children: React.ReactNode }) {
 /***************************************************************
                      Loading Button
 ***************************************************************/
+export function SpinnerIcon({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<'svg'>) {
+  return (
+    <svg
+      className={clsx(className, "size-5 animate-spin motion-reduce:hidden text-current mr-2 -ml-1")}
+      fill="none"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      ></path>
+    </svg>
+  );
+}
+
 export function ButtonLoading(props: ButtonProps) {
   const { children, ...rest } = props;
   return (
     <Button disabled aria-disabled {...rest}>
       <div className="flex items-center justify-center">
-        <svg
-          className="size-5 animate-spin motion-reduce:hidden text-current mr-2 -ml-1"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          ></circle>
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
-        </svg>
+        <SpinnerIcon className="animate-spin" />
         {children || 'Loading...'}
       </div>
     </Button>
@@ -310,17 +336,17 @@ const primary_styles = {
   colors: {
     zinc: 'bg-zinc-500',
     indigo: 'bg-indigo-500',
-    red: 'bg-red-500',
-    orange: 'bg-[#ffc679]',
+    red: 'bg-red-400',
+    orange: 'bg-orange-pastel',
     amber: 'bg-amber-500',
     yellow: 'bg-yellow-500',
     lime: 'bg-lime-500',
-    green: 'bg-[#c6ea84]',
+    green: 'bg-green-pastel',
     emerald: 'bg-emerald-500',
     teal: 'bg-teal-500',
-    cyan: 'bg-cyan-500',
+    cyan: 'bg-cyan-300',
     sky: 'bg-sky-500',
-    blue: 'bg-blue-500',
+    blue: 'bg-blue-300',
     violet: 'bg-violet-500',
     purple: 'bg-purple-500',
     fuchsia: 'bg-fuchsia-500',

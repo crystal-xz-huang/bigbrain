@@ -1,16 +1,38 @@
-import { Card, CardContent, CardHeader } from '@/components/games/cards';
+import { Card, CardFooter, CardCover } from '@/components/ui/game-card';
 
 export function CardSkeleton() {
   return (
     <Card>
-      <CardHeader>
+      <CardCover>
         <div className="skeleton w-full h-full"></div>
-      </CardHeader>
-      <CardContent>
+      </CardCover>
+      <CardFooter>
         <div className="skeleton h-4 w-full mt-1 rounded-sm"></div>
         <div className="skeleton h-4 w-28 mt-2 rounded-sm"></div>
-      </CardContent>
+      </CardFooter>
     </Card>
+  );
+}
+
+export function CardsSkeleton() {
+  return (
+    <ul
+      role="list"
+      className="flex flex-row flex-shrink-0 pt-2 overflow-x-auto space-x-4"
+    >
+      <li className="relative flex flex-col flex-shrink-0 w-[200px] md:w-[250px]">
+        <CardSkeleton />
+      </li>
+      <li className="relative flex flex-col flex-shrink-0 w-[200px] md:w-[250px]">
+        <CardSkeleton />
+      </li>
+      <li className="relative flex flex-col flex-shrink-0 w-[200px] md:w-[250px]">
+        <CardSkeleton />
+      </li>
+      <li className="relative flex flex-col flex-shrink-0 w-[200px] md:w-[250px]">
+        <CardSkeleton />
+      </li>
+    </ul>
   );
 }
 

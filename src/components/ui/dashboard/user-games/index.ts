@@ -1,0 +1,1 @@
+export {default as UserGames} from './user-games';

@@ -1,14 +1,27 @@
 import { AccessError, InputError } from '@/lib/error';
 import { prisma } from '@/lib/prisma';
-import { assertOwnsGame, getAuthUser } from '@/lib/service';
-import type {
+import {
+  assertOwnsGame,
+  assertOwnsQuestion,
+  assertOwnsSession,
+  getAuthUser,
+} from '@/lib/service';
+import {
+  AdminGames,
   AuthUser,
   GameWithQuestions,
+  MutationType,
   QuestionWithAnswers,
   UpdateGameFormData,
+  AdminSession,
+  PlayerSession,
 } from '@/lib/types';
 import { generateId } from '@/lib/utils';
-import { Game, GameSession, QuestionType } from '@prisma/client';
+import {
+  Game,
+  GameSession,
+  QuestionType,
+} from '@prisma/client';
 import bcrypt from 'bcrypt';
 import type { User } from 'next-auth';
 
@@ -16,13 +29,34 @@ import type { User } from 'next-auth';
                       Helper Functions
 ***************************************************************/
 
-const newSessionCode = async (): Promise<string> => {
+const newSessionPin = async (): Promise<string> => {
   const sessions = await prisma.gameSession.findMany({
-    select: { code: true },
+    select: { pin: true },
   });
-  const existingCodes = sessions.map((s) => s.code);
-  return generateId(existingCodes, 999999);
+  const existingPins = sessions.map((s) => s.pin);
+  return generateId(existingPins, 999999);
 };
+
+async function getActiveSessionIdFromGameId(
+  userId: string,
+  gameId: string
+): Promise<string | null> {
+  const session = await prisma.gameSession.findFirst({
+    where: { gameId: gameId, hostId: userId, active: true },
+  });
+  return session ? session.id : null;
+}
+
+async function getInactiveSessionsIdFromGameId(
+  userId: string,
+  gameId: string
+): Promise<string[]> {
+  const sessions = await prisma.gameSession.findMany({
+    where: { gameId: gameId, hostId: userId, active: false },
+    select: { id: true },
+  });
+  return sessions.map((s) => s.id);
+}
 
 /***************************************************************
                       Auth Functions
@@ -97,14 +131,14 @@ export async function fetchUserStats(user: User) {
 ***************************************************************/
 
 export async function createGame(
-  userId: string | undefined,
+  userId: string,
   gameName: string
 ): Promise<Game | null> {
   try {
     const game = await prisma.game.create({
       data: {
-        name: gameName as string,
-        ownerId: userId as string,
+        name: gameName,
+        ownerId: userId,
       },
     });
     return game;
@@ -115,13 +149,13 @@ export async function createGame(
 }
 
 export async function deleteGame(
-  userId: string | undefined,
+  userId: string,
   gameId: string
 ): Promise<void> {
   try {
-    await assertOwnsGame(userId as string, gameId);
+    await assertOwnsGame(userId, gameId);
     await prisma.game.delete({
-      where: { id: gameId, ownerId: userId as string },
+      where: { id: gameId },
     });
   } catch (error) {
     console.error('Database Error:', error);
@@ -129,119 +163,16 @@ export async function deleteGame(
   }
 }
 
-export async function saveGame(
-  userId: string | undefined,
-  gameId: string,
-  data: UpdateGameFormData
-): Promise<GameWithQuestions | null> {
-  try {
-    await assertOwnsGame(userId as string, gameId);
-
-    // Update game
-    const game = await prisma.game.update({
-      where: { id: gameId, ownerId: userId as string },
-      data: {
-        name: data.name,
-        description: data.description,
-        image: data.image as string,
-      },
-    });
-
-    // Fetch existing questions
-    const existingQuestions = await prisma.question.findMany({
-      where: { gameId },
-      include: { answers: true },
-    });
-    const questionMap = new Map(existingQuestions.map((q) => [q.id, q]));
-
-    for (const q of data.questions) {
-      // Skip if no ID is provided
-      if (!q.id) continue;
-      const existing = questionMap.get(q.id);
-      if (!existing) continue;
-
-      // Update non-empty fields
-      await prisma.question.update({
-        where: { id: q.id },
-        data: {
-          title: q.title,
-          type: q.type,
-          duration: q.duration,
-          points: q.points,
-          hint: q.hint || existing.hint,
-        },
-      });
-
-      // Update answers
-      const answerMap = new Map(existing.answers.map((a) => [a.id, a]));
-
-      for (const a of q.answers || []) {
-        if (!a.id) {
-          // New answer
-          await prisma.questionAnswer.create({
-            data: {
-              questionId: q.id,
-              title: a.title || '',
-              correct: !!a.correct,
-            },
-          });
-        } else {
-          const existingAnswer = answerMap.get(a.id);
-          if (!existingAnswer) continue;
-
-          await prisma.questionAnswer.update({
-            where: { id: a.id },
-            data: {
-              title: a.title || existingAnswer.title,
-              correct:
-                typeof a.correct === 'boolean'
-                  ? a.correct
-                  : existingAnswer.correct,
-            },
-          });
-        }
-      }
-    }
-
-    // Create new questions and answers
-    for (const question of data.questions) {
-      await prisma.question.create({
-        data: {
-          gameId,
-          title: question.title,
-          type: question.type,
-          duration: question.duration,
-          points: question.points,
-          hint: question.hint,
-          answers: {
-            create: question.answers.map((answer) => ({
-              title: answer.title,
-              correct: answer.correct,
-            })),
-          },
-        },
-      });
-    }
-
-    // Return the updated game
-    return game;
-  } catch (error) {
-    console.error('Database Error:', error);
-    return null;
-  }
-}
-
 export async function updateGame(
-  userId: string | undefined,
+  userId: string,
   gameId: string,
   data: UpdateGameFormData
 ): Promise<GameWithQuestions | null> {
   try {
-    await assertOwnsGame(userId as string, gameId);
-
+    await assertOwnsGame(userId, gameId);
     // Update game
-    const game = await prisma.game.update({
-      where: { id: gameId, ownerId: userId as string },
+    await prisma.game.update({
+      where: { id: gameId },
       data: {
         name: data.name,
         description: data.description,
@@ -249,7 +180,7 @@ export async function updateGame(
       },
     });
 
-    // Delete existing questions
+    // Delete existing questions + answers
     await prisma.question.deleteMany({
       where: { gameId },
     });
@@ -277,7 +208,8 @@ export async function updateGame(
     }
 
     // Return the updated game
-    return game;
+    const updatedGame = await fetchGameById(gameId);
+    return updatedGame;
   } catch (error) {
     console.error('Database Error:', error);
     return null;
@@ -285,9 +217,11 @@ export async function updateGame(
 }
 
 export async function cloneGame(
+  userId: string,
   gameId: string
 ): Promise<GameWithQuestions | null> {
   try {
+    await assertOwnsGame(userId, gameId);
     const game = await prisma.game.findUnique({
       where: { id: gameId },
       include: {
@@ -361,15 +295,29 @@ export async function fetchGameById(
 }
 
 export async function fetchGamesFromAdmin(
-  user: User
-): Promise<GameWithQuestions[] | null> {
+  userId: string
+): Promise<AdminGames | null> {
   try {
     const games = await prisma.game.findMany({
-      where: { ownerId: user.id },
-      orderBy: { createdAt: 'desc' }, // Show most recent games first
-      include: { owner: true, questions: true },
+      where: { ownerId: userId },
+      include: {
+        questions: true,
+        owner: true,
+      },
+      orderBy: { createdAt: 'desc' },
     });
-    return games;
+
+    return Promise.all(
+      games.map(async (game) => {
+        const activeSession = await getActiveSessionIdFromGameId(userId, game.id);
+        const oldSessions = await getInactiveSessionsIdFromGameId(userId, game.id);
+        return {
+          ...game,
+          active: activeSession,
+          oldSessions,
+        };
+      })
+    );
   } catch (error) {
     console.error('Database Error:', error);
     return null;
@@ -381,14 +329,14 @@ const ITEMS_PER_PAGE = 6;
 export async function fetchFilteredGames(
   query: string,
   currentPage: number,
-  user: User
-): Promise<Game[]> {
+  userId: string
+): Promise<AdminGames> {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
     const games = await prisma.game.findMany({
       where: {
-        ownerId: user.id,
+        ownerId: userId,
         name: { contains: query, mode: 'insensitive' },
       },
       include: {
@@ -399,7 +347,18 @@ export async function fetchFilteredGames(
       skip: offset,
       take: ITEMS_PER_PAGE,
     });
-    return games;
+
+    return Promise.all(
+      games.map(async (game) => {
+        const activeSession = await getActiveSessionIdFromGameId(userId, game.id);
+        const oldSessions = await getInactiveSessionsIdFromGameId(userId, game.id);
+        return {
+          ...game,
+          active: activeSession,
+          oldSessions,
+        };
+      })
+    );
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch games.');
@@ -428,30 +387,14 @@ export async function fetchGamesPages(
 /***************************************************************
                       Game Question Functions
 ***************************************************************/
-const assertOwnsQuestion = async (
-  userId: string | undefined,
-  questionId: string
-): Promise<void> => {
-  const question = await prisma.question.findUnique({
-    where: { id: questionId },
-  });
-  if (!question) throw new InputError('Invalid question ID');
-
-  const game = await prisma.game.findUnique({
-    where: { id: question.gameId },
-  });
-  if (!game) throw new InputError('Game not found for question');
-  if (game.ownerId !== userId)
-    throw new AccessError('Cannot modify games owned by other admins');
-};
 
 export async function createQuestion(
-  userId: string | undefined,
+  userId: string,
   gameId: string,
   type: QuestionType
 ): Promise<QuestionWithAnswers | null> {
   try {
-    assertOwnsGame(userId as string, gameId);
+    await assertOwnsGame(userId, gameId);
 
     let defaultAnswers;
 
@@ -507,11 +450,11 @@ export async function createQuestion(
 }
 
 export async function deleteQuestion(
-  userId: string | undefined,
+  userId: string,
   questionId: string
 ): Promise<void> {
   try {
-    await assertOwnsQuestion(userId as string, questionId);
+    await assertOwnsQuestion(userId, questionId);
     await prisma.question.delete({
       where: { id: questionId },
     });
@@ -539,39 +482,20 @@ export async function fetchQuestionsByGameId(
   }
 }
 
-/***************************************************************
-                      Session Functions
-***************************************************************/
-
-async function startGame(gameId: string): Promise<GameSession> {
-  const game = await prisma.game.findUnique({
-    where: { id: gameId },
+export async function gameHasActiveSession(
+  userId: string,
+  gameId: string
+): Promise<boolean> {
+  const session = await prisma.gameSession.findFirst({
+    where: { gameId: gameId, hostId: userId, active: true },
   });
-
-  if (!game) throw new Error('Game not found');
-  if (game.active) throw new Error('Game already has active session');
-
-  const code = await newSessionCode();
-  const session = await prisma.gameSession.create({
-    data: {
-      gameId: gameId,
-      hostId: game.ownerId,
-      code: code,
-      isoTimeLastQuestionStarted: new Date().toISOString(),
-      position: 0,
-      status: 'LOBBY',
-    },
-  });
-
-  await prisma.game.update({
-    where: { id: gameId },
-    data: { active: session.id },
-  });
-
-  return session;
+  return !!session;
 }
 
-async function advanceGame(gameId: string): Promise<number> {
+export async function startGame(
+  userId: string,
+  gameId: string
+): Promise<GameSession> {
   const game = await prisma.game.findUnique({
     where: { id: gameId },
     include: {
@@ -583,87 +507,217 @@ async function advanceGame(gameId: string): Promise<number> {
     },
   });
 
-  if (!game) throw new Error('Game not found');
-  if (!game.active) throw new Error('Cannot advance a game that is not active');
+  if (!game) throw new InputError('Invalid game ID');
+  if (game.questions.length === 0)
+    throw new InputError('Game is incomplete: missing questions');
+  if (game.questions.some((q) => q.answers.length === 0))
+    throw new InputError('Game is incomplete: missing answers');
 
-  const session = await prisma.gameSession.findUnique({
-    where: { id: game.active },
+  const hasActiveSession = await gameHasActiveSession(userId, gameId);
+  if (hasActiveSession)
+    throw new InputError('Game already has an active session');
+
+  const pin = await newSessionPin();
+  const session = await prisma.gameSession.create({
+    data: {
+      gameId: gameId,
+      hostId: userId,
+      pin: pin,
+      active: true,
+      position: -1,
+      startedAt: null,
+      timeLastQuestionStarted: null,
+      questions: {
+        // copy questions to session
+        create: game.questions.map((q) => ({
+          title: q.title,
+          type: q.type,
+          duration: q.duration,
+          points: q.points,
+          hint: q.hint,
+          answers: {
+            create: q.answers.map((a) => ({
+              title: a.title,
+              correct: a.correct,
+            })),
+          },
+        })),
+      },
+    },
   });
 
-  if (!session) throw new Error('Session not found');
-  if (session.status !== 'IN_PROGRESS')
-    throw new Error('Cannot advance a session that is not in progress');
+  return session;
+}
 
-  const totalQuestions = game.questions.length;
+/***************************************************************
+                      Session Functions
+***************************************************************/
+
+async function getSessionFromIdThrow(sessionId: string): Promise<AdminSession> {
+  const session = await prisma.gameSession.findUnique({
+    where: { id: sessionId },
+    include: {
+      players: true,
+      questions: {
+        include: {
+          answers: true,
+        },
+      },
+    },
+  });
+  if (!session) throw new InputError('Invalid session ID');
+  return session;
+}
+
+async function startSession(sessionId: string): Promise<void> {
+  const session = await getSessionFromIdThrow(sessionId);
+  if (!session.active)
+    throw new InputError('Cannot start a session that is not active');
+  if (session.locked) throw new InputError('Cannot start a locked session');
+  if (session.position >= 0)
+    throw new InputError('Cannot start a session that has already begun');
+
+  const start = new Date();
+
+  await prisma.gameSession.update({
+    where: { id: sessionId },
+    data: {
+      position: 0,
+      startedAt: new Date(),
+      timeLastQuestionStarted: new Date(Date.now() + 20000), // start 20s later
+    },
+  });
+}
+
+async function advanceSession(sessionId: string): Promise<void> {
+  const session = await getSessionFromIdThrow(sessionId);
+  if (!session.active)
+    throw new InputError('Cannot advance a session that is not active');
+
+  const totalQuestions = session.questions.length;
   const newPosition = session.position + 1;
 
   if (newPosition >= totalQuestions) {
-    await endGame(gameId);
-    return newPosition;
+    await endSession(sessionId);
+    return;
   }
 
   await prisma.gameSession.update({
     where: { id: session.id },
     data: {
       position: newPosition,
-      isoTimeLastQuestionStarted: new Date().toISOString(),
+      timeLastQuestionStarted: new Date(),
     },
   });
-
-  return newPosition;
 }
 
-async function endGame(gameId: string): Promise<void> {
-  const game = await prisma.game.findUnique({
-    where: { id: gameId },
-  });
-
-  if (!game) throw new Error('Game not found');
-  if (!game.active) throw new Error('Cannot end a game that is not active');
-
-  const session = await prisma.gameSession.findUnique({
-    where: { id: game.active },
-  });
-
-  if (!session) throw new Error('Session not found');
-
+async function endSession(sessionId: string): Promise<void> {
   await prisma.gameSession.update({
-    where: { id: session.id },
-    data: { status: 'FINISHED' },
-  });
-
-  await prisma.game.update({
-    where: { id: gameId },
-    data: { active: null },
+    where: { id: sessionId },
+    data: {
+      active: false,
+    },
   });
 }
 
-export async function mutateGame({
-  gameId,
+export async function mutateSession({
+  userId,
+  sessionId,
   mutationType,
 }: {
-  gameId: string;
-  mutationType: 'START' | 'ADVANCE' | 'END';
-}) {
+  userId: string;
+  sessionId: string;
+  mutationType: MutationType;
+}): Promise<AdminSession> {
   try {
-    switch (mutationType.toUpperCase()) {
-      case 'START':
-        const session = await startGame(gameId);
-        return {
-          status: 'started',
-          sessionId: session.id,
-          sessionCode: session.code,
-        };
-      case 'ADVANCE':
-        const position = await advanceGame(gameId);
-        return { status: 'advanced', position };
-      case 'END':
-        await endGame(gameId);
-        return { status: 'ended' };
+    await assertOwnsSession(userId, sessionId);
+    switch (mutationType) {
+      case MutationType.START:
+        await startSession(sessionId);
+        break;
+      case MutationType.ADVANCE:
+        await advanceSession(sessionId);
+        break;
+      case MutationType.END:
+        await endSession(sessionId);
+        break;
       default:
-        throw new Error('Invalid mutation type');
+        throw new InputError('Invalid mutation type');
     }
+    return await getSessionFromIdThrow(sessionId);
   } catch (error) {
-    throw new Error('Failed to mutate game: ' + error);
+    throw error instanceof InputError
+      ? error
+      : new Error('Failed to mutate game: ' + (error as Error).message);
+  }
+}
+
+export async function lockSession({
+  userId,
+  sessionId,
+  locked,
+}: {
+  userId: string;
+  sessionId: string;
+  locked: boolean;
+}): Promise<AdminSession> {
+  await assertOwnsSession(userId, sessionId);
+  const session = await getSessionFromIdThrow(sessionId);
+  if (!session.active)
+    throw new InputError('Cannot lock a session that is not active');
+  if (session.position >= 0)
+    throw new InputError('Cannot lock a session that has already begun');
+
+  await prisma.gameSession.update({
+    where: { id: sessionId },
+    data: { locked: locked },
+  });
+
+  return await getSessionFromIdThrow(sessionId);
+}
+
+export async function fetchSessionFromAdmin(
+  userId: string,
+  sessionId: string
+): Promise<AdminSession | null> {
+  try {
+    await assertOwnsSession(userId, sessionId);
+    const session = await getSessionFromIdThrow(sessionId);
+    if (session.hostId !== userId)
+      throw new InputError('Admin does not own this session');
+    return session;
+  } catch (error) {
+    console.error('Database Error:', error);
+    return null;
+  }
+}
+
+export async function fetchSessionFromPlayer(
+  playerId: string,
+  pin: string
+): Promise<PlayerSession | null> {
+  try {
+    const session = await prisma.gameSession.findFirst({
+      where: { pin: pin, players: { some: { id: playerId } } },
+      include: {
+        questions: {
+          include: {
+            answers: true,
+          },
+        },
+      },
+    });
+
+    if (!session) return null;
+
+    // Ensure the player is part of the session
+    if (!session.players.some((p) => p.id === playerId)) {
+      throw new InputError('Player not found in this session');
+    }
+
+    return session as PlayerSession;
+  } catch (error) {
+    console.error('Database Error:', error);
+    return null;
   }
 }

@@ -43,7 +43,7 @@ export default function EmailSignUp({
             required
           />
           {state?.errors?.name && (
-            <ErrorMessage id="email-error">{state.errors.name[0]}</ErrorMessage>
+            <ErrorMessage id="name-error">{state.errors.name[0]}</ErrorMessage>
           )}
         </Field>
 

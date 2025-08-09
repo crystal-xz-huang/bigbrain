@@ -26,7 +26,7 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const isAdminRoute = nextUrl.pathname.startsWith('/admin');
+      const isAdminRoute = nextUrl.pathname.startsWith('/play') || nextUrl.pathname.startsWith('/user');
       const isAuthRoute = nextUrl.pathname.startsWith('/auth');
 
       // Protect '/admin' routes

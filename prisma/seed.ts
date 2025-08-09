@@ -1,35 +1,35 @@
-import { prisma } from "@/lib/prisma"
+// import { prisma } from "@/lib/prisma"
 
-async function main() {
-  console.time("Seeding complete 🌱");
+// async function main() {
+//   console.time("Seeding complete 🌱");
 
-  const alice = await prisma.user.upsert({
-    where: { email: "alice@prisma.io" },
-    update: {},
-    create: {
-      email: "alice@prisma.io",
-      name: "Alice",
-    },
-  });
+//   const crystal = await prisma.user.upsert({
+//     where: { email: "alice@prisma.io" },
+//     update: {},
+//     create: {
+//       email: "alice@prisma.io",
+//       name: "Alice",
+//     },
+//   });
 
-  const bob = await prisma.user.upsert({
-    where: { email: "bob@prisma.io" },
-    update: {},
-    create: {
-      email: "bob@prisma.io",
-      name: "Bob",
-    },
-  });
+//   const bob = await prisma.user.upsert({
+//     where: { email: "bob@prisma.io" },
+//     update: {},
+//     create: {
+//       email: "bob@prisma.io",
+//       name: "Bob",
+//     },
+//   });
 
-  console.timeEnd("Seeding complete 🌱");
-}
+//   console.timeEnd("Seeding complete 🌱");
+// }
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+// main()
+//   .then(async () => {
+//     await prisma.$disconnect();
+//   })
+//   .catch(async (e) => {
+//     console.error(e);
+//     await prisma.$disconnect();
+//     process.exit(1);
+//   });

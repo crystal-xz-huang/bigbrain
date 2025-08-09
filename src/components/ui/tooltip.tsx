@@ -40,8 +40,7 @@ function TooltipTrigger({
       onBlur={() => context.setOpen(false)}
       className={clsx(
         "cursor-pointer",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-        "data-[open]:bg-primary/10 data-[open]:text-primary-foreground",
+        "focus:outline-none",
         "transition-colors duration-200 ease-in-out"
       )}
       {...props}

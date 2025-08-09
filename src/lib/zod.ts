@@ -1,9 +1,11 @@
-import z, { object, string } from 'zod';
+import z, { array, object, string } from 'zod';
 import { QuestionType } from '@prisma/client';
+import { MutationType } from '@/lib/types';
 
 /***************************************************************
                       Sign In / Sign Up
 ***************************************************************/
+
 const name = string()
   .trim()
   .min(1, 'Name is required')
@@ -41,12 +43,22 @@ export type SignInFormInput = z.infer<typeof signInSchema>;
 export type SignUpFormInput = z.infer<typeof signUpSchema>;
 
 /***************************************************************
-                      Game Creation
+                      Games
 ***************************************************************/
+
 const answerSchema = object({
   title: z.string().trim().max(75, 'Answer must be less than 75 characters'), // allow empty for now
   correct: z.coerce.boolean(),
 });
+
+const saveQuestionSchema = object({
+  title: z.string().trim().optional(),
+  type: z.nativeEnum(QuestionType),
+  duration: z.number().int().min(5, 'Duration must be at least 5 seconds'),
+  points: z.number().int().min(0, 'Points must be a non-negative integer'),
+  hint: z.string().trim().max(120, 'Hint must be less than 120 characters').optional(),
+  answers: array(answerSchema).optional(),
+})
 
 const questionSchema = object({
   title: z.string().trim().min(1, 'Question cannot be empty').max(75, 'Question must be less than 75 characters'),
@@ -116,9 +128,16 @@ export const createGameSchema = object({
   name: string().trim().min(1, 'Please enter a name to create your game'),
 });
 
-export const updateGameSchema = object({
+export const saveGameSchema = object({
   name: string().trim().min(1, 'Game name cannot be empty').max(75, 'Game name must be less than 75 characters'),
   description: string().trim().max(250, 'Game description must be less than 250 characters').optional(),
+  image: string().nullable().optional(),
+  questions: z.array(saveQuestionSchema).optional(),
+});
+
+export const updateGameSchema = object({
+  name: string().trim().min(1, 'Game name cannot be empty').max(75, 'Game name must be less than 75 characters'),
+description: string().trim().max(250, 'Game description must be less than 250 characters').optional(),
   image: string().nullable().optional(),
   questions: z.array(questionSchema).min(1, 'At least one question is required'),
 });
@@ -139,3 +158,11 @@ export function groupQuestionErrors(error: z.ZodError): Record<number, string[]>
 
   return grouped;
 }
+
+/***************************************************************
+                      Session
+***************************************************************/
+
+export const mutationTypeSchema = object({
+  mutationType: z.nativeEnum(MutationType),
+})

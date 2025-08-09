@@ -1,8 +1,8 @@
 import { ButtonPrimary } from '@/components/ui/button';
 import type { HeadingProps } from '@/components/ui/heading';
 import clsx from 'clsx';
-import Image from 'next/image';
 import React from 'react';
+import Image from 'next/image';
 
 /***************************************************************
                       Banner Components

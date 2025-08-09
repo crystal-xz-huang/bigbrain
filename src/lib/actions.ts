@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use server';
 
 import { signIn, signOut } from '@/auth';
@@ -10,6 +11,9 @@ import {
   deleteQuestion,
   fetchQuestionsByGameId,
   fetchUserByEmail,
+  lockSession,
+  mutateSession,
+  startGame,
   updateGame,
 } from '@/lib/data';
 import { getAuthUser } from '@/lib/service';
@@ -20,15 +24,20 @@ import {
   CreateQuestionActionResponse,
   DeleteGameActionResponse,
   DeleteQuestionActionResponse,
+  MutateSessionActionResponse,
+  MutationType,
   SignInActionResponse,
   SignOutActionResponse,
   SignUpActionResponse,
+  StartGameActionResponse,
   UpdateGameActionResponse,
 } from '@/lib/types';
 import {
   createGameSchema,
   groupQuestionErrors,
+  saveGameSchema,
   signInSchema,
+  signUpSchema,
   updateGameSchema,
 } from '@/lib/zod';
 import { QuestionType } from '@prisma/client';
@@ -118,7 +127,7 @@ export async function signUpAction(
   _: SignUpActionResponse | null,
   formData: FormData
 ): Promise<SignUpActionResponse> {
-  const parsed = await parseFormData(formData, signInSchema);
+  const parsed = await parseFormData(formData, signUpSchema);
   if (!parsed.success) return parsed as SignUpActionResponse;
 
   // Check if user already exists
@@ -261,7 +270,8 @@ export async function cloneGameAction(
   _prevState: ActionResponse | null,
   _formData: FormData
 ): Promise<ActionResponse> {
-  const game = await cloneGame(gameId);
+  const user = await getAuthUser();
+  const game = await cloneGame(user.id, gameId);
   if (!game) {
     return {
       success: false,
@@ -317,6 +327,140 @@ export async function deleteQuestionAction(
       message:
         (err as Error).message ||
         'There was a problem deleting the question. Please try again.',
+    };
+  }
+}
+
+/***************************************************************
+                     Session Functions
+***************************************************************/
+// Create a new session
+export async function startGameAction(
+  gameId: string,
+  _prevState: StartGameActionResponse | null,
+  _formData: FormData
+): Promise<StartGameActionResponse> {
+  try {
+    const user = await getAuthUser();
+    const session = await startGame(user.id, gameId);
+    return {
+      success: true,
+      message: 'Game started successfully.',
+      sessionId: session.id,
+      pin: session.pin,
+    }
+  } catch (err) {
+    return {
+      success: false,
+      message:
+        (err as Error).message || 'There was a problem starting the game.',
+    };
+  }
+}
+
+export async function lockSessionAction(
+  sessionId: string,
+  prevState: MutateSessionActionResponse | null,
+  formData: FormData
+): Promise<MutateSessionActionResponse> {
+  try {
+    const user = await getAuthUser();
+    const locked = formData.get('locked') === 'true';
+    const session = await lockSession({
+      userId: user.id,
+      sessionId,
+      locked,
+    });
+    return {
+      success: true,
+      message: `Session ${locked ? 'locked' : 'unlocked'} successfully.`,
+      session: session,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      message:
+        (err as Error).message || 'There was a problem locking the game.',
+      session: prevState?.session || null,
+    };
+  }
+}
+
+// Mutate the session (start, advance, end)
+export async function startSessionAction(
+  sessionId: string,
+  _prevState: MutateSessionActionResponse | null,
+  _formData: FormData
+): Promise<MutateSessionActionResponse> {
+  try {
+    const user = await getAuthUser();
+    const session = await mutateSession({
+      userId: user.id,
+      sessionId,
+      mutationType: MutationType.START,
+    });
+    return {
+      success: true,
+      message: 'started',
+      session: session,
+    }
+  } catch (err) {
+    return {
+      success: false,
+      message:
+        (err as Error).message || 'There was a problem starting the session.',
+    };
+  }
+}
+
+
+export async function advanceSessionAction(
+  sessionId: string,
+  _prevState: MutateSessionActionResponse | null,
+  _formData: FormData
+): Promise<MutateSessionActionResponse> {
+  try {
+    const user = await getAuthUser();
+    const session = await mutateSession({
+      userId: user.id,
+      sessionId,
+      mutationType: MutationType.ADVANCE,
+    });
+    return {
+      success: true,
+      message: 'advanced',
+      session: session,
+    }
+  } catch (err) {
+    return {
+      success: false,
+      message:
+        (err as Error).message || 'There was a problem advancing the session.',
+    };
+  }
+}
+
+export async function endSessionAction(
+  sessionId: string,
+  _prevState: MutateSessionActionResponse | null,
+  _formData: FormData
+): Promise<MutateSessionActionResponse> {
+  try {
+    const user = await getAuthUser();
+    const session = await mutateSession({
+      userId: user.id,
+      sessionId,
+      mutationType: MutationType.END,
+    });
+    return {
+      success: true,
+      message: 'ended',
+      session: session,
+    }
+  } catch (err) {
+    return {
+      success: false,
+      message: (err as Error).message || 'There was a problem ending the session.',
     };
   }
 }

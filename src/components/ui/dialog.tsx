@@ -1,7 +1,9 @@
 import * as Headless from '@headlessui/react';
 import {
   CheckIcon,
+  CheckCircleIcon,
   ExclamationTriangleIcon,
+  ExclamationCircleIcon,
   InformationCircleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
@@ -125,11 +127,11 @@ interface DialogWithIconProps
   variant?: DialogVariant;
   open: boolean;
   onClose: () => void;
-  action: (formData: FormData) => void;
+  action?: (formData: FormData) => void;
   title: React.ReactNode;
   description?: React.ReactNode;
   body?: React.ReactNode;
-  actionText?: string;
+  actionText?: string | React.ReactNode;
   disabled?: boolean;
   pending?: boolean;
   children?: React.ReactNode;
@@ -159,28 +161,28 @@ export function DialogWithIcon({
     }
   > = {
     error: {
-      buttonColor: 'red',
+      buttonColor: 'error',
       icon: ExclamationTriangleIcon,
-      iconColor: 'text-red-600',
-      ring: 'bg-red-500/20 border-red-500/10 ring-red-500/10',
+      iconColor: 'text-error',
+      ring: 'text-error bg-error/20 border-error/5 ring-error',
     },
     info: {
-      buttonColor: 'blue',
+      buttonColor: 'info',
       icon: InformationCircleIcon,
-      iconColor: 'text-blue-600',
-      ring: 'bg-blue-100 border-blue-500/5 ring-blue-500/10',
+      iconColor: 'text-info',
+      ring: 'text-info bg-info/20 border-info/5 ring-info',
     },
     success: {
-      buttonColor: 'lime',
-      icon: CheckIcon,
-      iconColor: 'text-green-600',
-      ring: 'bg-green-100 border-green-500/5 ring-green-500/10',
+      buttonColor: 'success',
+      icon: CheckCircleIcon,
+      iconColor: 'text-success',
+      ring: 'text-success bg-success/20 border-success/5 ring-success',
     },
     warning: {
-      buttonColor: 'amber',
-      icon: ExclamationTriangleIcon,
-      iconColor: 'text-yellow-600',
-      ring: 'bg-yellow-100 border-yellow-500/5 ring-yellow-500/10',
+      buttonColor: 'warning',
+      icon: ExclamationCircleIcon,
+      iconColor: 'text-warning',
+      ring: 'text-warning bg-warning/20 border-warning/5 ring-warning',
     },
   };
 
@@ -217,48 +219,64 @@ export function DialogWithIcon({
             {/* Dialog Body */}
             <div className="sm:flex sm:items-start">
               {/* Icon */}
-              <div
+              <div className={clsx(
+                "shrink-0 size-min flex items-center justify-center rounded-full p-1.5 border-6 mx-auto box-content bg-clip-padding",
+                styles[variant].ring,
+              )}>
+                <Icon
+                  aria-hidden="true"
+                  className={clsx('m-auto size-6 !stroke-2', styles[variant].iconColor)}
+                />
+              </div>
+
+              {/* <div
                 className={clsx(
                   'mx-auto flex size-12 shrink-0 items-center justify-center rounded-full sm:mx-0 sm:size-10 border-6 ring-1',
-                  styles[variant].ring,
+                  styles[variant].ring
                 )}
               >
                 <Icon
                   aria-hidden="true"
                   className={clsx('m-auto size-5', styles[variant].iconColor)}
                 />
-              </div>
+              </div> */}
               {/* Title and Description */}
-              <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+              <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
                 <DialogTitle>{title}</DialogTitle>
                 <DialogDescription>{description}</DialogDescription>
                 {body && <DialogBody className="!mt-3">{body}</DialogBody>}
               </div>
             </div>
             {/* Dialog Actions */}
-            <Form
-              action={action}
-              className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-2"
-            >
-              {children}
-              <SubmitButton
-                type="submit"
-                className="inline-flex w-full justify-center sm:ml-3 sm:w-auto"
-                color={styles[variant].buttonColor}
-                disabled={pending}
+            {action ? (
+              <Form
+                action={action}
+                className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-2"
               >
-                {actionText || 'Confirm'}
-              </SubmitButton>
-              <Button
-                plain
-                type="button"
-                className="mt-3 inline-flex w-full justify-center sm:mt-0 sm:w-auto "
-                onClick={onClose}
-                disabled={pending}
-              >
-                Cancel
-              </Button>
-            </Form>
+                {children}
+                <SubmitButton
+                  type="submit"
+                  className="inline-flex w-full justify-center sm:ml-3 sm:w-auto"
+                  color={styles[variant].buttonColor}
+                  disabled={pending}
+                >
+                  {actionText || 'Confirm'}
+                </SubmitButton>
+                <Button
+                  plain
+                  type="button"
+                  className="mt-3 inline-flex w-full justify-center sm:mt-0 sm:w-auto "
+                  onClick={onClose}
+                  disabled={pending}
+                >
+                  Cancel
+                </Button>
+              </Form>
+            ) : (
+              <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-2">
+                {children}
+              </div>
+            )}
           </Headless.DialogPanel>
         </div>
       </div>

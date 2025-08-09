@@ -1,5 +1,5 @@
-import { Question, QuestionType } from '@prisma/client';
-import type { Answer, GameWithQuestions, QuestionWithAnswers } from '@/lib/types';
+import type { GameWithQuestions, QuestionWithAnswers } from '@/lib/types';
+import { Question, QuestionAnswer, QuestionType } from '@prisma/client';
 
 /***************************************************************
                       Data Input
@@ -64,7 +64,29 @@ export const isEmptyString = (value?: string) => {
   return !value || value.trim() === '';
 };
 
+export const isNullOrUndefined = (value?: any) => {
+  return value === null || value === undefined || isEmptyString(value);
+};
+
 export const pluralSuffix = (count: number) => (count > 1 ? 's' : '');
+
+/**
+ * Splits a string into `split` parts.
+ * @param string - The string to split
+ * @param split  - The number of parts to split the string into (default is 2)
+ * @returns An array containing the two parts of the string.
+ */
+export const splitString = (string: string, split = 2) => {
+  const length = string.length;
+  const partLength = Math.ceil(length / split);
+  return Array.from({ length: split }, (_, i) =>
+    string.slice(i * partLength, (i + 1) * partLength)
+  );
+};
+
+export const addMs = (date: Date, ms: number) => {
+  return new Date(date.getTime() + ms);
+}
 
 /***************************************************************
                      Date / Time
@@ -131,7 +153,10 @@ export const getInitials = (name: string) => {
   return initials.toUpperCase();
 };
 
-export const generateUserStats = (stats: { joinedAt: Date | undefined; totalGames: number}) => {
+export const generateUserStats = (stats: {
+  joinedAt: Date | undefined;
+  totalGames: number;
+}) => {
   return [
     {
       label: 'joined',
@@ -143,7 +168,7 @@ export const generateUserStats = (stats: { joinedAt: Date | undefined; totalGame
     },
     { label: 'games', value: stats?.totalGames || 0 },
   ];
-}
+};
 
 /***************************************************************
                      Game
@@ -175,17 +200,12 @@ export const totalNumberOfQuestions = (questions: Question[]) => {
  * Creates a new answer object with a unique ID.
  * @param questionId - The ID of the question this answer belongs to
  * @param correct - Whether the answer is correct
- * @param title - The title of the answer
  * @returns A new answer object
  */
-export const newAnswer = (
-  questionId: string,
-  correct: boolean,
-  title: string = ''
-) => {
+export const newAnswer = (questionId: string, correct: boolean): QuestionAnswer => {
   return {
     id: uid(),
-    title,
+    title: '',
     questionId,
     correct,
   };
@@ -253,27 +273,46 @@ export const generateAnswersForQuestionType = (
   }
 };
 
+export const isValidGame = (game: GameWithQuestions) => {
+  return (
+    game &&
+    game.questions &&
+    game.questions.length > 0 &&
+    game.questions.every(
+      (q) =>
+        q.answers &&
+        q.answers.length > 0 &&
+        q.answers.every((a) => !isNullOrUndefined(a.title))
+  ))
+}
+
 export const isInvalidGame = (game: GameWithQuestions) => {
   return (
     !game.questions ||
     game.questions.length === 0 ||
-    game.questions.some((q) => !q.answers || q.answers.length === 0 || q.answers.some((a) => !a.title))
-  )
-}
+    game.questions.some(
+      (q) =>
+        !q.answers || q.answers.length === 0 || q.answers.some((a) => isNullOrUndefined(a.title))
+    )
+  );
+};
 
-export const generateErrorMessage = (game: GameWithQuestions) => {
+export const generateGameErrorMessage = (game: GameWithQuestions) => {
   if (!game.questions || game.questions.length === 0) {
     return 'Missing questions';
   }
+
   const answerCount = game.questions.filter(
-      (q) => !q.answers || q.answers.length === 0 || q.answers.some((a) => !a.title)
+    (q) =>
+      !q.answers || q.answers.length === 0 || q.answers.some((a) => isNullOrUndefined(a.title))
   ).length;
 
   if (answerCount > 0) {
     return `${answerCount} answer${pluralSuffix(answerCount)} missing`;
   }
+
   return '';
-}
+};
 
 /***************************************************************
                      Pagination
