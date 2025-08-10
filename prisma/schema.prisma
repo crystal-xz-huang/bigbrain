@@ -111,49 +111,54 @@ model QuestionAnswer {
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
+model ActiveSessionLock {
+  gameId String
+  hostId String
+  @@id([gameId, hostId])
+}
+
 model GameSession {
-  id                      String                @id @default(cuid())
-  pin                     String                @unique
-  gameId                  String
-  game                    Game                  @relation("game_sessions", fields: [gameId], references: [id], onDelete: Cascade)
-  hostId                  String
-  host                    User                  @relation("host", fields: [hostId], references: [id], onDelete: Cascade)
-  players                 Player[]
-  questions               GameSessionQuestion[]
-
+  id              String                @id @default(cuid())
+  pin             String                @unique
+  gameId          String
+  game            Game                  @relation("game_sessions", fields: [gameId], references: [id], onDelete: Cascade)
+  hostId          String
+  host            User                  @relation("host", fields: [hostId], references: [id], onDelete: Cascade)
+  players         Player[]
+  questions       GameSessionQuestion[]
   // session state
-  locked                  Boolean               @default(false)
-  showLeaderboard         Boolean               @default(false)
-  active                  Boolean               @default(true)
-  // current question tracking
-  position                Int                   @default(-1)
-  timeLastQuestionStarted DateTime?
-  timeAnswersAvailable    DateTime?
+  locked          Boolean               @default(false)
+  showLeaderboard Boolean               @default(false)
+  active          Boolean               @default(true)
   // timestamps
-  createdAt               DateTime              @default(now())
-  updatedAt               DateTime              @updatedAt @map("updated_at")
-  startedAt               DateTime?
-  // revisioning
-  revision                Int                   @default(0)
+  startedAt       DateTime?
+  endedAt         DateTime?
+  // audit fields
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt @map("updated_at")
 
-  @@unique([gameId, hostId]) // Enforce only one session per host per game
+  @@index([gameId, hostId, active])
 }
 
 model GameSessionQuestion {
-  order         Int                 @default(0)
-  id            String              @id @default(cuid())
-  title         String
-  type          QuestionType
-  duration      Int
-  points        Int
-  hint          String?
-  sessionId     String
-  session       GameSession         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  answers       GameSessionAnswer[]
-  playerAnswers PlayerAnswer[]
+  // relations
+  sessionId          String
+  session            GameSession         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  // details
+  id                 String              @id @default(cuid())
+  position           Int                 @default(0)
+  title              String
+  type               QuestionType
+  duration           Int
+  points             Int
+  hint               String?
+  answers            GameSessionAnswer[]
+  playerAnswers      PlayerAnswer[]
   // timestamps
-  startedAt    DateTime?
-  
+  startAt            DateTime? // when question is available
+  answersAvailableAt DateTime? // when correct answers are revealed
+  endAt              DateTime? // when question ends
+
   @@index([sessionId])
 }
 
@@ -162,8 +167,8 @@ model GameSessionAnswer {
   questionId String
   question   GameSessionQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   title      String
-  correct    Boolean
   selection  SelectedAnswer[]
+  correct    Boolean
 
   @@index([questionId])
 }
@@ -199,8 +204,8 @@ model PlayerAnswer {
   player      Player              @relation(fields: [playerId], references: [id], onDelete: Cascade)
   questionId  String
   question    GameSessionQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  selection   SelectedAnswer[]
-  createdAt   DateTime            @default(now())
+  selection   SelectedAnswer[] // for MC/SC questions
+  textAnswer  String? // for type answer questions
   submittedAt DateTime?
 
   @@unique([playerId, questionId]) // Ensure a player can only answer a question once
