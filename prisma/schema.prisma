@@ -114,6 +114,7 @@ model QuestionAnswer {
 model ActiveSessionLock {
   gameId String
   hostId String
+
   @@id([gameId, hostId])
 }
 
@@ -164,11 +165,11 @@ model GameSessionQuestion {
 
 model GameSessionAnswer {
   id         String              @id @default(cuid())
+  title      String
+  correct    Boolean
   questionId String
   question   GameSessionQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  title      String
   selection  SelectedAnswer[]
-  correct    Boolean
 
   @@index([questionId])
 }
@@ -195,6 +196,7 @@ model Player {
   score     Int            @default(0)
   answers   PlayerAnswer[]
 
+  @@unique([sessionId, name]) // only one identical name in a session
   @@map("players")
 }
 
@@ -204,9 +206,9 @@ model PlayerAnswer {
   player      Player              @relation(fields: [playerId], references: [id], onDelete: Cascade)
   questionId  String
   question    GameSessionQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  selection   SelectedAnswer[] // for MC/SC questions
-  textAnswer  String? // for type answer questions
+  selection   SelectedAnswer[]
   submittedAt DateTime?
+  correct     Boolean? // null if not yet graded
 
   @@unique([playerId, questionId]) // Ensure a player can only answer a question once
   @@index([playerId])

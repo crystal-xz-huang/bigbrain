@@ -205,27 +205,15 @@ export type AdminSession = GameSession & {
   questions: (GameSessionQuestion & { answers: GameSessionAnswer[] })[];
 };
 
-export type PlayerSession = Pick<GameSession,
-  'id' | 'pin' | 'locked' | 'showLeaderboard' | 'active' | 'position'
-> & {
+export type PlayerSession = GameSession & {
   players: Player[];
-  questions: Array<Pick<GameSessionQuestion, 'id'>>; // ids only (Lobby uses length)
-  // if a question is live, DO NOT include `correct`
-  currentQuestion?: {
-    id: string;
-    type: QuestionType;
-    duration: number;
-    points: number;
-    title?: string; // ok if you display it, but omit anything revealing
-    answers?: Array<Pick<GameSessionAnswer, 'id' | 'title'>>; // no `correct`
-    startedAt?: string; // if you need timers
-  };
-};
+  questions: (GameSessionQuestion & { answers: Omit<GameSessionAnswer, 'correct'>[] })[];
+}
 
 export type PlayerQuestion = Pick<GameSessionQuestion, 'id' | 'type' | 'duration' | 'points' | 'title'> & {
   answers: Array<Pick<GameSessionAnswer, 'id' | 'title'>>; // no `correct`
   startedAt?: string;
-  
+
 }
 
 export enum MutationType {
@@ -252,3 +240,10 @@ export interface LockSessionActionResponse extends ActionResponse {
   message: string;
   locked?: boolean;
 }
+
+/***************************************************************
+                     Player
+***************************************************************/
+export type PlayerAnswerPayload =
+  | { selectedAnswerIds: string[]; text?: undefined }   // SINGLE/MULTIPLE
+  | { selectedAnswerIds?: undefined; text: string };    // TYPE_ANSWER

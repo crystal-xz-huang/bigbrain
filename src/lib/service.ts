@@ -44,3 +44,12 @@ export async function assertOwnsSession(userId:string, sessionId: string): Promi
   if (session.hostId !== userId)
     throw new AccessError('Admin does not own this session');
 }
+
+export async function assertPlayerInSession(playerId: string, sessionId: string): Promise<void> {
+  const player = await prisma.player.findUnique({
+    where: { id: playerId },
+    select: { sessionId: true },
+  });
+  if (!player) throw new InputError('Invalid player ID');
+  if (player.sessionId !== sessionId) throw new AccessError('Player not in this session');
+}

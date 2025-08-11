@@ -1,7 +1,7 @@
 import { Lobby } from '@/components/ui/session/lobby';
-import { fetchSessionFromAdmin } from '@/lib/data';
-import { requireUser } from '@/lib/session';
+import { fetchSessionFromPin, fetchSessionFromPlayer } from '@/lib/data';
 import { notFound } from 'next/navigation';
+import { cookies } from "next/headers";
 
 export default async function Page({
   params,
@@ -9,9 +9,13 @@ export default async function Page({
   params: Promise<{ pin: string }>
 }) {
   const { pin } = await params;
+  const session = await fetchSessionFromPin(pin);
   if (!session) {
     notFound();
   }
-  return <Lobby gameSession={session} userId={user.id} />;
-}
+  
+  const playerId = cookies().get("playerId")?.value || null;
 
+
+  return <Lobby gameSession={session} userId={} />;
+}

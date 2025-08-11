@@ -1,5 +1,15 @@
-import type { GameWithQuestions, QuestionWithAnswers } from '@/lib/types';
-import { Question, QuestionAnswer, QuestionType } from '@prisma/client';
+import type {
+  GameWithQuestions,
+  PlayerAnswerPayload,
+  QuestionWithAnswers,
+} from '@/lib/types';
+import {
+  GameSessionAnswer,
+  GameSessionQuestion,
+  Question,
+  QuestionAnswer,
+  QuestionType,
+} from '@prisma/client';
 
 /***************************************************************
                       Data Input
@@ -86,7 +96,7 @@ export const splitString = (string: string, split = 2) => {
 
 export const addMs = (date: Date, ms: number) => {
   return new Date(date.getTime() + ms);
-}
+};
 
 /***************************************************************
                      Date / Time
@@ -202,7 +212,10 @@ export const totalNumberOfQuestions = (questions: Question[]) => {
  * @param correct - Whether the answer is correct
  * @returns A new answer object
  */
-export const newAnswer = (questionId: string, correct: boolean): QuestionAnswer => {
+export const newAnswer = (
+  questionId: string,
+  correct: boolean
+): QuestionAnswer => {
   return {
     id: uid(),
     title: '',
@@ -283,8 +296,9 @@ export const isValidGame = (game: GameWithQuestions) => {
         q.answers &&
         q.answers.length > 0 &&
         q.answers.every((a) => !isNullOrUndefined(a.title))
-  ))
-}
+    )
+  );
+};
 
 export const isInvalidGame = (game: GameWithQuestions) => {
   return (
@@ -292,7 +306,9 @@ export const isInvalidGame = (game: GameWithQuestions) => {
     game.questions.length === 0 ||
     game.questions.some(
       (q) =>
-        !q.answers || q.answers.length === 0 || q.answers.some((a) => isNullOrUndefined(a.title))
+        !q.answers ||
+        q.answers.length === 0 ||
+        q.answers.some((a) => isNullOrUndefined(a.title))
     )
   );
 };
@@ -304,7 +320,9 @@ export const generateGameErrorMessage = (game: GameWithQuestions) => {
 
   const answerCount = game.questions.filter(
     (q) =>
-      !q.answers || q.answers.length === 0 || q.answers.some((a) => isNullOrUndefined(a.title))
+      !q.answers ||
+      q.answers.length === 0 ||
+      q.answers.some((a) => isNullOrUndefined(a.title))
   ).length;
 
   if (answerCount > 0) {
@@ -348,4 +366,60 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
     '...',
     totalPages,
   ];
+};
+
+/***************************************************************
+                     Players
+***************************************************************/
+
+export const validatePlayerSelection = (
+  payload: PlayerAnswerPayload,
+  questionType: QuestionType,
+  answers: GameSessionAnswer[]
+) => {
+  let selectedIds: string[] = [];
+  const validIds = new Set(answers.map((a) => a.id));
+
+  if (
+    'selectedAnswerIds' in payload &&
+    Array.isArray(payload.selectedAnswerIds)
+  ) {
+    selectedIds = [...new Set(payload.selectedAnswerIds)].filter((id) =>
+      validIds.has(id)
+    );
+  } else if ('text' in payload && typeof payload.text === 'string') {
+    const norm = payload.text.trim().toLowerCase();
+    const match = answers.find((a) => a.title.trim().toLowerCase() === norm);
+    if (match) selectedIds = [match.id];
+  }
+
+  if (
+    questionType === QuestionType.SINGLE ||
+    questionType === QuestionType.TYPE_ANSWER
+  ) {
+    selectedIds = selectedIds.slice(0, 1);
+  }
+
+  return selectedIds;
+};
+
+export const gradePlayerSelection = (
+  selection: string[],
+  questionType: QuestionType,
+  answers: GameSessionAnswer[]
+) => {
+  const correctSet = new Set(answers.filter((a) => a.correct).map((a) => a.id));
+  const selectedSet = new Set(selection);
+
+  let correct = true;
+  if (questionType === QuestionType.MULTIPLE) {
+    correct =
+      selectedSet.size === correctSet.size &&
+      [...selectedSet].every((id) => correctSet.has(id));
+  } else {
+    const [only] = selection;
+    correct = !!only && correctSet.has(only);
+  }
+
+  return correct;
 };
