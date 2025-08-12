@@ -15,6 +15,7 @@ import {
   mutateSession,
   startGame,
   updateGame,
+  verifySessionPin,
 } from '@/lib/data';
 import { getAuthUser } from '@/lib/service';
 import {
@@ -31,11 +32,13 @@ import {
   SignUpActionResponse,
   StartGameActionResponse,
   UpdateGameActionResponse,
+  VerifySessionPinActionResponse,
 } from '@/lib/types';
 import {
   createGameSchema,
   groupQuestionErrors,
   saveGameSchema,
+  sessionPinSchema,
   signInSchema,
   signUpSchema,
   updateGameSchema,
@@ -348,7 +351,7 @@ export async function startGameAction(
       message: 'Game started successfully.',
       sessionId: session.id,
       pin: session.pin,
-    }
+    };
   } catch (err) {
     return {
       success: false,
@@ -403,7 +406,7 @@ export async function startSessionAction(
       success: true,
       message: 'started',
       session: session,
-    }
+    };
   } catch (err) {
     return {
       success: false,
@@ -412,7 +415,6 @@ export async function startSessionAction(
     };
   }
 }
-
 
 export async function advanceSessionAction(
   sessionId: string,
@@ -430,7 +432,7 @@ export async function advanceSessionAction(
       success: true,
       message: 'advanced',
       session: session,
-    }
+    };
   } catch (err) {
     return {
       success: false,
@@ -456,11 +458,37 @@ export async function endSessionAction(
       success: true,
       message: 'ended',
       session: session,
-    }
+    };
   } catch (err) {
     return {
       success: false,
-      message: (err as Error).message || 'There was a problem ending the session.',
+      message:
+        (err as Error).message || 'There was a problem ending the session.',
     };
+  }
+}
+
+/***************************************************************
+                     Player Functions
+***************************************************************/
+
+export async function verifySessionPinAction(
+  _prevState: VerifySessionPinActionResponse | null,
+  formData: FormData
+): Promise<VerifySessionPinActionResponse> {
+  const parsed = await parseFormData(formData, sessionPinSchema);
+  if (!parsed.success) return parsed as VerifySessionPinActionResponse;
+
+  const { pin } = parsed.data;
+  const valid = await verifySessionPin(pin);
+  if (!valid) {
+    return {
+      success: false,
+      message: 'Invalid session PIN',
+      inputs: parsed.raw,
+    };
+  } else {
+    revalidatePath(routes.player.join(pin));
+    redirect(routes.player.join(pin));
   }
 }

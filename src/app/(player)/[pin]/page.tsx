@@ -13,9 +13,11 @@ export default async function Page({
   if (!session) {
     notFound();
   }
-  
-  const playerId = cookies().get("playerId")?.value || null;
 
+  const playerId = cookies().get("playerId")?.value || null;
+  if (!playerId) {
+    
+  }
 
   return <Lobby gameSession={session} userId={} />;
 }

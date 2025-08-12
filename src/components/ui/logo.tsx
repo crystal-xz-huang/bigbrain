@@ -1,4 +1,4 @@
-import BigBrainLogo from '@public/bigbrain-logo.svg';
+import BigBrainLogo from '@/public/bigbrain-logo.svg';
 import Image from 'next/image';
 import clsx from 'clsx';
 import { HeadingOutlined } from '@/components/ui/heading';
@@ -12,7 +12,7 @@ export function Logo({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center w-full h-full">
       <Image
         src={BigBrainLogo}
         alt="Big Brain Logo"
@@ -21,7 +21,7 @@ export function Logo({
       <span
         className={clsx(
           className,
-          'whitespace-nowrap font-bold tracking-wider ml-2.5 text-zinc-950 dark:text-white'
+          'whitespace-nowrap ml-2.5 text-zinc-950 dark:text-white grow font-bungee'
         )}
       >
         {children || 'BigBrain'}
@@ -52,7 +52,7 @@ export function LogoHeading({ className }: { className?: string }) {
   ];
 
   return (
-    <HeadingOutlined className={clsx("relative tracking-normal ", className)}>
+    <HeadingOutlined className={clsx('relative tracking-normal ', className)}>
       <div className="flex flex-row items-center justify-center flex-nowrap">
         {splitString(name, name.length).map((part, index) => (
           <div key={index} className={clsx(colors[index])}>

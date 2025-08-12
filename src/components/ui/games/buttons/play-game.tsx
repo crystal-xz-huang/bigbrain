@@ -131,7 +131,7 @@ function CopySessionId({
           value={pin}
           copied={copied}
           onCopy={copyToClipboard}
-          className='text-primary-400 !text-5xl'
+          className='text-primary !text-5xl'
         />
       </Field>
     </>

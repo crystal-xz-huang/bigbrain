@@ -827,3 +827,15 @@ export async function playerSubmitAnswers(
     };
   });
 }
+
+export async function verifySessionPin(pin: string): Promise<boolean> {
+  try {
+    const session = await prisma.gameSession.findUnique({
+      where: { pin },
+    });
+    return !!session;
+  } catch (error) {
+    console.error('Database Error:', error);
+    return false;
+  }
+}

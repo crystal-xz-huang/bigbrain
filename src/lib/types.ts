@@ -207,14 +207,24 @@ export type AdminSession = GameSession & {
 
 export type PlayerSession = GameSession & {
   players: Player[];
-  questions: (GameSessionQuestion & { answers: Omit<GameSessionAnswer, 'correct'>[] })[];
-}
+  questions: (GameSessionQuestion & {
+    answers: Omit<GameSessionAnswer, 'correct'>[];
+  })[];
+};
 
-export type PlayerQuestion = Pick<GameSessionQuestion, 'id' | 'type' | 'duration' | 'points' | 'title'> & {
+export type PlayerQuestion = Pick<
+  GameSessionQuestion,
+  'id' | 'type' | 'duration' | 'points' | 'title'
+> & {
   answers: Array<Pick<GameSessionAnswer, 'id' | 'title'>>; // no `correct`
   startedAt?: string;
+};
 
-}
+export type PlayerJoinActionResponse = ActionResponse & {
+  success: boolean;
+  message: string;
+  session?: PlayerSession | null;
+};
 
 export enum MutationType {
   'START' = 'START',
@@ -245,5 +255,19 @@ export interface LockSessionActionResponse extends ActionResponse {
                      Player
 ***************************************************************/
 export type PlayerAnswerPayload =
-  | { selectedAnswerIds: string[]; text?: undefined }   // SINGLE/MULTIPLE
-  | { selectedAnswerIds?: undefined; text: string };    // TYPE_ANSWER
+  | { selectedAnswerIds: string[]; text?: undefined } // SINGLE/MULTIPLE
+  | { selectedAnswerIds?: undefined; text: string }; // TYPE_ANSWER
+
+interface EnterPinFormData {
+  pin: string;
+}
+export interface VerifySessionPinActionResponse extends ActionResponse {
+  success: boolean;
+  message: string;
+  errors?: {
+    [K in keyof EnterPinFormData]?: string[];
+  };
+  inputs?: {
+    [K in keyof EnterPinFormData]?: string | '';
+  };
+}

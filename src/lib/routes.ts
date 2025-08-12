@@ -17,27 +17,9 @@ export const routes = {
     join: (pin: string) => `/join/${pin}`,
     play: (sessionId: string) => `/play/${sessionId}`,
     results: (sessionId: string) => `/results/${sessionId}`,
+  },
+  player: {
+    join: '/join',
+    play: (pin: string) => `/join/${pin}`,
   }
 };
-
-export const publicRoutes = {
-  home: '/',
-  signin: '/auth/signin',
-  signup: '/auth/signup',
-}
-
-export const adminRoutes = {
-  dashboard: '/user/dashboard',
-  games: '/user/games',
-  game: {
-    view: (id: string) => `/user/games/${id}`,
-    edit: (id: string) => `/user/games/${id}/edit`,
-    question: {
-      edit: (gameId: string, questionId: string) => `/user/games/${gameId}/edit?questionId=${questionId}`,
-    },
-  },
-  session: {
-    play: (sessionId: string) => `/play/${sessionId}`,
-    results: (sessionId: string) => `/results/${sessionId}`,
-  }
-}

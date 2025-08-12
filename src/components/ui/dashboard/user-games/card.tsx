@@ -58,7 +58,7 @@ export default function GameCard({ game }: { game: AdminGame }) {
         )}
       </CardCover>
       <CardFooter>
-        <CardTitle className="h-[2rem]">
+        <CardTitle>
           <Link
             className="hover:underline"
             title={game.name}

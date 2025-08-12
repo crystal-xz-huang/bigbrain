@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { Provider } from '@/lib/types';
 
 const iconMap: Record<string, React.ReactElement> = {
   github: (
@@ -46,6 +45,12 @@ const iconMap: Record<string, React.ReactElement> = {
       />
     </svg>
   ),
+};
+
+
+type Provider = {
+  id: string;
+  name: string;
 };
 
 export function AuthButton({

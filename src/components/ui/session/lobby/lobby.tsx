@@ -64,7 +64,7 @@ export default function Lobby({
                   The code is hidden
                 </div>
               ) : (
-                <HeadingOutlined className="text-primary-300">
+                <HeadingOutlined className="text-primary">
                   <div className="flex flex-row items-center justify-center flex-1 gap-4">
                     {splitString(session.pin).map((part, index) => (
                       <div key={index}>{part}</div>

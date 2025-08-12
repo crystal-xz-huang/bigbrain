@@ -166,3 +166,7 @@ export function groupQuestionErrors(error: z.ZodError): Record<number, string[]>
 export const mutationTypeSchema = object({
   mutationType: z.nativeEnum(MutationType),
 })
+
+export const sessionPinSchema = object({
+  pin: z.string().trim().min(1, 'PIN is required').max(6, 'PIN must be 6 characters long'),
+})

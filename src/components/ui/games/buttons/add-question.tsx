@@ -19,14 +19,15 @@ import type {
 import * as Headless from '@headlessui/react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { QuestionType } from '@prisma/client';
-import MultipleChoiceImage from '@public/multiple-choice.svg';
-import SingleChoiceImage from '@public/single-choice.svg';
-import TypeAnswerImage from '@public/type-answer.svg';
 import clsx from 'clsx';
 import Form from 'next/form';
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
 import { routes } from '@/lib/routes';
+
+import MultipleChoiceImage from '@/public/multiple-choice.svg';
+import SingleChoiceImage from '@/public/single-choice.svg';
+import TypeAnswerImage from '@/public/type-answer.svg';
 
 const buttons = [
   {

@@ -7,8 +7,8 @@ import {
   BannerImage,
   BannerTitle,
 } from '@/components/ui/banner';
-import BannerIllustrationCreate from '@public/banner-illustration-create.svg';
-import BannerIllustrationPlay from '@public/banner-illustration-play.svg';
+import BannerIllustrationCreate from '@/public/banner-illustration-create.svg';
+import BannerIllustrationPlay from '@/public/banner-illustration-play.svg';
 import clsx from 'clsx';
 
 export function BannerGroup({
@@ -68,7 +68,7 @@ export function CreateGameBanner() {
         alt="Create Game Illustration"
       />
       <BannerContent>
-        <BannerTitle className="text-primary-900">Create Game</BannerTitle>
+        <BannerTitle className="text-primary-content">Create Game</BannerTitle>
         <BannerDescription className="text-primary-content/80">
           <div>Generate a game for free</div>
           <div>and play with participants</div>

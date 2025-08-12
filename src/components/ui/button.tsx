@@ -165,8 +165,8 @@ const styles = {
       '[--btn-icon:var(--color-black)] data-active:[--btn-icon:var(--color-black)]/80 data-hover:[--btn-icon:var(--color-black)]/80',
     ],
     primary: [
-      'text-primary-content [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-primary-300)] [--btn-border:var(--color-primary-400)]/90',
-      '[--btn-icon:var(--color-primary-300)] data-active:[--btn-icon:var(--color-primary-200)] data-hover:[--btn-icon:var(--color-primary-200)]',
+      'text-primary-content [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-primary-300)] [--btn-border:var(--color-primary-content)]/90',
+      '[--btn-icon:var(--color-primary-content)] data-active:[--btn-icon:var(--color-primary-content)] data-hover:[--btn-icon:var(--color-primary-content)]',
     ],
     success: [
       'text-success-content [--btn-hover-overlay:var(--color-white)]/20 [--btn-bg:var(--color-success)] [--btn-border:var(--color-success)]/90',
