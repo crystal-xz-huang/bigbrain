@@ -2,7 +2,7 @@ import { Container, Heading } from '@/components/ui/page';
 import { Search } from '@/components/ui/search';
 import { CardsListSkeleton } from '@/components/ui/skeletons';
 import { fetchGamesPages } from '@/lib/data';
-import { requireUser } from '@/lib/session';
+import { getUser } from '@/lib/dal';
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 
@@ -24,7 +24,7 @@ export default async function GamesPage(props: {
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
 
-  const user = await requireUser();
+  const user = await getUser();
   const totalPages = await fetchGamesPages(query, user);
 
   return (

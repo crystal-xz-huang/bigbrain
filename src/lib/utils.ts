@@ -5,7 +5,6 @@ import type {
 } from '@/lib/types';
 import {
   GameSessionAnswer,
-  GameSessionQuestion,
   Question,
   QuestionAnswer,
   QuestionType,
@@ -50,6 +49,9 @@ export function fileToDataUrl(file: File): Promise<string> {
                      ID Generation
 ***************************************************************/
 
+const randNum = (max: number) =>
+  Math.floor(Math.random() * (max - 100000) + 100000);
+
 export const uid = () => {
   const num = Math.floor(Math.random() * 1000000);
   return num.toString().padStart(10, '0');
@@ -63,22 +65,33 @@ export const generateId = (currentList: string[], max = 999999999) => {
   return R.toString();
 };
 
-const randNum = (max: number) =>
-  Math.floor(Math.random() * (max - 100000) + 100000);
-
 /***************************************************************
-                     Helper Functions
+                      Data Validation
 ***************************************************************/
 
-export const isEmptyString = (value?: string) => {
+export const isEmptyString = (value?: string): boolean => {
   return !value || value.trim() === '';
 };
 
-export const isNullOrUndefined = (value?: any) => {
+export const isNullOrUndefined = (value?: any): boolean => {
   return value === null || value === undefined || isEmptyString(value);
 };
 
-export const pluralSuffix = (count: number) => (count > 1 ? 's' : '');
+export const isTooLong = (text: string, maxLength: number): boolean => {
+  return text.length > maxLength;
+};
+
+/***************************************************************
+                     String Transformation
+***************************************************************/
+
+export const pluralSuffix = (count: number): string => (count > 1 ? 's' : '');
+
+export const ordinalSuffix = (num: number): string => {
+  const suffixes = ['th', 'st', 'nd', 'rd'];
+  const value = num % 100;
+  return num + (suffixes[(value - 20) % 10] || suffixes[value] || suffixes[0]);
+};
 
 /**
  * Splits a string into `split` parts.
@@ -86,7 +99,7 @@ export const pluralSuffix = (count: number) => (count > 1 ? 's' : '');
  * @param split  - The number of parts to split the string into (default is 2)
  * @returns An array containing the two parts of the string.
  */
-export const splitString = (string: string, split = 2) => {
+export const splitString = (string: string, split = 2): string[] => {
   const length = string.length;
   const partLength = Math.ceil(length / split);
   return Array.from({ length: split }, (_, i) =>
@@ -94,8 +107,26 @@ export const splitString = (string: string, split = 2) => {
   );
 };
 
-export const addMs = (date: Date, ms: number) => {
-  return new Date(date.getTime() + ms);
+/**
+ * Splits an array into `split` parts.
+ * @param array - The array to split
+ * @param split - The number of parts to split the array into (default is 2)
+ * @returns An array of arrays, each containing a part of the original array.
+ */
+export const splitArray = <T>(array: T[], split = 2): T[][] => {
+  const result: T[][] = [];
+  const minSize = Math.floor(array.length / split);
+  let remainder = array.length % split;
+
+  let start = 0;
+  for (let i = 0; i < split; i++) {
+    const size = minSize + (remainder > 0 ? 1 : 0);
+    remainder--;
+    result.push(array.slice(start, start + size));
+    start += size;
+  }
+
+  return result;
 };
 
 /***************************************************************
@@ -152,8 +183,12 @@ export const formatTime = (total: number) => {
   )}`;
 };
 
+export const addMs = (date: Date, ms: number): Date => {
+  return new Date(date.getTime() + ms);
+};
+
 /***************************************************************
-                     User
+                     User Helpers
 ***************************************************************/
 
 export const getInitials = (name: string) => {
@@ -181,7 +216,7 @@ export const generateUserStats = (stats: {
 };
 
 /***************************************************************
-                     Game
+                     Game Helpers
 ***************************************************************/
 /**
  * Calculates the total duration of all questions in a game.
@@ -335,6 +370,7 @@ export const generateGameErrorMessage = (game: GameWithQuestions) => {
 /***************************************************************
                      Pagination
 ***************************************************************/
+
 export const generatePagination = (currentPage: number, totalPages: number) => {
   // If the total number of pages is 7 or less,
   // display all pages without any ellipsis.
@@ -369,7 +405,7 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
 };
 
 /***************************************************************
-                     Players
+                     Player Helpers
 ***************************************************************/
 
 export const validatePlayerSelection = (

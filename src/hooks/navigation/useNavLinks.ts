@@ -5,6 +5,6 @@ export default function useNavLinks(links: NavLink[]) {
   const pathname = usePathname();
   return links.map((link) => ({
     ...link,
-    current: pathname === link.url,
+    current: pathname === link.href,
   }));
 }

@@ -9,7 +9,7 @@ import { usePathname, useRouter } from 'next/navigation';
 
 const tabs = [
   { name: 'Games', href: routes.games, current: true },
-  { name: 'Reports', href: routes.reports, current: false },
+  { name: 'Reports', href: '#', current: false },
 ];
 
 export default function NavLinks({ className }: { className?: string }) {

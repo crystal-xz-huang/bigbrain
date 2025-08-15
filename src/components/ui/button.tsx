@@ -165,7 +165,7 @@ const styles = {
       '[--btn-icon:var(--color-black)] data-active:[--btn-icon:var(--color-black)]/80 data-hover:[--btn-icon:var(--color-black)]/80',
     ],
     primary: [
-      'text-primary-content [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-primary-300)] [--btn-border:var(--color-primary-content)]/90',
+      'text-primary-content [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-primary-300)] [--btn-border:var(--color-primary-400)]/90',
       '[--btn-icon:var(--color-primary-content)] data-active:[--btn-icon:var(--color-primary-content)] data-hover:[--btn-icon:var(--color-primary-content)]',
     ],
     success: [
@@ -189,7 +189,7 @@ const styles = {
 
 export type ButtonColor = keyof typeof styles.colors;
 
-type ButtonProps = (
+export type ButtonProps = (
   | {
       color?: keyof typeof styles.colors;
       outline?: never;
@@ -269,7 +269,10 @@ export function SpinnerIcon({
 }: React.ComponentPropsWithoutRef<'svg'>) {
   return (
     <svg
-      className={clsx(className, "size-5 animate-spin motion-reduce:hidden text-current mr-2 -ml-1")}
+      className={clsx(
+        className,
+        'size-5 animate-spin motion-reduce:hidden text-current mr-2 -ml-1'
+      )}
       fill="none"
       viewBox="0 0 24 24"
       {...props}
@@ -306,7 +309,7 @@ export function ButtonLoading(props: ButtonProps) {
 /***************************************************************
                      Primary Button
 ***************************************************************/
-const primary_styles = {
+export const primary_styles = {
   base: [
     // Typography
     'font-sans tracking-wide font-black whitespace-nowrap text-base md:text-lg',
@@ -323,18 +326,10 @@ const primary_styles = {
     // Color
     'text-black',
     // Sizing
-    // 'md:px-8 w-full md:w-80 h-12 px-6 py-0',
-  ],
-  plain: [
-    // Base
-    'relative overflow-hidden rounded-full',
-    // Color
-    'text-black bg-black/10',
-    // Disabled
-    'data-disabled:opacity-50',
+    // 'w-full h-12 px-6 py-0',
   ],
   colors: {
-    zinc: 'bg-zinc-500',
+    zinc: 'bg-zinc-200',
     indigo: 'bg-indigo-500',
     red: 'bg-red-400',
     orange: 'bg-orange-pastel',
@@ -353,6 +348,10 @@ const primary_styles = {
     pink: 'bg-pink-300',
     rose: 'bg-rose-500',
     white: 'bg-white',
+    error: 'bg-error',
+    success: 'bg-success',
+    warning: 'bg-warning',
+    info: 'bg-info',
   },
 };
 
@@ -402,23 +401,21 @@ function PrimaryTouchTarget({
   );
 }
 
+export type PrimaryButtonProps = {
+  color?: keyof typeof primary_styles.colors;
+  className?: string;
+  children: React.ReactNode;
+} & (
+  | Omit<Headless.ButtonProps, 'as' | 'className'>
+  | Omit<React.ComponentPropsWithoutRef<typeof Link>, 'className'>
+);
+
 export const ButtonPrimary = forwardRef(function Button(
-  {
-    color,
-    className,
-    children,
-    ...props
-  }: { color?: keyof typeof primary_styles.colors } & {
-    className?: string;
-    children: React.ReactNode;
-  } & (
-      | Omit<Headless.ButtonProps, 'as' | 'className'>
-      | Omit<React.ComponentPropsWithoutRef<typeof Link>, 'className'>
-    ),
+  { color, className, children, ...props }: PrimaryButtonProps,
   ref: React.ForwardedRef<HTMLElement>
 ) {
   const classes = clsx(className, primary_styles.base, primary_styles.solid);
-  const isDisabled = props.disabled === true;
+  const isDisabled = 'disabled' in props && props.disabled;
 
   return 'href' in props ? (
     <Link
@@ -450,7 +447,7 @@ export function ButtonClose({
       type="button"
       className={clsx(
         className,
-        'bg-black/20 min-w-[1.5rem] h-6 flex flex-col justify-center items-center rounded-full pr-0 pl-0 cursor-pointer'
+        'bg-black/20 min-w-[1.5rem] h-6 flex flex-col justify-center items-center rounded-full pr-0 pl-0 cursor-pointer '
       )}
       {...props}
     >
@@ -467,3 +464,116 @@ export function ButtonClose({
     </Headless.Button>
   );
 }
+
+/***************************************************************
+                     Button Group
+***************************************************************/
+
+export function ButtonGroup({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<'div'>) {
+  return (
+    <div
+      {...props}
+      className={clsx(
+        className,
+        'relative flex flex-row flex-shrink-0 overflow-hidden'
+      )}
+    />
+  );
+}
+
+export const ButtonGroupItem = forwardRef(function Button(
+  {
+    color,
+    position = 'only',
+    className,
+    children,
+    ...props
+  }: {
+    color?: keyof typeof primary_styles.colors;
+    position?: 'first' | 'middle' | 'last' | 'only';
+    className?: string;
+    children: React.ReactNode;
+  } & Omit<Headless.ButtonProps, 'as' | 'className'>,
+  ref: React.ForwardedRef<HTMLElement>
+) {
+  const styles = {
+    first: [
+      { borderRadius: '0.5rem 0rem 0rem 0.5rem' },
+      { borderRadius: '0.75rem 0rem 0rem 0.75rem', padding: '0.25rem' },
+      { borderRadius: '0.4375rem 0rem 0rem 0.4375rem' },
+    ],
+    middle: [
+      { borderRadius: '0rem' },
+      { borderRadius: '0rem', padding: '0.25rem' },
+      { borderRadius: '0rem' },
+    ],
+    last: [
+      { borderRadius: '0rem 0.5rem 0.5rem 0rem' },
+      { borderRadius: '0rem 0.75rem 0.75rem 0rem', padding: '0.25rem' },
+      { borderRadius: '0rem 0.4375rem 0.4375rem 0rem' },
+    ],
+    only: [
+      { borderRadius: '0.5rem' },
+      { borderRadius: '0.75rem', padding: '0.25rem' },
+      { borderRadius: '0.4375rem' },
+    ],
+  };
+
+  return (
+    <Headless.Button
+      type="button"
+      {...props}
+      ref={ref}
+      className={clsx(
+        className,
+        'flex group text-lg font-black leading-6 text-black touch-manipulation cursor-pointer pointer-events-auto flex-shrink-0 h-12 p-0 relative w-11 md:w-12 rounded-none data-disabled:pointer-events-none'
+      )}
+    >
+      <div className="-inset-1 absolute z-0" style={styles[position][0]} />
+      <div
+        className="absolute inset-x-0 top-0 bottom-0 transform group-active:translate-y-0.5 group-active:bottom-0.5 z-1 bg-black"
+        style={styles[position][1]}
+      >
+        <div className="relative w-full h-full">
+          <div
+            className={clsx(
+              'top-1 absolute inset-x-0 bottom-0 overflow-hidden',
+              primary_styles.colors[color ?? 'zinc']
+            )}
+            style={styles[position][2]}
+          >
+            <div className="absolute inset-0 bg-black/30" />
+          </div>
+          <div
+            className={clsx(
+              'bottom-1 absolute inset-x-0 top-0 overflow-hidden group-active:bottom-0.5',
+              primary_styles.colors[color ?? 'zinc']
+            )}
+            style={styles[position][2]}
+          >
+            <div className="group-hover:bg-white/20 absolute inset-0" />
+          </div>
+        </div>
+      </div>
+      {'disabled' in props && !!props.disabled && (
+        <div
+          className="z-1 absolute inset-0 overflow-hidden"
+          style={styles[position][1]}
+        >
+          <div className="absolute top-0 left-0 size-full bg-black/20" />
+        </div>
+      )}
+      <div
+        className="relative flex flex-row gap-x-4 items-center w-full min-h-full pointer-events-none z-2 transform -translate-y-0.5 group-active:translate-y-0"
+        style={{ padding: '0.25rem' }}
+      >
+        <div className="flex flex-col flex-1 items-center">
+          <div className="relative">{children}</div>
+        </div>
+      </div>
+    </Headless.Button>
+  );
+});

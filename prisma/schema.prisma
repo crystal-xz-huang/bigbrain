@@ -137,6 +137,7 @@ model GameSession {
   // audit fields
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @updatedAt @map("updated_at")
+  sessions        PlayerSession[]
 
   @@index([gameId, hostId, active])
 }
@@ -187,14 +188,16 @@ model SelectedAnswer {
 }
 
 model Player {
-  id        String         @id @default(cuid())
-  name      String
-  role      Role           @default(PLAYER)
-  sessionId String
-  session   GameSession    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  joinedAt  DateTime       @default(now())
-  score     Int            @default(0)
-  answers   PlayerAnswer[]
+  id          String          @id @default(cuid())
+  name        String
+  image       String?
+  role        Role            @default(PLAYER)
+  sessionId   String
+  gameSession GameSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  joinedAt    DateTime        @default(now())
+  score       Int             @default(0)
+  answers     PlayerAnswer[]
+  session     PlayerSession[]
 
   @@unique([sessionId, name]) // only one identical name in a session
   @@map("players")
@@ -213,4 +216,18 @@ model PlayerAnswer {
   @@unique([playerId, questionId]) // Ensure a player can only answer a question once
   @@index([playerId])
   @@index([questionId])
+}
+
+model PlayerSession {
+  id            String      @id @default(cuid())
+  token         String      @unique // opaque random
+  playerId      String
+  player        Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  gameSessionId String
+  gameSession   GameSession @relation(fields: [gameSessionId], references: [id], onDelete: Cascade)
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  createdAt     DateTime    @default(now())
+
+  @@index([playerId, gameSessionId])
 }

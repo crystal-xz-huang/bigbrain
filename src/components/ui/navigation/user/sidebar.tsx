@@ -1,11 +1,11 @@
 'use client';
 
-import {
-  mainNavigation,
-  secondaryNavigation,
-} from '@/components/ui/navigation/constants';
 import { Link } from '@/components/ui/link';
 import { Logo } from '@/components/ui/logo';
+import {
+  navigationButtons,
+  navigationLinks,
+} from '@/components/ui/navigation/user/constants';
 import {
   Sidebar,
   SidebarBody,
@@ -21,14 +21,15 @@ import {
 } from '@/components/ui/sidebar';
 import { useNavLinks } from '@/hooks/navigation';
 import { useSidebar } from '@/hooks/sidebar';
-import { PlusIcon } from '@heroicons/react/20/solid';
+import { splitArray } from '@/lib/utils';
 import clsx from 'clsx';
 import type { User } from 'next-auth';
 import { SidebarProfileDropdown } from './profile-dropdown';
 
-export default function DashboardSidebar({ user }: { user: User }) {
-  const mainLinks = useNavLinks(mainNavigation);
-  const secondaryLinks = useNavLinks(secondaryNavigation);
+export default function SidebarComponent({ user }: { user: User }) {
+  const links = splitArray(navigationLinks, 2);
+  const mainNavLinks = useNavLinks(links[0]);
+  const secondaryNavLinks = useNavLinks(links[1]);
   const { isCollapsed, toggleCollapse } = useSidebar();
 
   return (
@@ -40,7 +41,7 @@ export default function DashboardSidebar({ user }: { user: User }) {
         )}
       >
         <Link href="/" aria-label="Home" className="px-2 sidebar-icon h-9">
-          <Logo className={clsx(isCollapsed && 'sr-only hidden')}/>
+          <Logo className={clsx(isCollapsed && 'sr-only hidden')} />
         </Link>
 
         <SidebarCloseButton
@@ -51,13 +52,13 @@ export default function DashboardSidebar({ user }: { user: User }) {
       </SidebarHeader>
       <SidebarBody className={clsx(isCollapsed && 'items-center')}>
         <SidebarSection>
-          {/* Navigation items */}
-          {mainLinks.map((link) => {
+          {/* Main navigation items */}
+          {mainNavLinks.map((link) => {
             const LinkIcon = link.icon;
             return (
               <SidebarItem
                 key={link.label}
-                href={link.url}
+                href={link.href}
                 current={link.current}
               >
                 {LinkIcon && <LinkIcon />}
@@ -70,27 +71,39 @@ export default function DashboardSidebar({ user }: { user: User }) {
         </SidebarSection>
         <SidebarDivider className={clsx(isCollapsed && 'w-full')} />
         <SidebarSection>
+          {/* Quick action items */}
           <SidebarHeading className={clsx(isCollapsed && 'sr-only hidden')}>
             Quick Actions
           </SidebarHeading>
-          <SidebarItem href="#">
-            <PlusIcon />
-            <SidebarLabel className={clsx(isCollapsed && 'sr-only hidden')}>
-              New game
-            </SidebarLabel>
-          </SidebarItem>
+          {/* Action buttons */}
+          {navigationButtons.map((btn) => {
+            const BtnIcon = btn.icon;
+            const BtnTrigger = btn.trigger;
+            return (
+              <BtnTrigger key={btn.label}>
+                <SidebarItem aria-label={btn.label}>
+                  {BtnIcon && <BtnIcon />}
+                  <SidebarLabel
+                    className={clsx(isCollapsed && 'sr-only hidden')}
+                  >
+                    {btn.label}
+                  </SidebarLabel>
+                </SidebarItem>
+              </BtnTrigger>
+            );
+          })}
         </SidebarSection>
         <SidebarDivider className={clsx(isCollapsed && 'w-full')} />
 
         <SidebarSpacer />
         <SidebarSection>
           {/* Secondary navigation items */}
-          {secondaryLinks.map((link) => {
+          {secondaryNavLinks.map((link) => {
             const LinkIcon = link.icon;
             return (
               <SidebarItem
                 key={link.label}
-                href={link.url}
+                href={link.href}
                 current={link.current}
               >
                 {LinkIcon && <LinkIcon />}

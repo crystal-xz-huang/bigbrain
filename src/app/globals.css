@@ -7,7 +7,9 @@
   --correct: rgb(0 167 109);
   --false: rgb(213 69 108);
   --hint: oklch(83.392% .124 66.558);
+  --navy: #276b74;
   --dark: #19444a;
+  --gold: rgb(255 205 117);
 
   --red-pastel: rgb(255 167 160);
   --orange-pastel: rgb(255, 198, 121);
@@ -37,15 +39,18 @@
   --primary-400: oklch(84.896% 0.08751 343.478);
   --primary-500: oklch(80.882% 0.1127 343.512);
   --primary-600: oklch(77.488% 0.13602 343.996);
+  --primary-700: oklch(75.461% .183 346.812);
+  --primary-800: oklch(65% .241 354.308);
+  --primary-900: oklch(45% .187 3.815);
 
-  --primary: hsl(328.42,100%,85.1%);
-  --primary-content: oklch(45% .187 3.815);
+  --primary: var(--primary-400);
+  --primary-content: oklch(52% .223 3.958);
 
-  --secondary: oklch(92% .084 155.995);
-  --secondary-content: oklch(0% 0 0);
+  --secondary: oklch(45% .24 277.023);
+  --secondary-content: oklch(93% .034 272.788);
 
-  --accent: oklch(90% .076 70.697);
-  --accent-content: oklch(47% .157 37.304);
+  --accent: hsl(328.42,100%,85.1%);
+  --accent-content: oklch(100% .004 0);
 
   --highlight: hsl(66.63,100%,68.04%);
 
@@ -56,11 +61,11 @@
   --info: oklch(68% .169 237.323);
   --info-content: oklch(29% .066 243.157);
   --success: oklch(69% .17 162.48);
-  --success-content: oklch(26% .051 172.552);
+  --success-content: oklch(100% 0 0);
   --warning: rgb(244 119 33);
   --warning-content: oklch(28% .066 53.813);
-  --error: oklch(71% .194 13.428);
-  --error-content: oklch(27% .105 12.094);
+  --error: rgb(213, 69, 108);
+  --error-content: oklch(100% 0 0);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -86,11 +91,14 @@
   --font-sans: var(--font-nunito), sans-serif;
   --font-mono: var(--font-roboto-mono);
   --font-bungee: var(--font-bungee);
+  --font-bungee-outline: var(--font-bungee-outline);
 
   --color-dark: var(--dark);
+  --color-navy: var(--navy);
   --color-correct: var(--correct);
   --color-false: var(--false);
   --color-hint: var(--hint);
+  --color-gold: var(--gold);
 
   --color-red-pastel: var(--red-pastel);
   --color-orange-pastel: var(--orange-pastel);
@@ -119,7 +127,9 @@
   --color-primary-400: var(--primary-400);
   --color-primary-500: var(--primary-500);
   --color-primary-600: var(--primary-600);
-
+  --color-primary-700: var(--primary-700);
+  --color-primary-800: var(--primary-800);
+  --color-primary-900: var(--primary-900);
   --color-primary: var(--primary);
   --color-primary-content: var(--primary-content);
 
@@ -271,7 +281,11 @@ body {
 }
 
 .icon-2xl,
-.icon-xl {
+.icon-xl,
+.icon-3xl,
+.icon-4xl,
+.icon-5xl,
+.icon-6xl {
   flex-grow: 0;
   flex-shrink: 0
 }

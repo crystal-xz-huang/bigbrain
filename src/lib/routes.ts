@@ -14,12 +14,11 @@ export const routes = {
     },
   },
   session: {
-    join: (pin: string) => `/join/${pin}`,
     play: (sessionId: string) => `/play/${sessionId}`,
     results: (sessionId: string) => `/results/${sessionId}`,
   },
   player: {
     join: '/join',
-    play: (pin: string) => `/join/${pin}`,
+    play: (pin: string) => `/${pin}`,
   }
 };

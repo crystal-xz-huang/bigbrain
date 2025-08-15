@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, ButtonPrimary, SpinnerIcon } from '@/components/ui/button';
+import { Button, ButtonPrimary, PrimaryButtonProps, SpinnerIcon } from '@/components/ui/button';
 import { CopyToClipboardInput } from '@/components/ui/clipboard';
 import { DialogWithIcon } from '@/components/ui/dialog';
 import { Field, Label } from '@/components/ui/fieldset';
@@ -8,8 +8,7 @@ import { useToast } from '@/hooks/toast';
 import { startGameAction } from '@/lib/actions';
 import { routes } from '@/lib/routes';
 import { StartGameActionResponse } from '@/lib/types';
-import Form from 'next/form';
-import React, { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 
 const initialState: StartGameActionResponse = {
   success: false,
@@ -18,12 +17,11 @@ const initialState: StartGameActionResponse = {
 
 export default function PlayGame({
   gameId,
-  disabled,
   ...props
 }: {
   gameId: string;
   disabled?: boolean;
-} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+} & PrimaryButtonProps) {
   const toast = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [state, action, pending] = useActionState(
@@ -40,15 +38,15 @@ export default function PlayGame({
         description: state.message,
       });
     }
-  }, [state.success, state.sessionId, state.message]);
+  }, [state.success, state.message, state.sessionId]);
 
   return (
     <>
       {/* Button */}
-      <Form action={action}>
+      <form action={action}>
         <ButtonPrimary
           type="submit"
-          disabled={pending || disabled}
+          disabled={pending || (props.disabled ?? false)}
           {...props}
         >
           <div className="flex items-center justify-center">
@@ -57,7 +55,7 @@ export default function PlayGame({
             <span className="md:hidden inline">Play</span>
           </div>
         </ButtonPrimary>
-      </Form>
+      </form>
 
       {/* Modal */}
       <DialogWithIcon
@@ -103,11 +101,9 @@ function CopySessionId({
   const [copied, setCopied] = useState(false);
   const toast = useToast();
 
-  if (!sessionId || !pin) {
-    return <p className="text-red-500">No session ID available.</p>;
-  }
+  if (!sessionId || !pin) return null;
 
-  const sessionUrl = routes.session.play(pin);
+  const sessionUrl = `${window.location.origin}${routes.player.play(pin)}`;
 
   const copyToClipboard = () => {
     navigator.clipboard
@@ -131,7 +127,7 @@ function CopySessionId({
           value={pin}
           copied={copied}
           onCopy={copyToClipboard}
-          className='text-primary !text-5xl'
+          className='text-accent !text-5xl'
         />
       </Field>
     </>

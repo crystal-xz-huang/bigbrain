@@ -1,7 +1,7 @@
 import { ToastProvider } from '@/hooks/toast';
 import type { Metadata } from 'next';
 import { SessionProvider } from 'next-auth/react';
-import { Inter, Roboto_Mono, Nunito, Bungee } from 'next/font/google';
+import { Inter, Roboto_Mono, Nunito, Bungee, Bungee_Shade } from 'next/font/google';
 import './globals.css';
 
 const inter = Inter({
@@ -26,8 +26,15 @@ const bungee = Bungee({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-bungee',
-  weight: '400',
-})
+  weight: ['400'],
+});
+
+const bungee_shade = Bungee_Shade({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-bungee-shade',
+  weight: ['400'],
+});
 
 export const metadata: Metadata = {
   title: 'BigBrain',
@@ -44,7 +51,7 @@ export default function RootLayout({
       lang="en"
       className="bg-white lg:bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950"
     >
-      <body className={`${inter.variable} ${roboto_mono.variable} ${nunito.variable} ${bungee.variable} antialiased`}>
+      <body className={`${inter.variable} ${roboto_mono.variable} ${nunito.variable} ${bungee.variable} ${bungee_shade.variable} antialiased`}>
         <SessionProvider>
           <ToastProvider>{children}</ToastProvider>
         </SessionProvider>

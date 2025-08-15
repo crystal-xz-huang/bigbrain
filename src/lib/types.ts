@@ -25,9 +25,15 @@ export interface ActionResponse {
 
 export interface NavLink {
   label: string;
-  url: string;
+  href: string;
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   current?: boolean;
+}
+
+export interface NavButton {
+  label: string;
+  trigger: React.ComponentType<{ children: React.ReactElement<React.ButtonHTMLAttributes<HTMLButtonElement>,'button'> }>;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }
 
 /***************************************************************
@@ -201,11 +207,13 @@ export interface DeleteQuestionActionResponse extends ActionResponse {
 ***************************************************************/
 
 export type AdminSession = GameSession & {
+  host: User;
   players: Player[];
   questions: (GameSessionQuestion & { answers: GameSessionAnswer[] })[];
 };
 
 export type PlayerSession = GameSession & {
+  host: User;
   players: Player[];
   questions: (GameSessionQuestion & {
     answers: Omit<GameSessionAnswer, 'correct'>[];
@@ -254,6 +262,7 @@ export interface LockSessionActionResponse extends ActionResponse {
 /***************************************************************
                      Player
 ***************************************************************/
+
 export type PlayerAnswerPayload =
   | { selectedAnswerIds: string[]; text?: undefined } // SINGLE/MULTIPLE
   | { selectedAnswerIds?: undefined; text: string }; // TYPE_ANSWER
@@ -261,6 +270,7 @@ export type PlayerAnswerPayload =
 interface EnterPinFormData {
   pin: string;
 }
+
 export interface VerifySessionPinActionResponse extends ActionResponse {
   success: boolean;
   message: string;
@@ -269,5 +279,21 @@ export interface VerifySessionPinActionResponse extends ActionResponse {
   };
   inputs?: {
     [K in keyof EnterPinFormData]?: string | '';
+  };
+}
+
+interface PlayerJoinFormData {
+  name: string;
+  image?: string | null;
+}
+
+export interface CreatePlayerActionResponse extends ActionResponse {
+  success: boolean;
+  message: string;
+  errors?: {
+    [K in keyof PlayerJoinFormData]?: string[];
+  };
+  inputs?: {
+    [K in keyof PlayerJoinFormData]?: string | '';
   };
 }

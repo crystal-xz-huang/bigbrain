@@ -1,17 +1,16 @@
 import * as Headless from '@headlessui/react';
 import {
-  CheckIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon,
   ExclamationCircleIcon,
+  ExclamationTriangleIcon,
   InformationCircleIcon,
-  XMarkIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
+import Form from 'next/form';
 import type React from 'react';
 import { Button, ButtonColor, ButtonLoading } from './button';
 import { Text } from './text';
-import Form from 'next/form';
 
 const sizes = {
   xs: 'sm:max-w-xs',

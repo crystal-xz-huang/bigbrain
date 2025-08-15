@@ -13,6 +13,7 @@ import {
   fetchUserByEmail,
   lockSession,
   mutateSession,
+  playerJoin,
   startGame,
   updateGame,
   verifySessionPin,
@@ -22,6 +23,7 @@ import {
   ActionResponse,
   AuthResponse,
   CreateGameActionResponse,
+  CreatePlayerActionResponse,
   CreateQuestionActionResponse,
   DeleteGameActionResponse,
   DeleteQuestionActionResponse,
@@ -37,11 +39,11 @@ import {
 import {
   createGameSchema,
   groupQuestionErrors,
-  saveGameSchema,
   sessionPinSchema,
   signInSchema,
   signUpSchema,
   updateGameSchema,
+  playerSchema,
 } from '@/lib/zod';
 import { QuestionType } from '@prisma/client';
 import { AuthError } from 'next-auth';
@@ -49,6 +51,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { routes } from './routes';
+import { cookies } from 'next/headers'
+import { getAvatarFiles } from '@/lib/server';
 
 /***************************************************************
                      Helper Functions
@@ -488,7 +492,56 @@ export async function verifySessionPinAction(
       inputs: parsed.raw,
     };
   } else {
-    revalidatePath(routes.player.join(pin));
-    redirect(routes.player.join(pin));
+    revalidatePath(routes.player.play(pin));
+    redirect(routes.player.play(pin));
+  }
+}
+
+export async function createPlayerAction(
+  pin: string,
+  _prevState: CreatePlayerActionResponse | null,
+  formData: FormData
+): Promise<CreatePlayerActionResponse> {
+  const parsed = await parseFormData(formData, playerSchema);
+  if (!parsed.success) return parsed as CreatePlayerActionResponse;
+
+  try {
+    const { name, image } = parsed.data;
+    console.log('Creating player with data:', parsed.data);
+
+    // Check image
+    const avatarFiles = getAvatarFiles();
+    if (!avatarFiles.includes(image)) {
+      return {
+        success: false,
+        message: 'Invalid avatar image selected.',
+        inputs: parsed.raw,
+      };
+    }
+
+    const player = await playerJoin(pin, name, image);
+
+    // Set the playerId cookie to persist the player session
+    const cookieStore = await cookies();
+    cookieStore.set('playerId', player.id, {
+      path: routes.player.play(pin),
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    });
+
+    // Revalidate the path
+    revalidatePath(routes.player.play(pin));
+
+    return {
+      success: true,
+      message: 'Player created successfully.',
+    };
+  } catch (err) {
+    return {
+      success: false,
+      message: (err as Error).message || 'There was a problem creating the player.',
+      inputs: parsed.raw,
+    };
   }
 }

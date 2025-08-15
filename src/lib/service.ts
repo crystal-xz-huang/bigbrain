@@ -6,6 +6,7 @@ import type { User } from 'next-auth';
 /***************************************************************
                       Auth Functions
 ***************************************************************/
+
 export async function getAuthUser(): Promise<Omit<User, 'id'> & { id: string }> {
   const session = await auth();
   if (!session || !session.user || !session.user.id) throw new AccessError('Unauthorized access');

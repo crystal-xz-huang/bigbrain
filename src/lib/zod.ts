@@ -56,20 +56,32 @@ const saveQuestionSchema = object({
   type: z.nativeEnum(QuestionType),
   duration: z.number().int().min(5, 'Duration must be at least 5 seconds'),
   points: z.number().int().min(0, 'Points must be a non-negative integer'),
-  hint: z.string().trim().max(120, 'Hint must be less than 120 characters').optional(),
+  hint: z
+    .string()
+    .trim()
+    .max(120, 'Hint must be less than 120 characters')
+    .optional(),
   answers: array(answerSchema).optional(),
-})
+});
 
 const questionSchema = object({
-  title: z.string().trim().min(1, 'Question cannot be empty').max(75, 'Question must be less than 75 characters'),
+  title: z
+    .string()
+    .trim()
+    .min(1, 'Question cannot be empty')
+    .max(75, 'Question must be less than 75 characters'),
   type: z.nativeEnum(QuestionType),
   duration: z.number().int().min(5, 'Duration must be at least 5 seconds'),
   points: z.number().int().min(0, 'Points must be a non-negative integer'),
-  hint: z.string().trim().max(120, 'Hint must be less than 120 characters').optional(),
+  hint: z
+    .string()
+    .trim()
+    .max(120, 'Hint must be less than 120 characters')
+    .optional(),
   answers: z.array(answerSchema),
 }).superRefine((data, ctx) => {
-  const validAnswers = data.answers.filter(a => a.title.trim() !== '');
-  const correct = validAnswers.filter(a => a.correct).length;
+  const validAnswers = data.answers.filter((a) => a.title.trim() !== '');
+  const correct = validAnswers.filter((a) => a.correct).length;
   const total = validAnswers.length;
 
   switch (data.type) {
@@ -77,8 +89,7 @@ const questionSchema = object({
       if (correct < 1) {
         ctx.addIssue({
           path: ['answers'],
-          message:
-            'Multiple choice must have at least one correct answer',
+          message: 'Multiple choice must have at least one correct answer',
           code: z.ZodIssueCode.custom,
         });
       }
@@ -96,8 +107,7 @@ const questionSchema = object({
       if (correct !== 1) {
         ctx.addIssue({
           path: ['answers'],
-          message:
-            'Single choice must have exactly one correct answer',
+          message: 'Single choice must have exactly one correct answer',
           code: z.ZodIssueCode.custom,
         });
       }
@@ -105,8 +115,7 @@ const questionSchema = object({
       if (total < 2 || correct >= total) {
         ctx.addIssue({
           path: ['answers'],
-          message:
-            'Single choice must have at least one false answer.',
+          message: 'Single choice must have at least one false answer.',
           code: z.ZodIssueCode.custom,
         });
       }
@@ -118,10 +127,10 @@ const questionSchema = object({
           path: ['answers'],
           message: 'Type answer must have at least one answer',
           code: z.ZodIssueCode.custom,
-        })
+        });
       }
       break;
-    }
+  }
 });
 
 export const createGameSchema = object({
@@ -129,21 +138,37 @@ export const createGameSchema = object({
 });
 
 export const saveGameSchema = object({
-  name: string().trim().min(1, 'Game name cannot be empty').max(75, 'Game name must be less than 75 characters'),
-  description: string().trim().max(250, 'Game description must be less than 250 characters').optional(),
+  name: string()
+    .trim()
+    .min(1, 'Game name cannot be empty')
+    .max(75, 'Game name must be less than 75 characters'),
+  description: string()
+    .trim()
+    .max(250, 'Game description must be less than 250 characters')
+    .optional(),
   image: string().nullable().optional(),
   questions: z.array(saveQuestionSchema).optional(),
 });
 
 export const updateGameSchema = object({
-  name: string().trim().min(1, 'Game name cannot be empty').max(75, 'Game name must be less than 75 characters'),
-description: string().trim().max(250, 'Game description must be less than 250 characters').optional(),
+  name: string()
+    .trim()
+    .min(1, 'Game name cannot be empty')
+    .max(75, 'Game name must be less than 75 characters'),
+  description: string()
+    .trim()
+    .max(250, 'Game description must be less than 250 characters')
+    .optional(),
   image: string().nullable().optional(),
-  questions: z.array(questionSchema).min(1, 'At least one question is required'),
+  questions: z
+    .array(questionSchema)
+    .min(1, 'At least one question is required'),
 });
 
 // Group the errors by question index
-export function groupQuestionErrors(error: z.ZodError): Record<number, string[]> {
+export function groupQuestionErrors(
+  error: z.ZodError
+): Record<number, string[]> {
   const grouped: Record<number, string[]> = {};
 
   for (const issue of error.issues) {
@@ -165,8 +190,21 @@ export function groupQuestionErrors(error: z.ZodError): Record<number, string[]>
 
 export const mutationTypeSchema = object({
   mutationType: z.nativeEnum(MutationType),
-})
+});
 
-export const sessionPinSchema = object({
-  pin: z.string().trim().min(1, 'PIN is required').max(6, 'PIN must be 6 characters long'),
-})
+export const sessionPinSchema = z.object({
+  pin: z
+    .string()
+    .trim()
+    .transform((val) => val.replace(/\s+/g, "")) // remove all spaces
+    .refine((v) => /^[0-9]{6}$/.test(v), 'Pin must be 6 digits'),
+  });
+
+export const playerSchema = object({
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Name is required')
+    .max(25, 'Name must be less than 25 characters'),
+  image: z.string().url().or(z.string().startsWith("/avatars/")),
+});

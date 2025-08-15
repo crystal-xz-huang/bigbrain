@@ -1,5 +1,5 @@
 import { fetchFilteredGames, fetchGamesFromAdmin } from '@/lib/data';
-import { requireUser } from '@/lib/session';
+import { getUser } from '@/lib/dal';
 
 import GameCard from '@/components/ui/games/list/game-card';
 import EmptyState from '@/components/ui/games/list/empty-state';
@@ -11,7 +11,7 @@ export default async function GamesList({
   query: string;
   currentPage: number;
 }) {
-  const user = await requireUser();
+  const user = await getUser();
   const games = await fetchGamesFromAdmin(user.id);
   const filteredGames = await fetchFilteredGames(query, currentPage, user.id);
 

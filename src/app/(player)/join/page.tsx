@@ -1,7 +1,7 @@
 import { Link } from '@/components/ui/link';
 import EnterPinForm from '@/components/ui/session/forms/enter-pin';
 import { routes } from '@/lib/routes';
-import BigBrain from '@/public/bigbrain-game-logo.svg';
+import BigBrain from '@/public/bigbrain-play.svg';
 import LandingBackgroundImage from '@/public/landing-background.jpg';
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -40,7 +40,10 @@ export default function Page() {
         <footer className="row-start-3 flex flex-col gap-3 flex-wrap items-center justify-center">
           <div>
             Create your own game for FREE at{' '}
-            <Link href={routes.home} className='font-bold hover:underline hover:underline-offset-4'>
+            <Link
+              href={routes.home}
+              className="font-bold hover:underline hover:underline-offset-4"
+            >
               bigbrain.com
             </Link>
           </div>

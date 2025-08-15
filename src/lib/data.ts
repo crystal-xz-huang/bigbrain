@@ -1,33 +1,37 @@
-import { AccessError, InputError } from '@/lib/error';
+import { InputError } from '@/lib/error';
 import { prisma } from '@/lib/prisma';
 import {
   assertOwnsGame,
   assertOwnsQuestion,
   assertOwnsSession,
-  assertPlayerInSession,
-  getAuthUser,
+  assertPlayerInSession
 } from '@/lib/service';
 import {
   AdminGames,
+  AdminSession,
   AuthUser,
   GameWithQuestions,
   MutationType,
+  PlayerAnswerPayload,
+  PlayerSession,
   QuestionWithAnswers,
   UpdateGameFormData,
-  AdminSession,
-  PlayerSession,
-  PlayerAnswerPayload,
 } from '@/lib/types';
-import { generateId, gradePlayerSelection, validatePlayerSelection } from '@/lib/utils';
+import {
+  generateId,
+  gradePlayerSelection,
+  validatePlayerSelection,
+} from '@/lib/utils';
 import {
   type Game,
   type GameSession,
-  PrismaClientKnownRequestError,
+  Player,
   QuestionType,
 } from '@prisma/client';
-import type { User } from 'next-auth';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import bcrypt from 'bcrypt';
-import { assert } from 'node:console';
+import type { User } from 'next-auth';
+import { getRandomAvatar } from '@/lib/server';
 
 /***************************************************************
                       Helper Functions
@@ -66,13 +70,6 @@ async function getInactiveSessionsIdFromGameId(
                       Auth Functions
 ***************************************************************/
 
-export async function fetchAuthUser(): Promise<AuthUser> {
-  const user = await getAuthUser();
-  const dbUser = await fetchUserByEmail(user.email as string);
-  if (!dbUser) throw new AccessError('User not found');
-  return dbUser;
-}
-
 export async function fetchUserByCredentials(
   email: string,
   password: string
@@ -83,6 +80,12 @@ export async function fetchUserByCredentials(
   const passwordsMatch = await bcrypt.compare(password, user.passwordHash);
   if (!passwordsMatch) return null;
 
+  return user as AuthUser;
+}
+
+export async function fetchUserById(userId: string): Promise<AuthUser | null> {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) return null;
   return user as AuthUser;
 }
 
@@ -502,28 +505,13 @@ export async function fetchQuestionsByGameId(
                       Session Functions
 ***************************************************************/
 
-async function getAdminSessionFromIdThrow(sessionId: string): Promise<AdminSession> {
+async function getSessionFromIdThrow(sessionId: string): Promise<AdminSession> {
   const session = await prisma.gameSession.findUnique({
     where: { id: sessionId },
     include: {
+      host: true,
       players: { orderBy: { joinedAt: 'asc' } },
       questions: { orderBy: { position: 'asc' }, include: { answers: true } },
-    },
-  });
-  if (!session) throw new InputError('Invalid session ID');
-  return session;
-}
-
-async function getPlayerSessionFromIdThrow(sessionId: string): Promise<PlayerSession> {
-  const session = await prisma.gameSession.findUnique({
-    where: { id: sessionId },
-    include: {
-      players: { orderBy: { joinedAt: 'asc' } },
-      questions: {
-        orderBy: { position: 'asc' },
-        include: { answers: { select: { id: true, title: true },}
-        }
-      },
     },
   });
   if (!session) throw new InputError('Invalid session ID');
@@ -596,7 +584,7 @@ export async function startGame(
 
 async function startSession(sessionId: string): Promise<void> {
   await prisma.$transaction(async (tx) => {
-    const session = await getAdminSessionFromIdThrow(sessionId);
+    const session = await getSessionFromIdThrow(sessionId);
     if (!session.active)
       throw new InputError('Cannot start a session that is not active');
     if (session.locked) throw new InputError('Cannot start a locked session');
@@ -663,7 +651,7 @@ export async function lockSession({
 }): Promise<AdminSession> {
   await assertOwnsSession(userId, sessionId);
 
-  const session = await getAdminSessionFromIdThrow(sessionId);
+  const session = await getSessionFromIdThrow(sessionId);
   if (!session.active) throw new InputError('Cannot lock an inactive session');
   if (session.startedAt)
     throw new InputError('Cannot lock a session that has already begun');
@@ -673,7 +661,7 @@ export async function lockSession({
     data: { locked: locked },
   });
 
-  return await getAdminSessionFromIdThrow(sessionId);
+  return await getSessionFromIdThrow(sessionId);
 }
 
 export async function mutateSession({
@@ -697,7 +685,7 @@ export async function mutateSession({
       default:
         throw new InputError('Invalid mutation type');
     }
-    return await getAdminSessionFromIdThrow(sessionId);
+    return await getSessionFromIdThrow(sessionId);
   } catch (error) {
     throw error instanceof InputError
       ? error
@@ -711,7 +699,7 @@ export async function fetchSessionFromAdmin(
 ): Promise<AdminSession | null> {
   try {
     await assertOwnsSession(userId, sessionId);
-    return await getAdminSessionFromIdThrow(sessionId);
+    return await getSessionFromIdThrow(sessionId);
   } catch (error) {
     console.error('Database Error:', error);
     return null;
@@ -722,19 +710,38 @@ export async function fetchSessionFromAdmin(
                      Player Functions
 ***************************************************************/
 
-export async function fetchSessionFromPin(pin: string): Promise <PlayerSession | null> {
-  try {
-    const session = await prisma.gameSession.findUnique({
-      where: { pin },
-      include: {
-        players: { orderBy: { joinedAt: 'asc' } },
-        questions: {
-          orderBy: { position: 'asc' },
-          include: { answers: { select: { id: true, title: true } } },
-        },
+async function getSessionFromPinThrow(pin: string): Promise<PlayerSession> {
+  const session = await prisma.gameSession.findUnique({
+    where: { pin },
+    include: {
+      host: true,
+      players: { orderBy: { joinedAt: 'asc' } },
+      questions: {
+        orderBy: { position: 'asc' },
+        include: { answers: { select: { id: true, title: true } } },
       },
-    });
-    if (!session) return null;
+    },
+  });
+  if (!session) throw new InputError('Invalid session PIN');
+  return session;
+}
+
+export async function fetchSessionFromPin(pin: string): Promise<PlayerSession | null> {
+  try {
+    return await getSessionFromPinThrow(pin);
+  } catch (error) {
+    console.error('Database Error:', error);
+    return null;
+  }
+}
+
+export async function fetchSessionFromPlayer(
+  playerId: string,
+  pin: string
+): Promise<PlayerSession | null> {
+  try {
+    const session = await getSessionFromPinThrow(pin);
+    await assertPlayerInSession(playerId, session.id);
     return session;
   } catch (error) {
     console.error('Database Error:', error);
@@ -742,29 +749,29 @@ export async function fetchSessionFromPin(pin: string): Promise <PlayerSession |
   }
 }
 
-export async function fetchSessionFromPlayer(playerId: string, sessionId: string): Promise<PlayerSession | null> {
-  try {
-    await assertPlayerInSession(playerId, sessionId);
-    return await getPlayerSessionFromIdThrow(sessionId);
-  } catch (error) {
-    console.error('Database Error:', error);
-    return null;
-  }
-}
-
-export async function playerJoin(name: string, sessionId: string) {
-  const session = await getAdminSessionFromIdThrow(sessionId);
+export async function playerJoin(
+  pin: string,
+  name: string,
+  image?: string
+): Promise<Player> {
+  const session = await getSessionFromPinThrow(pin);
   if (!session.active) throw new InputError('Cannot join an inactive session');
   if (session.locked) throw new InputError('Cannot join a locked session');
   if (session.startedAt) throw new InputError('Session has already begun');
 
-  const player = await prisma.player.upsert({
-    where: { sessionId_name: { sessionId, name } }, // unique constraint
-    update: {}, // no update needed, just ensure it exists
-    create: { sessionId, name }, // create if it doesn't exist
-  });
-
-  return player;
+  // Create a new player
+  try {
+    const player = await prisma.player.create({
+      data: { sessionId: session.id, name, image },
+    });
+    return player;
+  } catch (err) {
+    if (err instanceof PrismaClientKnownRequestError && err.code === 'P2002') {
+      throw new InputError('Nickname already taken');
+    }
+    console.error('Database Error:', err);
+    throw new Error('Failed to join session');
+  }
 }
 
 export async function playerSubmitAnswers(
@@ -803,11 +810,20 @@ export async function playerSubmitAnswers(
       select: { id: true },
     });
 
-    const selectedAnswerIds = validatePlayerSelection(payload, q.type, q.answers);
-    await tx.selectedAnswer.deleteMany({ where: { playerAnswerId: playerAnswer.id } });
+    const selectedAnswerIds = validatePlayerSelection(
+      payload,
+      q.type,
+      q.answers
+    );
+    await tx.selectedAnswer.deleteMany({
+      where: { playerAnswerId: playerAnswer.id },
+    });
     if (selectedAnswerIds.length) {
       await tx.selectedAnswer.createMany({
-        data: selectedAnswerIds.map(answerId => ({ playerAnswerId: playerAnswer.id, answerId })),
+        data: selectedAnswerIds.map((answerId) => ({
+          playerAnswerId: playerAnswer.id,
+          answerId,
+        })),
         skipDuplicates: true,
       });
     }
@@ -823,7 +839,7 @@ export async function playerSubmitAnswers(
       playerAnswerId: playerAnswer.id,
       correct,
       selectedAnswerIds,
-      correctAnswerIds: q.answers.filter(a => a.correct).map(a => a.id),
+      correctAnswerIds: q.answers.filter((a) => a.correct).map((a) => a.id),
     };
   });
 }

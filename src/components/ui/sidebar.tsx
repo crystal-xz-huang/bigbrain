@@ -97,7 +97,7 @@ export const SidebarItem = forwardRef(function SidebarItem(
     // Active
     'data-active:bg-zinc-950/5 data-active:*:data-[slot=icon]:fill-zinc-950',
     // Current
-    'data-current:*:data-[slot=icon]:!fill-primary-600 data-current:!bg-primary-500/10 data-current:!text-primary-600',
+    'data-current:*:data-[slot=icon]:!fill-primary data-current:!bg-primary/10 data-current:!text-primary',
     // Dark mode
     'dark:text-white dark:*:data-[slot=icon]:fill-zinc-400',
     'dark:data-hover:bg-white/5 dark:data-hover:*:data-[slot=icon]:fill-white',

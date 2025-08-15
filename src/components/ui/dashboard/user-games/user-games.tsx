@@ -5,10 +5,10 @@ import { Subheading } from '@/components/ui/heading';
 import { TextLink } from '@/components/ui/text';
 import { fetchGamesFromAdmin } from '@/lib/data';
 import { routes } from '@/lib/routes';
-import { requireUser } from '@/lib/session';
+import { getUser } from '@/lib/dal';
 
 export default async function UserGames() {
-  const user = await requireUser();
+  const user = await getUser();
   const games = await fetchGamesFromAdmin(user.id);
 
   if (!games || games.length === 0) {

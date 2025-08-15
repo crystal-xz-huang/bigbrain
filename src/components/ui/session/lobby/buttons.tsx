@@ -71,9 +71,12 @@ export function CopyLinkToClipboard({
   const [copied, setCopied] = useState(false);
   const toast = useToast();
 
+  // Append the base URL to the href because the href is a relative path
+  const url = `${window.location.origin}${href}`;
+
   const copyToClipboard = () => {
     navigator.clipboard
-      .writeText(href)
+      .writeText(url)
       .then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);

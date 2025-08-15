@@ -1,18 +1,19 @@
 import { Lobby } from '@/components/ui/session/lobby';
 import { fetchSessionFromAdmin } from '@/lib/data';
-import { requireUser } from '@/lib/session';
+import { getUser } from '@/lib/dal';
 import { notFound } from 'next/navigation';
 
 export default async function Page({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ sessionId: string }>
 }) {
-  const { id } = await params;
-  const user = await requireUser();
-  const session = await fetchSessionFromAdmin(user.id, id);
+  const { sessionId } = await params;
+  const user = await getUser();
+  const session = await fetchSessionFromAdmin(user.id, sessionId);
   if (!session) {
     notFound();
   }
+
   return <Lobby gameSession={session} userId={user.id} />;
 }

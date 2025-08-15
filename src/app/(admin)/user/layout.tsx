@@ -1,7 +1,7 @@
-import { Navbar, Sidebar } from '@/components/ui/navigation';
+import { Navbar, Sidebar } from '@/components/ui/navigation/user';
 import { SidebarLayout } from '@/components/ui/sidebar-layout';
 import { SidebarProvider } from '@/hooks/sidebar';
-import { requireUser } from '@/lib/session';
+import { getUser } from '@/lib/dal';
 import React from 'react';
 
 export default async function Layout({
@@ -9,7 +9,7 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await requireUser();
+  const user = await getUser();
 
   return (
     <SidebarProvider>
