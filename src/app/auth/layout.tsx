@@ -1,5 +1,4 @@
 import { AuthLayout } from '@/components/ui/auth-layout';
-import { Suspense } from 'react';
 
 export default function Layout({
   children,
@@ -8,9 +7,7 @@ export default function Layout({
 }) {
   return (
     <AuthLayout>
-      <Suspense>
-        {children}
-      </Suspense>
+      {children}
     </AuthLayout>
   );
 }

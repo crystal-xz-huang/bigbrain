@@ -7,6 +7,8 @@ type SidebarContext = {
   isOpen: boolean
   open: () => void
   close: () => void
+  collapse: () => void
+  expand: () => void
   toggleCollapse: () => void
 }
 

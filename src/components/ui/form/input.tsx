@@ -2,8 +2,7 @@
 
 import { Input as FormInput } from '@/components/ui/input';
 import * as Headless from '@headlessui/react';
-import { ExclamationCircleIcon } from '@heroicons/react/16/solid';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import React, { useState } from 'react';
 
@@ -11,7 +10,7 @@ import React, { useState } from 'react';
                   Input with Trailing Error Icon
 ***************************************************************/
 
-function InputGroup({ children }: { children: React.ReactNode }) {
+export function InputGroup({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative w-full">
       <div className="my-2 grid grid-cols-1">{children}</div>
@@ -33,7 +32,7 @@ export function Input({
       {invalid && (
         <ExclamationCircleIcon
           aria-hidden="true"
-          className="pointer-events-none col-start-1 row-start-1 mr-3 size-5 self-center justify-self-end text-rose-500 sm:size-4"
+          className="stroke-2 pointer-events-none col-start-1 row-start-1 mr-3 size-6 self-center justify-self-end text-rose-500 sm:size-5"
         />
       )}
     </InputGroup>
@@ -44,15 +43,17 @@ export function Input({
                       Password Input
 ***************************************************************/
 
-export function PasswordInput({ ...props }) {
+export function PasswordInput({ children, ...props }: { children?: React.ReactNode } & Omit<Headless.InputProps, 'className'>) {
   const [showPassword, setShowPassword] = useState(false);
+
   return (
     <InputGroup>
-      <Input
+      <FormInput
         type={showPassword ? 'text' : 'password'}
         className="col-start-1 row-start-1 before:hidden"
         {...props}
       />
+      {children}
       <button
         type="button"
         className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"

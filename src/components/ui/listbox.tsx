@@ -109,7 +109,7 @@ export function ListboxOption<T>({
   Headless.ListboxOptionProps<'div', T>,
   'as' | 'className'
 >) {
-  let sharedClasses = clsx(
+  const sharedClasses = clsx(
     // Base
     'flex min-w-0 items-center',
     // Icons
@@ -150,7 +150,9 @@ export function ListboxOption<T>({
             >
               <path d="M4 8.5l3 3L12 4" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <span className={clsx(className, sharedClasses, 'col-start-2')}>{children}</span>
+            <span className={clsx(className, sharedClasses, 'col-start-2')}>
+              {children}
+            </span>
           </div>
         )
       }}

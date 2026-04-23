@@ -1,8 +1,10 @@
-import * as Headless from '@headlessui/react'
-import clsx from 'clsx'
-import React, { forwardRef } from 'react'
+import * as Headless from '@headlessui/react';
+import clsx from 'clsx';
+import React, { forwardRef } from 'react';
 
-export function InputGroup({ children }: React.ComponentPropsWithoutRef<'span'>) {
+export function InputGroup({
+  children,
+}: React.ComponentPropsWithoutRef<'span'>) {
   return (
     <span
       data-slot="control"
@@ -16,19 +18,27 @@ export function InputGroup({ children }: React.ComponentPropsWithoutRef<'span'>)
     >
       {children}
     </span>
-  )
+  );
 }
 
-const dateTypes = ['date', 'datetime-local', 'month', 'time', 'week']
-type DateType = (typeof dateTypes)[number]
+const dateTypes = ['date', 'datetime-local', 'month', 'time', 'week'];
+type DateType = (typeof dateTypes)[number];
 
 export const Input = forwardRef(function Input(
   {
     className,
     ...props
   }: {
-    className?: string
-    type?: 'email' | 'number' | 'password' | 'search' | 'tel' | 'text' | 'url' | DateType
+    className?: string;
+    type?:
+      | 'email'
+      | 'number'
+      | 'password'
+      | 'search'
+      | 'tel'
+      | 'text'
+      | 'url'
+      | DateType;
   } & Omit<Headless.InputProps, 'as' | 'className'>,
   ref: React.ForwardedRef<HTMLInputElement>
 ) {
@@ -38,17 +48,23 @@ export const Input = forwardRef(function Input(
       className={clsx([
         className,
         // Basic layout
-        'relative block w-full',
+        'relative block w-full transition',
         // Background color + shadow applied to inset pseudo element, so shadow blends with border in light mode
         'before:absolute before:inset-px before:rounded-[calc(var(--radius-lg)-1px)] before:bg-white before:shadow-sm',
         // Background color is moved to control and shadow is removed in dark mode so hide `before` pseudo
         'dark:before:hidden',
-        // Focus ring
-        'after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-transparent after:ring-inset sm:focus-within:after:ring-2 sm:focus-within:after:ring-primary',
+        // Focus border
+        'after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-transparent after:ring-inset focus-within:after:ring-1 focus-within:after:ring-glow-border-focus',
+        // Focus ring/shadow
+        'rounded-[calc(var(--radius-lg)-1px)] focus-within:shadow-[var(--glow-box-shadow-focus)]',
         // Disabled state
         'has-data-disabled:opacity-50 has-data-disabled:before:bg-zinc-950/5 has-data-disabled:before:shadow-none',
         // Invalid state
-        'has-data-invalid:before:shadow-rose-500/10 has-data-invalid:sm:focus-within:after:ring-rose-400',
+        'has-data-invalid:focus-within:after:ring-glow-red-600 has-data-invalid:focus-within:shadow-[var(--glow-box-shadow-focus-error)]',
+        // Required + invalid state
+        'has-user-invalid:focus-within:after:ring-glow-red-600 has-user-invalid:focus-within:shadow-[var(--glow-box-shadow-focus-error)]',
+        // Valid state
+        // 'has-user-valid:focus-within:after:ring-glow-green-600 has-user-valid:focus-within:shadow-[var(--glow-box-shadow-focus-success)]',
       ])}
     >
       <Headless.Input
@@ -72,7 +88,7 @@ export const Input = forwardRef(function Input(
               '[&::-webkit-datetime-edit-meridiem-field]:p-0',
             ],
           // Basic layout
-          'relative block w-full appearance-none rounded-lg px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)]',
+          'relative block w-full appearance-none rounded-lg px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] transition',
           // Typography
           'text-base/6 text-zinc-950 placeholder:text-zinc-500 sm:text-sm/6 dark:text-white',
           // Border
@@ -82,7 +98,11 @@ export const Input = forwardRef(function Input(
           // Hide default focus styles
           'focus:outline-hidden',
           // Invalid state
-          'data-invalid:border-rose-500 data-invalid:data-hover:border-rose-500 dark:data-invalid:border-rose-500 dark:data-invalid:data-hover:border-rose-500',
+          'data-invalid:border-glow-red-400 data-invalid:data-hover:border-glow-red-500',
+          // Required + invalid state
+          'user-invalid:border-glow-red-400 user-invalid:data-hover:border-glow-red-500',
+          // Success state
+          // 'user-valid:border-glow-green-400 user-valid:data-hover:border-glow-green-500',
           // Disabled state
           'data-disabled:border-zinc-950/20 dark:data-disabled:border-white/15 dark:data-disabled:bg-white/2.5 dark:data-hover:data-disabled:border-white/15',
           // System icons
@@ -90,5 +110,5 @@ export const Input = forwardRef(function Input(
         ])}
       />
     </span>
-  )
-})
+  );
+});

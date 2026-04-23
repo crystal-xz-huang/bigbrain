@@ -1,14 +1,26 @@
-import type {
-  GameWithQuestions,
-  PlayerAnswerPayload,
-  QuestionWithAnswers,
-} from '@/lib/types';
 import {
-  GameSessionAnswer,
-  Question,
-  QuestionAnswer,
-  QuestionType,
-} from '@prisma/client';
+  CountsRule,
+  PASSWORD_REGEX,
+  EDITING_RULES,
+} from '@/lib/definitions/constants';
+import type {
+  AdminGamesListItemDTO,
+  AnswerDTO,
+  GameEditDTO,
+  GamesListDTO,
+  GamesListItemDTO,
+  LibraryListItemDTO,
+  ParsedResult,
+  PlayerAnswerPayload,
+  PublicGamesListItemDTO,
+  QuestionDTO,
+} from '@/lib/definitions/types';
+import {
+  AdminOwnerGamesListItemDTO,
+  UserStatsDTO,
+} from '@/lib/definitions/types';
+import { GameSessionAnswer, QuestionType } from '@prisma/client';
+import * as z from 'zod';
 
 /***************************************************************
                       Data Input
@@ -45,52 +57,319 @@ export function fileToDataUrl(file: File): Promise<string> {
   return dataUrlPromise as Promise<string>;
 }
 
+
+/***************************************************************
+                     Slug Helpers
+***************************************************************/
+/**
+ * Convert a string to a slug format. For example, "Dog 1234" becomes "dog-1234".
+ * @param {string} s - The string to convert.
+ * @returns {string | null} - The slugified string or null if input is invalid.
+ */
+export const slugify = (s: string): string | null => {
+  if (!s || typeof s !== 'string' || s.trim() === '') return null;
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+};
+
+/**
+ * Convert a slug back to a human-readable format. For example, "dog-1234" becomes "Dog 1234".
+ * @param {string} slug The slug to convert.
+ * @returns {string} The human-readable string.
+ */
+export const unslugify = (slug: string): string | null => {
+  if (!slug || typeof slug !== 'string' || slug.trim() === '') return null;
+  return slug
+    .replace(/-/g, ' ') // replace hyphens with spaces
+    .replace(/\b\w/g, (c) => c.toUpperCase()); // capitalize first letter of each word
+};
+
 /***************************************************************
                      ID Generation
 ***************************************************************/
 
-const randNum = (max: number) =>
-  Math.floor(Math.random() * (max - 100000) + 100000);
+/**
+ * Generates a unique ID that is not already in the current list.
+ * The ID will be a string of exactly `length` digits, with no leading zeros.
+ * If the current list is full, it will increase the length and try again.
+ *
+ * @param currentList - The list of existing IDs to avoid duplicates
+ * @param length - The desired length of the generated ID (default is 6)
+ * @returns A unique ID as a string with exactly `length` digits (or more if needed).
+ */
+export function generateId(currentList: string[], length = 6): string {
+  const used = new Set(currentList);
+  let L = length;
 
-export const uid = () => {
-  const num = Math.floor(Math.random() * 1000000);
-  return num.toString().padStart(10, '0');
-};
+  while (true) {
+    const min = Math.pow(10, L - 1);
+    const max = Math.pow(10, L) - 1;
+    const total = max - min + 1; // number of L-digit numbers (no leading zeros)
 
-export const generateId = (currentList: string[], max = 999999999) => {
-  let R = randNum(max);
-  while (currentList.includes(R.toString())) {
-    R = randNum(max);
+    // How many used IDs already have this length?
+    let usedOfLen = 0;
+    for (const id of used) if (id.length === L) usedOfLen++;
+
+    // If the space is exhausted, increase length and try again.
+    if (usedOfLen >= total) {
+      L++;
+      continue;
+    }
+
+    // Try random sampling a few times (fast when space isn't too full).
+    for (let tries = 0; tries < 50; tries++) {
+      const candidate = String(randomNum(L));
+      if (!used.has(candidate)) return candidate;
+    }
+
+    // If it's very full (random failed repeatedly), expand the length to avoid long loops.
+    L++;
   }
-  return R.toString();
+}
+
+/**
+ * Generates a random number with exactly `L` digits.
+ * @param L - The number of digits (e.g., 6 for a 6-digit number)
+ * @returns A random number as a string with exactly `L` digits.
+ */
+const randomNum = (L: number) => {
+  const min = Math.pow(10, L - 1);
+  const total = Math.pow(10, L) - min; // = 9 * 10^(L-1)
+  return Math.floor(Math.random() * (total + 1)) + min;
 };
 
 /***************************************************************
                       Data Validation
 ***************************************************************/
 
-export const isEmptyString = (value?: string): boolean => {
+export const isEmptyString = (value: string): boolean => {
   return !value || value.trim() === '';
 };
 
-export const isNullOrUndefined = (value?: any): boolean => {
-  return value === null || value === undefined || isEmptyString(value);
+export const isNullOrUndefined = (value: unknown): boolean => {
+  if (value === null || value === undefined) return true;
+  if (typeof value === 'string' && value.trim() === '') return true;
+  return false;
 };
 
 export const isTooLong = (text: string, maxLength: number): boolean => {
   return text.length > maxLength;
 };
 
+export const validatePassword = (password: string): boolean =>
+  PASSWORD_REGEX.test(password);
+
+export function parseFormData<T, S extends z.ZodType<T>>(
+  formData: FormData,
+  schema: S
+): ParsedResult<T> {
+  const data = Object.fromEntries(formData);
+  const parsed = schema.safeParse(data);
+
+  if (!parsed.success) {
+    console.error('Pretty errors:', z.prettifyError(parsed.error));
+    console.error('Treeify errors:', z.treeifyError(parsed.error));
+    console.error('Flattened errors:', z.flattenError(parsed.error));
+    console.error('Error issues:', parsed.error.issues);
+    return {
+      success: false,
+      message: 'Please fix the errors in the form.',
+      errors: z.flattenError(parsed.error).fieldErrors,
+      inputs: data,
+      // also return the parsed error from zod
+      error: parsed.error,
+    };
+  }
+
+  console.log('Parsed data:', parsed.data);
+  return {
+    success: true,
+    inputs: data,
+    // return the parsed data from zod
+    data: parsed.data,
+  };
+}
+
+/** Format a ZodError as a human-readable string in the following form.
+ *
+ * From
+ *
+ * ```ts
+ * ZodError {
+ *   issues: [
+ *     {
+ *       expected: 'string',
+ *       code: 'invalid_type',
+ *       path: [ 'username' ],
+ *       message: 'Invalid input: expected string'
+ *     },
+ *     {
+ *       expected: 'number',
+ *       code: 'invalid_type',
+ *       path: [ 'favoriteNumbers', 1 ],
+ *       message: 'Invalid input: expected number'
+ *     }
+ *   ];
+ * }
+ * ```
+ *
+ * to
+ *
+ * ```
+ * username
+ *   ✖ Expected number, received string at "username
+ * favoriteNumbers[0]
+ *   ✖ Invalid input: expected number
+ * ```
+ */
+export function formatZodIssues(issues: z.core.$ZodIssue[]): string {
+  // Group issues by keys
+  const errorMap = new Map<string, string[]>();
+  const push = (key: string, msg: string) => {
+    const arr = errorMap.get(key);
+    if (arr) arr.push(msg);
+    else errorMap.set(key, [msg]);
+  };
+  for (const { path, message } of issues) {
+    if (typeof path[0] === 'string' && typeof path[1] === 'number') {
+      // e.g. ['questions', 0, 'title'] -> question 1
+      // or [ 'favoriteNumbers', 1 ] -> favourite number 2
+      const label = path[0].endsWith('s') ? path[0].slice(0, -1) : path[0];
+      const index = (path[1] as number) + 1;
+      const key = `${label} ${index}`;
+      push(key, message);
+    } else {
+      const key = 'general';
+      push(key, message);
+    }
+  }
+  // Format the output
+  const lines: string[] = [];
+  const general = errorMap.get('general');
+  if (general) {
+    for (const msg of general) lines.push(`✖ ${msg}`);
+    errorMap.delete('general');
+  }
+  for (const [key, msgs] of errorMap) {
+    lines.push(`✖ ${key}`);
+    for (const m of msgs) lines.push(`  → ${m}`);
+  }
+  return lines.join('\n');
+}
+
+export function clean(tag: string): string {
+  return tag.trim().replace(/\s+/g, ' ');
+}
+
+export function normalize(tag: string): string {
+  return tag.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+export function dedupe<T>(arr: T[]): T[] {
+  return Array.from(new Set(arr));
+}
+
+export function cleanTags(tags: string[]): string[] {
+  const cleaned = tags.map((t) => t.trim().replace(/\s+/g, ' ').toLowerCase());
+  return Array.from(new Set(cleaned)).filter(Boolean); // Remove empty strings
+}
+
 /***************************************************************
                      String Transformation
 ***************************************************************/
 
-export const pluralSuffix = (count: number): string => (count > 1 ? 's' : '');
+export type CaseType = 'lower' | 'upper' | 'capitalized' | 'sentence' | 'title';
 
-export const ordinalSuffix = (num: number): string => {
-  const suffixes = ['th', 'st', 'nd', 'rd'];
-  const value = num % 100;
-  return num + (suffixes[(value - 20) % 10] || suffixes[value] || suffixes[0]);
+export const convertCase = (str: string, caseType: CaseType) => {
+  switch (caseType) {
+    case 'lower':
+      // lower case
+      return str.toLowerCase();
+    case 'upper':
+      // UPPER CASE
+      return str.toUpperCase();
+    case 'capitalized':
+      // Capitalized Case: first letter of each word uppercase, rest lowercase
+      return str.replace(
+        /\w\S*/g,
+        (text) => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
+      );
+    case 'title':
+      // Title Case (same as Capitalized for simplicity):
+      return str.replace(
+        /\w\S*/g,
+        (text) => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
+      );
+    case 'sentence':
+      // Sentence case: first letter uppercase, rest lowercase
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    default:
+      return str;
+  }
+};
+
+/**
+ * Pluralizes a word based on the given number.
+ * If no custom plural form is provided, it defaults to the singular word + s.
+ *
+ * @param n The number to base the pluralization on
+ * @param word The singular form of the word
+ * @param plural The plural form of the word (optional, defaults to word + 's')
+ * @returns The singular or plural form of the word based on the number
+ * @example
+ * pluralize(0, 'cat') // returns '0 cats'
+ * pluralize(1, 'cat') // returns '1 cat'
+ * pluralize(2, 'person', 'people') // returns '2 people'
+ */
+export const pluralize = (
+  n: number,
+  word: string,
+  plural = word + 's'
+): string => {
+  // If the value is 1 or -1, return the singular form of the word
+  const _pluralize = (n: number, w: string, plural = w + 's') =>
+    [1, -1].includes(Number(n)) ? word : plural;
+  return `${n} ${_pluralize(n, word, plural)}`;
+};
+
+/**
+ *
+ * @param n The number to base the pluralization on
+ * @example
+ * formatCardinals(0) // returns 'zero'
+ * formatCardinals(1) // returns 'one'
+ * formatCardinals(2) // returns 'two'
+ * formatCardinals(3) // returns 'few'
+ * formatCardinals(11) // returns 'many'
+ */
+export const formatCardinals = (n: number): string => {
+  const arCardinalRules = new Intl.PluralRules('ar-EG');
+  return arCardinalRules.select(n);
+};
+
+/**
+ * Formats a number with its ordinal suffix.
+ * @param n The number to format
+ * @returns The number with its ordinal suffix (e.g., 1st, 2nd, 3rd, 4th)
+ * @example
+ * formatOrdinals(1) // returns "1st"
+ * formatOrdinals(2) // returns "2nd"
+ * @tutorial https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules
+ */
+export const formatOrdinals = (n: number): string => {
+  const enOrdinalRules = new Intl.PluralRules('en-US', { type: 'ordinal' });
+  const suffixes = new Map([
+    ['one', 'st'],
+    ['two', 'nd'],
+    ['few', 'rd'],
+    ['other', 'th'],
+  ]);
+  const rule = enOrdinalRules.select(n);
+  const suffix = suffixes.get(rule);
+  return `${n}${suffix}`;
 };
 
 /**
@@ -130,61 +409,132 @@ export const splitArray = <T>(array: T[], split = 2): T[][] => {
 };
 
 /***************************************************************
-                     Date / Time
+                     String Generation
 ***************************************************************/
 
-const timeAgo = (timestamp: string | number | Date) => {
-  const now = new Date();
-  const date = new Date(timestamp);
-  const diff = now.getTime() - date.getTime();
-
-  return {
-    seconds: Math.floor(diff / 1000),
-    minutes: Math.floor(diff / (1000 * 60)),
-    hours: Math.floor(diff / (1000 * 60 * 60)),
-    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-    weeks: Math.floor(diff / (1000 * 60 * 60 * 24 * 7)),
-  };
-};
-
-export const formatLastUpdated = (date: Date) => {
-  const diff = timeAgo(date);
-
-  // less than 1 minute ago
-  if (diff.minutes < 1) {
-    return 'just now';
-  }
-  // less than 1 hour ago
-  else if (diff.minutes < 60) {
-    return `${diff.minutes} min${pluralSuffix(diff.minutes)} ago`;
-  }
-  // less than 24 hours ago
-  else if (diff.hours < 24) {
-    return `${diff.hours}h ago`;
-  }
-  // default to days
-  return `${diff.days} day${pluralSuffix(diff.days)} ago`;
-};
-
 /**
- * Formats a total time in seconds into a human-readable string.
- * @param total - Total time in seconds
- * @returns A formatted string representing the time in minutes and seconds.
+ * Generates a default game name
+ * @returns A string in the format "Untitled Draft MM/DD/YYYY HH:MM AM/PM"
  */
-export const formatTime = (total: number) => {
-  if (total < 60) {
-    return `${total} sec${pluralSuffix(total)}`;
-  }
-  // if total is greater than 60, return in minutes
-  const minutes = Math.floor(total / 60);
-  const seconds = total % 60;
-  return `${minutes} min${pluralSuffix(minutes)} ${seconds} sec${pluralSuffix(
-    seconds
+export const generateDefaultGameName = (): string => {
+  const now = new Date();
+  return `Untitled Draft ${now.toLocaleDateString()} ${now.toLocaleTimeString(
+    [],
+    {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    }
   )}`;
 };
 
-export const addMs = (date: Date, ms: number): Date => {
-  return new Date(date.getTime() + ms);
+/**
+ * Generates a random alphanumeric string of a specified length.
+ * @param length - The length of the random string to generate
+ * @returns A random alphanumeric string of the specified length
+ */
+export const generateRandomString = (length: number): string => {
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+};
+
+/***************************************************************
+                     Date / Time
+***************************************************************/
+
+const TIME_UNITS_IN_MS = {
+  seconds: 1000,
+  minutes: 1000 * 60,
+  hours: 1000 * 60 * 60,
+  days: 1000 * 60 * 60 * 24,
+  weeks: 1000 * 60 * 60 * 24 * 7,
+  months: 1000 * 60 * 60 * 24 * 30,
+  years: 1000 * 60 * 60 * 24 * 365,
+} as const;
+
+const getTimeUnits = (ms: number) => {
+  return {
+    seconds: Math.floor(ms / TIME_UNITS_IN_MS.seconds),
+    minutes: Math.floor(ms / TIME_UNITS_IN_MS.minutes),
+    hours: Math.floor(ms / TIME_UNITS_IN_MS.hours),
+    days: Math.floor(ms / TIME_UNITS_IN_MS.days),
+    weeks: Math.floor(ms / TIME_UNITS_IN_MS.weeks),
+    months: Math.floor(ms / TIME_UNITS_IN_MS.months),
+    years: Math.floor(ms / TIME_UNITS_IN_MS.years),
+  };
+};
+
+const getTimeUnitsFromNow = (timestamp: string | Date) => {
+  const now = new Date();
+  const date = new Date(timestamp);
+  const diff = now.getTime() - date.getTime();
+  return getTimeUnits(diff);
+};
+
+// format as "MMM DD, YYYY"
+export const formatDate = (timestamp: string): string => {
+  const date = new Date(timestamp);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+/**
+ * Formats a date to show how long ago it was updated.
+ *
+ * @param date The date to format (ISO string or Date object)
+ * @returns A human-readable string representing how long ago the update was.
+ * @example Returns "Saved just now" or "Last edit was saved 1 minute ago, 2 hours ago, 3 days ago, 1 week ago, on MM/DD/YYYY"
+ */
+export const formatLastUpdated = (timestamp: string | Date): string => {
+  const diff = getTimeUnitsFromNow(timestamp);
+  const prefix = diff.minutes < 1 ? 'Saved ' : 'Last edit was saved ';
+  const suffix = ' ago';
+  // less than 1 minute ago
+  if (diff.minutes < 1) {
+    return `${prefix} just now`;
+  }
+  // less than 1 hour ago
+  else if (diff.minutes < 60) {
+    return prefix + pluralize(diff.minutes, 'minute') + suffix;
+  }
+  // less than 24 hours ago
+  else if (diff.hours < 24) {
+    return prefix + pluralize(diff.hours, 'hour') + suffix;
+  }
+  // less than 1 week ago
+  else if (diff.days < 7) {
+    return prefix + pluralize(diff.days, 'day') + suffix;
+  }
+  // less than 1 month ago
+  else if (diff.weeks < 4) {
+    return prefix + pluralize(diff.weeks, 'week') + suffix;
+  }
+  // default to date string if more than 1 month ago
+  return prefix + `on ${new Date(timestamp).toLocaleDateString()}`;
+};
+
+/**
+ * Formats the given time in seconds to a string in the format "Xm Ys".
+ * @param seconds - The time in seconds to format
+ * @returns {string} A string representing the formatted time
+ * @example
+ * formatDuration(45) // returns "45s"
+ * formatDuration(200) // returns "3m 20s"
+ */
+export const formatDuration = (seconds: number): string => {
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  if (s === 0) return `${m}m`;
+  return `${m}m ${s}s`;
 };
 
 /***************************************************************
@@ -198,174 +548,170 @@ export const getInitials = (name: string) => {
   return initials.toUpperCase();
 };
 
-export const generateUserStats = (stats: {
-  joinedAt: Date | undefined;
-  totalGames: number;
-}) => {
+export const generateUserStats = (stats: UserStatsDTO) => {
   return [
     {
       label: 'joined',
-      value:
-        stats?.joinedAt?.toLocaleString('default', {
-          month: 'short',
-          year: 'numeric',
-        }) || 'N/A',
+      value: stats.createdAt
+        ? new Date(stats.createdAt).toLocaleDateString('default', {
+            month: 'short',
+            year: 'numeric',
+          })
+        : 'N/A',
     },
-    { label: 'games', value: stats?.totalGames || 0 },
+    { label: 'games', value: stats.games },
+    { label: 'plays', value: stats.plays },
   ];
+};
+
+export const generateAvatarProps = (user: {
+  name: string | null;
+  image: string | null;
+}) => {
+  if (!user.name) return null;
+  return user.image
+    ? {
+        src: user.image,
+        alt: `${user.name}'s profile picture`,
+      }
+    : {
+        alt: `${user.name}'s profile picture`,
+        initials: getInitials(user.name),
+      };
 };
 
 /***************************************************************
                      Game Helpers
 ***************************************************************/
-/**
- * Calculates the total duration of all questions in a game.
- * @param questions - Array of questions
- * @returns Total duration in seconds
- */
-export const totalDuration = (questions: Question[]) => {
-  if (!questions || questions.length === 0) return 0;
-  return questions.reduce((acc, question) => {
-    if (!question.duration) return acc;
-    return acc + question.duration;
-  }, 0);
+
+export const isAdminGame = (
+  item: GamesListItemDTO
+): item is AdminGamesListItemDTO => {
+  return 'active' in item && 'played' in item;
+}
+
+export const isPublicGame = (
+  item: GamesListItemDTO
+): item is PublicGamesListItemDTO => {
+  return !('active' in item) && !('played' in item);
 };
 
-/**
- * Calculates the total number of questions in a game.
- * @param questions - Array of questions
- * @returns Total number of questions
- */
-export const totalNumberOfQuestions = (questions: Question[]) => {
-  if (!questions || questions.length === 0) return 0;
-  return questions.length;
+export const isAdminOwnerGame = (
+  item: GamesListItemDTO
+): item is AdminOwnerGamesListItemDTO => {
+  return !('owner' in item) && 'active' in item && 'played' in item;
 };
 
-/**
- * Creates a new answer object with a unique ID.
- * @param questionId - The ID of the question this answer belongs to
- * @param correct - Whether the answer is correct
- * @returns A new answer object
- */
-export const newAnswer = (
-  questionId: string,
-  correct: boolean
-): QuestionAnswer => {
+export const isLibraryGame = (
+  item: GamesListItemDTO | LibraryListItemDTO
+): item is LibraryListItemDTO => {
+  return !('owner' in item) && 'status' in item && 'visibility' in item;
+};
+
+export const generateGameCardBadgeText = (game: GamesListItemDTO) => {
+  if (isPublicGame(game)) return undefined;
+  // Admin view
+  if (game.active) return 'In progress';
+  if (game.played) return 'Played';
+  return '';
+};
+
+export const newAnswer = (correct: boolean): AnswerDTO => ({
+  id: crypto.randomUUID(),
+  title: '',
+  correct,
+});
+
+export const normalizeQuestionForEditing = (q: QuestionDTO): QuestionDTO => {
+  const r = EDITING_RULES[q.type];
+  let answers = (q.answers ?? []).map((a) => ({ ...a }));
+
+  // pad to min
+  while (answers.length < r.min) answers.push(newAnswer(false));
+  // trim to max
+  if (r.max && answers.length > r.max) answers = answers.slice(0, r.max);
+
+  // correctness rules
+  switch (r.correct) {
+    case CountsRule.EXACTLY_ONE: {
+      let idx = answers.findIndex((a) => a.correct);
+      if (idx === -1) idx = 0; // ensure one exists
+      answers = answers.map((a, i) => ({ ...a, correct: i === idx }));
+      break;
+    }
+    case CountsRule.AT_LEAST_ONE: {
+      if (!answers.some((a) => a.correct)) answers[0].correct = true;
+      break;
+    }
+    case CountsRule.ALL: {
+      answers = answers.map((a) => ({ ...a, correct: true }));
+      break;
+    }
+  }
+
+  return { ...q, answers };
+};
+
+export const generateAnswersForQuestionType = (
+  question: QuestionDTO,
+  type: QuestionType
+): AnswerDTO[] => {
+  const next = normalizeQuestionForEditing({ ...question, type });
+  return next.answers;
+};
+
+export const normalizeGameForEditing = (game: GameEditDTO): GameEditDTO => {
   return {
-    id: uid(),
-    title: '',
-    questionId,
-    correct,
+    ...game,
+    questions: game.questions.map(normalizeQuestionForEditing),
   };
 };
 
-/**
- * Generates answers for a question based on its type.
- * @param question - The question object
- * @param type - The new type to change to
- * @return {Answer[]}
- */
-export const generateAnswersForQuestionType = (
-  question: QuestionWithAnswers,
-  type: QuestionType
-) => {
-  switch (type) {
-    case QuestionType.SINGLE:
-      // Ensure 1 correct answer and 3 false answers
-      let correctAnswer = question.answers.find((a) => a.correct);
-      const falseAnswers = question.answers.filter((a) => !a.correct);
+// export const isValidGame = (game: GameWithQuestions) => {
+//   return (
+//     game &&
+//     game.questions &&
+//     game.questions.length > 0 &&
+//     game.questions.every(
+//       (q) =>
+//         q.answers &&
+//         q.answers.length > 0 &&
+//         q.answers.every((a) => !isNullOrUndefined(a.title))
+//     )
+//   );
+// };
 
-      if (!correctAnswer) correctAnswer = newAnswer(question.id, true);
-      if (falseAnswers.length !== 3) {
-        while (falseAnswers.length < 3) {
-          falseAnswers.push(newAnswer(question.id, false));
-        }
-        falseAnswers.splice(3);
-      }
+// export const isInvalidGame = (game: GameWithQuestions) => {
+//   return (
+//     !game.questions ||
+//     game.questions.length === 0 ||
+//     game.questions.some(
+//       (q) =>
+//         !q.answers ||
+//         q.answers.length === 0 ||
+//         q.answers.some((a) => isNullOrUndefined(a.title))
+//     )
+//   );
+// };
 
-      return [correctAnswer, ...falseAnswers];
-      break;
+// export const generateGameErrorMessage = (game: GameWithQuestions) => {
+//   if (!game.questions || game.questions.length === 0) {
+//     return 'Missing questions';
+//   }
 
-    case QuestionType.MULTIPLE:
-      // Ensure exactly 4 answers with at least one correct
-      const a = question.answers.slice(0, 4);
-      while (a.length < 4) {
-        a.push(newAnswer(question.id, false));
-      }
-      if (!a.some((a) => a.correct)) a[0].correct = true;
+//   const answerCount = game.questions.filter(
+//     (q) =>
+//       !q.answers ||
+//       q.answers.length === 0 ||
+//       q.answers.some((a) => isNullOrUndefined(a.title))
+//   ).length;
 
-      return a;
-      break;
+//   if (answerCount > 0) {
+//     return `${answerCount} answer${pluralSuffix(answerCount)} missing`;
+//   }
 
-    case QuestionType.TYPE_ANSWER:
-      const totalCount = question.answers.length;
-      const validAnswers = question.answers.filter(
-        (a) => !isEmptyString(a.title)
-      );
-
-      let updatedAnswers;
-      if (validAnswers.length === 0 && totalCount > 0) {
-        updatedAnswers = question.answers.slice(0, 1);
-      } else if (validAnswers.length === 0 && totalCount === 0) {
-        updatedAnswers = [newAnswer(question.id, true)];
-      } else {
-        updatedAnswers = validAnswers;
-      }
-      return updatedAnswers;
-      break;
-
-    default:
-      console.error('Invalid question type:', type);
-      return question.answers;
-      break;
-  }
-};
-
-export const isValidGame = (game: GameWithQuestions) => {
-  return (
-    game &&
-    game.questions &&
-    game.questions.length > 0 &&
-    game.questions.every(
-      (q) =>
-        q.answers &&
-        q.answers.length > 0 &&
-        q.answers.every((a) => !isNullOrUndefined(a.title))
-    )
-  );
-};
-
-export const isInvalidGame = (game: GameWithQuestions) => {
-  return (
-    !game.questions ||
-    game.questions.length === 0 ||
-    game.questions.some(
-      (q) =>
-        !q.answers ||
-        q.answers.length === 0 ||
-        q.answers.some((a) => isNullOrUndefined(a.title))
-    )
-  );
-};
-
-export const generateGameErrorMessage = (game: GameWithQuestions) => {
-  if (!game.questions || game.questions.length === 0) {
-    return 'Missing questions';
-  }
-
-  const answerCount = game.questions.filter(
-    (q) =>
-      !q.answers ||
-      q.answers.length === 0 ||
-      q.answers.some((a) => isNullOrUndefined(a.title))
-  ).length;
-
-  if (answerCount > 0) {
-    return `${answerCount} answer${pluralSuffix(answerCount)} missing`;
-  }
-
-  return '';
-};
+//   return '';
+// };
 
 /***************************************************************
                      Pagination

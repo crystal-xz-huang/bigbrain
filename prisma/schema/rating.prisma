@@ -1,0 +1,17 @@
+model GameRating {
+  id          String   @id @default(cuid())
+  gameId      String
+  gameVersion Int // version of the game when rated
+  userId      String? // nullable so if user is deleted, the rating remains
+  score       Int // 0 to 5
+  review      String? // optional text review
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  game Game  @relation(fields: [gameId], references: [id], onDelete: Restrict) // disable deleting games with ratings
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull) // keep rating if user is deleted
+
+  @@unique([gameId, gameVersion, userId]) // one rating per user per game (update existing rating if version changes)
+  @@index([gameId, score]) // for fetching all ratings for a game and calculating average
+  @@index([userId, createdAt]) // for fetching all ratings by a user
+  @@map("game_ratings")
+}

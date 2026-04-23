@@ -1,0 +1,38 @@
+enum VoteValue {
+  UP
+  DOWN
+}
+
+model GameVote {
+  id        String    @id @default(cuid())
+  value     VoteValue
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  // optional 1-1 relation to User (a vote can have 0 or 1 user)
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull) // keep vote if user is deleted
+  userId    String?
+  // mandatory 1-1 relation to Game (a vote must have a game)
+  game      Game      @relation(fields: [gameId], references: [id], onDelete: Restrict) // disable deleting games with votes
+  gameId    String
+
+  @@unique([gameId, userId]) // user can vote only once per game
+  @@index([gameId, value])
+  @@index([userId, value])
+}
+
+model GameCommentVote {
+  id        String      @id @default(cuid())
+  value     VoteValue
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  // optional 1-1 relation to User (a vote can have 0 or 1 user)
+  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull) // keep vote if user is deleted
+  userId    String?
+  // mandatory 1-1 relation to GameComment (a vote must have a comment)
+  comment   GameComment @relation(fields: [commentId], references: [id], onDelete: Restrict) // disable deleting comments with votes
+  commentId String
+
+  @@unique([commentId, userId]) // user can vote only once per comment
+  @@index([commentId, value])
+  @@index([userId, value])
+}

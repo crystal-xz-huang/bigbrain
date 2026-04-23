@@ -1,34 +1,33 @@
 'use client';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ActionResponse } from '@/lib/types';
+import {
+  SignInActionResponse,
+  SignUpActionResponse,
+} from '@/lib/definitions/types';
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 
 export function FormAlert({
-  state,
+  variant,
+  title,
   children,
 }: {
-  state?: ActionResponse;
+  variant: 'success' | 'error';
+  title: string | React.ReactNode;
   children?: React.ReactNode;
 }) {
-  // Don't show the alert if there's no message or errors
-  if (state?.success || !state?.message) return null;
-
   return (
     <Alert>
-      {state?.success ? (
+      {variant === 'success' ? (
         <CheckCircleIcon className="size-4" />
       ) : (
         <ExclamationTriangleIcon className="size-4" />
       )}
-      <AlertTitle>{state?.success ? 'Success' : 'Error'}</AlertTitle>
-      <AlertDescription>
-        <h3>{state?.message}</h3>
-        {children}
-      </AlertDescription>
+      <AlertTitle>{title}</AlertTitle>
+      <AlertDescription>{children}</AlertDescription>
     </Alert>
   );
 }
@@ -37,7 +36,7 @@ export function AuthAlert({
   state,
   error,
 }: {
-  state?: ActionResponse;
+  state?: SignInActionResponse | SignUpActionResponse;
   error?: string;
 }) {
   const getAuthError = (error: string | undefined) => {
@@ -50,18 +49,13 @@ export function AuthAlert({
   };
 
   const message = state?.message || (error ? getAuthError(error) : null);
-
-  // Don't show the alert if there's no message
-  if (!message) return null;
+  // Don't show the alert if there's no message or errors
+  if (state?.success || !message) return null;
 
   return (
     <Alert>
-      {state?.success ? (
-        <CheckCircleIcon className="size-4" />
-      ) : (
-        <ExclamationTriangleIcon className="size-4" />
-      )}
-      <AlertTitle>{state?.success ? 'Success' : 'Error'}</AlertTitle>
+      <ExclamationTriangleIcon className="size-4" />
+      <AlertTitle>Error</AlertTitle>
       <AlertDescription>{message}</AlertDescription>
     </Alert>
   );

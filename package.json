@@ -9,29 +9,32 @@
     "lint": "next lint",
     "postinstall": "prisma generate"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "dependencies": {
     "@auth/neon-adapter": "^1.10.0",
     "@auth/prisma-adapter": "^2.10.0",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
     "@neondatabase/serverless": "^0.10.4",
-    "@prisma/client": "^6.14.0",
+    "@prisma/client": "^6.15.0",
     "@prisma/extension-accelerate": "^2.0.1",
-    "bcrypt": "^6.0.0",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-tooltip": "^1.2.8",
+    "bcryptjs": "^3.0.2",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.1",
+    "fast-glob": "^3.3.3",
     "framer-motion": "^12.18.1",
-    "next": "15.3.3",
+    "next": "15.3.8",
     "next-auth": "5.0.0-beta.28",
+    "path": "^0.12.7",
+    "radix-ui": "^1.4.3",
     "react": "^19.0.0",
-    "react-day-picker": "^9.8.0",
     "react-dom": "^19.0.0",
+    "server-only": "^0.0.1",
     "use-debounce": "^10.0.5",
-    "zod": "^3.25.67"
+    "zod": "^4.0.17"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

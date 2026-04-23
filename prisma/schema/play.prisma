@@ -1,0 +1,66 @@
+enum GamePlayStatus {
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+
+model GamePlay {
+  id         String             @id @default(cuid())
+  startedAt  DateTime           @default(now())
+  finishedAt DateTime?
+  // mandatory 1-1 relation to Game
+  game       Game               @relation(fields: [gameId], references: [id])
+  gameId     String
+  // optional 1-1 relation to User (if played by a guest, userId is null)
+  user       User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId     String?
+  questions  GamePlayQuestion[]
+
+  @@index([gameId, startedAt])
+  @@index([userId, startedAt])
+}
+
+model GamePlayQuestion {
+  id         String            @id @default(cuid())
+  // mandatory 1-1 relation to GamePlay
+  gamePlay   GamePlay          @relation(fields: [playId], references: [id], onDelete: Cascade)
+  playId     String
+  // snapshot of the question at the time of play
+  title      String
+  image      String?
+  hint       String?
+  funfact    String?
+  duration   Int
+  points     Int
+  type       QuestionType
+  answers    GamePlayAnswer[]
+  // runtime data
+  order      Int?
+  startedAt  DateTime?
+  endedAt    DateTime?
+  submission PlayerSubmission?
+}
+
+model GamePlayAnswer {
+  id         String             @id @default(cuid())
+  title      String
+  correct    Boolean
+  // mandatory 1-1 relation to GamePlayQuestion
+  question   GamePlayQuestion   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+  // bidirectional relation to PlayerSubmission for selected answers
+  selectedIn PlayerSubmission[]
+}
+
+model PlayerSubmission {
+  id          String           @id @default(cuid())
+  // mandatory 1-1 relation to GamePlayQuestion
+  question    GamePlayQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId  String
+  // submission content
+  selected    GamePlayAnswer[]
+  textAnswer  String?
+  submittedAt DateTime         @default(now())
+
+  @@unique([questionId]) // one submission per question (per play)
+}

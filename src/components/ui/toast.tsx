@@ -1,6 +1,6 @@
 'use client';
 
-import type { ToastType } from '@/lib/types';
+import type { ToastType } from '@/lib/definitions/types';
 import { Transition } from '@headlessui/react';
 import {
   CheckCircleIcon,

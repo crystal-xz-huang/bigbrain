@@ -1,5 +1,5 @@
 import { usePathname } from 'next/navigation';
-import type { NavLink } from '@/lib/types';
+import type { NavLink } from '@/lib/definitions/types';
 
 export default function useNavLinks(links: NavLink[]) {
   const pathname = usePathname();

@@ -1,0 +1,81 @@
+enum GameStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum GameVisibility {
+  PUBLIC // visible to everyone
+  UNLISTED // visible only to those with the link, not listed publicly
+  PRIVATE // owner-only
+}
+
+model Game {
+  id            String         @id @default(cuid())
+  name          String
+  description   String?
+  image         String?
+  status        GameStatus     @default(DRAFT)
+  visibility    GameVisibility @default(PRIVATE)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  publishedAt   DateTime?
+  archivedAt    DateTime?
+  // optional 1-1 relation
+  owner         User?          @relation("Owner", fields: [ownerId], references: [id], onDelete: SetNull)
+  ownerId       String?
+  // optional 1-n relations
+  tags          GameTag[]
+  categories    GameCategory[]
+  questions     Question[]
+  votes         GameVote[]
+  comments      GameComment[]
+  ratings       GameRating[]
+  favoritedBy   User[]         @relation("FavoritedGames")
+  plays         GamePlay[]
+  // denormalized fields
+  questionCount Int            @default(0)
+  commentCount  Int            @default(0)
+  favoriteCount Int            @default(0)
+  duration      Int            @default(0)
+  upVotes       Int            @default(0)
+  downVotes     Int            @default(0)
+
+  @@unique([name, ownerId]) // ensure unique game names per owner
+  @@map("games")
+}
+
+enum QuestionType {
+  SINGLE
+  MULTIPLE
+  TYPE_ANSWER
+}
+
+model Question {
+  id        String           @id @default(cuid())
+  title     String
+  image     String?
+  hint      String?
+  funfact   String?
+  duration  Int              @default(20)
+  points    Int              @default(1)
+  type      QuestionType
+  gameId    String
+  createdAt DateTime         @default(now())
+  // relations
+  answers   QuestionAnswer[]
+  game      Game             @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([gameId])
+}
+
+model QuestionAnswer {
+  id         String   @id @default(cuid())
+  title      String
+  correct    Boolean
+  // relations
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+
+  @@index([questionId])
+}

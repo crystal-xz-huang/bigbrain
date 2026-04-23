@@ -1,0 +1,27 @@
+model GameComment {
+  id         String            @id @default(cuid())
+  content    String
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  deletedAt  DateTime?
+  locked     Boolean           @default(false) // prevent edits or replies
+  // denormalized counts
+  upvotes    Int               @default(0)
+  downvotes  Int               @default(0)
+  replyCount Int               @default(0)
+  // optional 1-n relation to GameCommentVote
+  votes      GameCommentVote[]
+  // mandatory 1-1 relation to Game (a comment must have a game)
+  game       Game              @relation(fields: [gameId], references: [id], onDelete: Restrict) // disable deleting games with comments
+  gameId     String
+  // optional 1-1 relation to User (a comment can have 0 or 1 author)
+  author     User?             @relation(fields: [authorId], references: [id], onDelete: SetNull) // keep comment if user is deleted
+  authorId   String?
+  // optional 1-1 self-relation to GameComment for parent comment (a comment can have 0 or 1 parent)
+  parent     GameComment?      @relation("Parent", fields: [gameId, parentId], references: [gameId, id], onDelete: Restrict) // prevent hard-deleting a parent with children
+  parentId   String?
+  // optional 1-n self-relation to GameComment for child comments (a comment can have 0 or more children)
+  children   GameComment[]     @relation("Parent")
+
+  @@unique([gameId, id]) // unique comment IDs per game
+}

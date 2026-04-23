@@ -1,10 +1,10 @@
 import { Metadata } from 'next';
-import SignUp from '@/components/ui/auth/signup';
+import { SignUpForm } from '@/components/auth/signup';
 
 export const metadata: Metadata = {
   title: 'Sign Up',
 };
 
 export default function SignUpPage() {
-  return <SignUp />;
+  return <SignUpForm />;
 }

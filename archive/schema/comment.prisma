@@ -1,0 +1,31 @@
+
+
+model GameComment {
+  id         String            @id @default(cuid())
+  content    String            @db.Text
+  // votes (one-to-many)
+  votes      GameCommentVote[]
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  deletedAt  DateTime?
+  locked     Boolean           @default(false) // prevent edits or replies
+  // game (many-to-one) a comment belongs to one game, but a game can have many comments
+  game       Game              @relation(fields: [gameId], references: [id], onDelete: Restrict) // disable deleting games with comments
+  gameId     String
+  // author (many-to-one) nullable user to keep comments even if the user is deleted
+  author     User?             @relation(fields: [authorId], references: [id], onDelete: SetNull) // keep comment if user is deleted
+  authorId   String?
+  // replies (one-to-many self-relation) a comment can have many direct replies, but a reply belongs to zero or one parent comment
+  replies    GameComment[]     @relation("CommentReplies") // all direct replies
+  parent     GameComment?      @relation("CommentReplies", fields: [gameId, parentId], references: [gameId, id], onDelete: Restrict) // prevent hard-deleting a parent with children
+  parentId   String?
+  // denormalized counters
+  upvotes    Int               @default(0) @map("upvote_count")
+  downvotes  Int               @default(0) @map("downvote_count")
+  replyCount Int               @default(0) @map("reply_count")
+
+  @@unique([gameId, id]) // parent and child comments always belong to the same game
+  @@index([gameId, createdAt]) // for fetching all comments for a game
+  @@index([gameId, parentId, createdAt]) // for fetching all replies to a comment
+  @@index([authorId, createdAt]) // for fetching all comments by a user
+}

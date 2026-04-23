@@ -1,16 +1,6 @@
 import { Heading } from '@/components/ui/heading';
 import clsx from 'clsx';
 
-// Wrapper for the page content with padding and max width
-// function PageContent({ children }: { children: React.ReactNode }) {
-//   return (
-//     <div className="mx-auto max-w-6xl p-6 lg:p-10">
-//       <div className="container mx-auto">{children}</div>
-//     </div>
-//   );
-// }
-
-
 // Take up the full height and width of the parent container
 function PageContent({
   children,
@@ -20,7 +10,7 @@ function PageContent({
   className?: string;
 }) {
   return (
-    <div className={clsx(className, 'grow flex-1 shrink-0')}>{children}</div>
+    <div className={clsx(className, 'w-full h-full container mx-auto')}>{children}</div>
   );
 }
 
@@ -36,6 +26,4 @@ function Container({ className, children }: { className?: string; children: Reac
   return <div className={clsx(className, "container mx-auto mt-6")}>{children}</div>;
 }
 
-
-
-export { PageContainer, PageContent, PageWrapper, PageHeading as Heading, Container};
+export { PageContent, PageHeading as Heading, Container};

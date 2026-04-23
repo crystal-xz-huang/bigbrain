@@ -1,9 +1,9 @@
 'use client';
 
 import { Toast as ToastComponent } from '@/components/ui/toast';
-import type { ToastOptions, ToastType } from '@/lib/types';
+import type { ToastOptions, ToastType } from '@/lib/definitions/types';
 import { ReactNode, useState } from 'react';
-import Toast from './toast';
+import Toast from './generators/Toast';
 import ToastContext from './toast-context';
 
 const ToastProvider = ({ children }: { children: ReactNode }) => {

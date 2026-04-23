@@ -1,0 +1,56 @@
+enum GamePlayStatus {
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+
+model GamePlay {
+  id             String             @id @default(cuid())
+  duration       Int                @default(0) // in seconds, total time spent playing
+  score          Int                @default(0) // total score achieved
+  maxScore       Int                @default(0) // sum of all question points
+  correctCount   Int                @default(0) // number of correctly answered questions
+  totalQuestions Int                @default(0) // total number of questions in the game
+  startedAt      DateTime           @default(now())
+  finishedAt     DateTime?
+  // mandatory 1-1 relation to GameRevision
+  revision       GameRevision       @relation(fields: [revisionId], references: [id], onDelete: Restrict)
+  revisionId     Int
+  // optional 1-1 relation to Game
+  gameId         String?
+  game           Game?              @relation(fields: [gameId], references: [id], onDelete: SetNull)
+  // optional 1-1 relation to User (if played by a guest, userId is null)
+  user           User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId         String?
+  questions      GamePlayQuestion[]
+
+  @@index([revisionId])
+  @@index([gameId, startedAt])
+  @@index([userId, startedAt])
+}
+
+model GamePlayQuestion {
+  id         String             @id @default(cuid())
+  // mandatory 1-1 relation to GamePlay
+  play       GamePlay           @relation(fields: [playId], references: [id], onDelete: Cascade)
+  playId     String
+  // mandatory 1-1 relation to GameQuestions (snapshot of the question at the time of play)
+  question   GameQuestion       @relation(fields: [questionId], references: [id])
+  questionId String
+  // runtime data
+  order      Int
+  startedAt  DateTime?
+  endedAt    DateTime?
+  submission PlayerSubmission[]
+}
+
+model PlayerSubmission {
+  id              String           @id @default(cuid())
+  // submission content
+  selectedOptions String[]         @default([]) // for choice-based questions
+  textAnswer      String? // for type-answer questions
+  question        GamePlayQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId      String
+
+  @@unique([questionId, id])
+}

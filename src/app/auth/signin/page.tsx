@@ -1,10 +1,10 @@
 import { Metadata } from 'next';
-import SignIn from '@/components/ui/auth/signin';
+import { SignInForm } from '@/components/auth/signin';
 
 export const metadata: Metadata = {
   title: 'Sign In',
 };
 
 export default function SignInPage() {
-  return <SignIn />;
+  return <SignInForm />;
 }

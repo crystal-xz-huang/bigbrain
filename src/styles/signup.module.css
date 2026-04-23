@@ -1,0 +1,101 @@
+.TippyBox {
+  border: 1px transparent;
+  position: relative;
+  background-color: var(--color-glow-neutral-1000);
+  box-shadow: 0 1px 4px rgb(26 26 26 / .08);
+  border-radius: 6px;
+  line-height: 1.4;
+  white-space: normal;
+  outline: 0;
+  max-width: 250px;
+  transition-property: transform, visibility, opacity;
+}
+
+.TippyArrow {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  background-color: var(--color-glow-neutral-1000);
+}
+
+.TippyContent {
+  position: relative;
+  padding: 6px 10px;
+  z-index: 1;
+  color: #2e2e2e;
+  font-weight: 400;
+  font-size: 12px;
+  word-break: break-word;
+}
+
+@media (prefers-color-scheme: dark) {
+  .TippyBox {
+    background-color: var(--color-glow-neutral-300);
+  }
+
+  .TippyContent {
+    color: #dedede;
+  }
+
+  .TippyArrow {
+    background-color: var(--color-glow-neutral-300);
+  }
+}
+
+.TippyRoot {
+  z-index: 9999;
+  position: absolute;
+  margin: 0;
+  inset: auto auto 0px 0px;
+  transform: translate3d(130px, -49px, 0px);
+}
+
+.TippyArrow {
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+@media (width >=64rem) {
+  .TippyRoot {
+    inset: 0px auto auto 0px;
+    transform: translate3d(400px, -50px, 0px);
+  }
+
+  .TippyArrow {
+    top: 50%;
+    left: -5px;
+    bottom: auto;
+    transform: translateY(-50%) rotate(45deg);
+  }
+}
+
+.TooltipContent {
+  padding: 7px 2px 0 5px;
+}
+
+.TooltipList {
+  margin: 2px 0 0;
+  padding: 0 0 5px 17px;
+  list-style: none;
+}
+
+.TooltipItem::before {
+  content: "•";
+  position: relative;
+  top: -1px;
+  display: inline-block;
+  vertical-align: middle;
+  width: 8px;
+  height: 8px;
+  margin-right: 7px;
+  margin-left: -1em;
+  border-radius: 50%;
+  background-color: #b0b0b0;
+  color: transparent;
+  text-align: center;
+}
+
+.TooltipItemValid::before {
+  background-color: #00e06c;
+}

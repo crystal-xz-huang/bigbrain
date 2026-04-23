@@ -1,0 +1,45 @@
+enum GameStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  DELETED
+}
+
+enum GameVisibility {
+  PUBLIC // visible to everyone
+  UNLISTED // visible only to those with the link, not listed publicly
+  PRIVATE // owner-only
+}
+
+model Game {
+  id               String         @id @default(cuid())
+  // content
+  title            String
+  description      String?
+  image            String?
+  status           GameStatus     @default(DRAFT)
+  visibility       GameVisibility @default(PRIVATE)
+  categories       GameCategory[]
+  tags             GameTag[]
+  // timestamps
+  createdAt        DateTime       @default(now())
+  publishedAt      DateTime?
+  archivedAt       DateTime?
+  deletedAt        DateTime?
+  // optional 1-1 relation (if the owner is deleted, set to null  categories  GameCategory[]
+  owner            User?          @relation("Owner", fields: [ownerId], references: [id], onDelete: SetNull)
+  ownerId          String?
+  // optional 1-n relations
+  favoritedBy      User[]         @relation("FavoritedGames")
+  votes            GameVote[]
+  comments         GameComment[]
+  ratings          GameRating[]
+  plays            GamePlay[]
+  //  revisions
+  latestRevision   GameRevision?  @relation("Latest", fields: [latestRevisionId], references: [id])
+  latestRevisionId Int?           @unique
+  revisions        GameRevision[] @relation("History")
+
+  @@unique([title, ownerId]) // ensure unique game title per owner
+  @@map("games")
+}

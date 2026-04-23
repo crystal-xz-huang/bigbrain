@@ -1,0 +1,11 @@
+model GameCategory {
+  id        Int    @id @default(autoincrement())
+  name      String @unique
+  slug      String @unique @db.VarChar(3000)
+  // optional 1-n relation to Game (a category can have 0 or more games)
+  games     Game[]
+  // denormalized counter
+  gameCount Int    @default(0) @map("game_count")
+
+  @@map("game_categories")
+}

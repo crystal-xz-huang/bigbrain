@@ -2,12 +2,8 @@
 
 import { InputGroup } from '@/components/ui//input';
 import { HeadingOutlined } from '@/components/ui/heading';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { splitString } from '@/lib/utils';
+import { Tooltip } from "radix-ui";
 import clsx from 'clsx';
 
 export function CopyToClipboardInput({
@@ -40,11 +36,14 @@ export function CopyToClipboardInput({
         </HeadingOutlined>
       </span>
 
-      <Tooltip>
-        <TooltipContent>
-          {copied ? 'Copied!' : 'Copy link to share'}
-        </TooltipContent>
-        <TooltipTrigger>
+      <Tooltip.Root>
+        <Tooltip.Portal>
+          <Tooltip.Content className="TooltipContent" sideOffset={8}>
+            {copied ? 'Copied!' : 'Copy link to share'}
+            <Tooltip.Arrow className="TooltipArrow" />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+        <Tooltip.Trigger asChild>
           <button
             onClick={onCopy}
             className={clsx(
@@ -88,8 +87,8 @@ export function CopyToClipboardInput({
               </svg>
             )}
           </button>
-        </TooltipTrigger>
-      </Tooltip>
+        </Tooltip.Trigger>
+      </Tooltip.Root>
     </InputGroup>
   );
 }

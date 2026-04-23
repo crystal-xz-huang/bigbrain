@@ -1,10 +1,31 @@
-import { routes } from '@/lib/routes';
+/* ---------------------------------------------------------------------------
+
+NextAuth Configuration
+
+An edge-compatible Auth.js configuration object to be exported and
+used everywhere. This *will not* include the database adapter.
+
+Contains all common configuration options which do not rely on the
+edge incompatible adapter.
+
+-----------------------------------------------------------------------------
+
+- This is an object, not a full Auth.js instance
+- Contains middleware that runs in an edge runtime
+- Can use *only* Auth.js / next-auth and no other library
+
+-----------------------------------------------------------------------------
+
+Read more:
+https://authjs.dev/guides/edge-compatibility
+https://authjs.dev/getting-started/migrating-to-v5
+
+*/
+
 import type { NextAuthConfig } from 'next-auth';
 import type { Provider } from 'next-auth/providers';
 import GitHub from 'next-auth/providers/github';
 import Google from 'next-auth/providers/google';
-
-// Edge-compatible configuration object for NextAuth.js
 
 const providers: Provider[] = [GitHub, Google];
 
@@ -21,33 +42,29 @@ export const providerMap = providers
 
 export const authConfig = {
   pages: {
-    signIn: routes.signin,
+    signIn: '/auth/signin',
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
-      const isAdminRoute = nextUrl.pathname.startsWith('/play') || nextUrl.pathname.startsWith('/user');
-      const isAuthRoute = nextUrl.pathname.startsWith('/auth');
+      // const isLoggedIn = !!auth?.user;
+      // const isAdminRoute = nextUrl.pathname.startsWith('/play') || nextUrl.pathname.startsWith('/user');
+      // const isAuthRoute = nextUrl.pathname.startsWith('/auth');
 
-      // Protect '/admin' routes
-      if (isAdminRoute) {
-        if (isLoggedIn) return true;
-        return false;
-      }
+      // if (isAdminRoute) {
+      //   if (isLoggedIn) return true;
+      //   return false;
+      // }
 
-      // Redirect logged-in users from auth routes to the dashboard
-      if (isLoggedIn && isAuthRoute) {
-        return Response.redirect(new URL(routes.dashboard, nextUrl));
-      }
+      // if (isLoggedIn && isAuthRoute) {
+      //   return Response.redirect(new URL(routes.dashboard, nextUrl));
+      // }
 
       // Allow access to all other routes
       return true;
     },
     // Add user ID to the token and session
     jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-      }
+      if (user) token.id = user.id;
       return token;
     },
     session({ session, token }) {

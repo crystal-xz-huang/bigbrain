@@ -1,4 +1,14 @@
-import { Card, CardFooter, CardCover } from '@/components/ui/game-card';
+import {
+  Card,
+  CardFooter,
+  CardCover,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/feed/card';
+
+/***************************************************************
+                     GAME CARD SKELETONS
+***************************************************************/
 
 export function CardSkeleton() {
   return (
@@ -7,8 +17,14 @@ export function CardSkeleton() {
         <div className="skeleton w-full h-full"></div>
       </CardCover>
       <CardFooter>
-        <div className="skeleton h-4 w-full mt-1 rounded-sm"></div>
-        <div className="skeleton h-4 w-28 mt-2 rounded-sm"></div>
+        <CardTitle>
+          <div>
+            <div className="skeleton h-4 w-full rounded-sm"></div>
+          </div>
+        </CardTitle>
+        <CardDescription>
+          <div className="skeleton h-4 w-32 rounded-sm"></div>
+        </CardDescription>
       </CardFooter>
     </Card>
   );
@@ -16,23 +32,20 @@ export function CardSkeleton() {
 
 export function CardsSkeleton() {
   return (
-    <ul
-      role="list"
-      className="flex flex-row flex-shrink-0 pt-2 overflow-x-auto space-x-4"
-    >
-      <li className="relative flex flex-col flex-shrink-0 w-[200px] md:w-[250px]">
+    <FeedList>
+      <FeedListItem>
         <CardSkeleton />
-      </li>
-      <li className="relative flex flex-col flex-shrink-0 w-[200px] md:w-[250px]">
+      </FeedListItem>
+      <FeedListItem>
         <CardSkeleton />
-      </li>
-      <li className="relative flex flex-col flex-shrink-0 w-[200px] md:w-[250px]">
+      </FeedListItem>
+      <FeedListItem>
         <CardSkeleton />
-      </li>
-      <li className="relative flex flex-col flex-shrink-0 w-[200px] md:w-[250px]">
+      </FeedListItem>
+      <FeedListItem>
         <CardSkeleton />
-      </li>
-    </ul>
+      </FeedListItem>
+    </FeedList>
   );
 }
 
@@ -55,5 +68,41 @@ export function CardsListSkeleton() {
         <CardSkeleton />
       </li>
     </ul>
+  );
+}
+
+/***************************************************************
+                     PROFILE BANNER SKELETON
+***************************************************************/
+
+import {
+  Banner,
+  BannerContent,
+  BannerDescription,
+  BannerFooter,
+  BannerHeader,
+} from '@/components/ui/banners/profile-banner';
+import { FeedList, FeedListItem } from '@/components/ui/feed/list';
+
+export function ProfileBannerSkeleton() {
+  return (
+    <Banner>
+      <BannerContent className="bg-beige-200">
+        <BannerHeader>
+          {/* Image */}
+          <div className="skeleton size-20 shrink-0 rounded-full"></div>
+          {/* Description */}
+          <BannerDescription className="mt-4 sm:mt-0 sm:pt-1 flex flex-col gap-3">
+            <div className="skeleton h-4 w-30"></div>
+            <div className="skeleton h-4 w-38"></div>
+            <div className="skeleton h-4 w-30"></div>
+          </BannerDescription>
+        </BannerHeader>
+      </BannerContent>
+      <BannerFooter className="bg-beige-100 px-6 py-5">
+        <div className="mx-6 skeleton w-40 h-[1rem]"></div>
+        <div className="mx-6 skeleton w-40 h-[1rem]"></div>
+      </BannerFooter>
+    </Banner>
   );
 }

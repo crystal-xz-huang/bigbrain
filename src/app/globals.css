@@ -9,8 +9,8 @@
   --hint: oklch(83.392% .124 66.558);
   --navy: #276b74;
   --dark: #19444a;
-  --gold: rgb(255 205 117);
-
+  --gold: rgb(255, 198, 121);
+  
   --red-pastel: rgb(255 167 160);
   --orange-pastel: rgb(255, 198, 121);
   --green-pastel: rgb(198 234 132);
@@ -22,41 +22,34 @@
   --beige-pastel: rgb(229 220 186);
   --purple-pastel: rgb(221 198 255);
 
-  --cyan-neon: #00ffff;
-  --magenta-neon: #ff00ff;
+  --base-100: oklch(97% .014 343.198);
+  --base-200: oklch(94% .028 342.258);
+  --base-300: oklch(89% .061 343.231);
+  --base-content: oklch(52% .223 3.958);
 
-  --base-100: oklch(97.788% .004 56.375);
-  --base-200: oklch(93.982% .007 61.449);
-  --base-300: oklch(91.586% .006 53.44);
-  --base-400: rgb(229 227 219);
-  --base-500: oklch(89.179% .006 48.514);
-  --base-content: oklch(23.574% .066 313.189);
+  --blue: #8be9fd;
+  --yellow: oklch(95.533% .134 112.757);
+  --orange: oklch(83.392% .124 66.558);
+  --purple-light: oklch(90% .063 306.703);
+  --purple: #b387fa;
+  --purple-dark: oklch(49% .265 301.924);
+  --pink: oklch(71.86% .217 310.43);
 
+  --beige-100: oklch(97.788% .004 56.375);
+  --beige-200: oklch(93.982% .007 61.449);
+  --beige-300: oklch(91.586% .006 53.44);
+  --beige: oklch(89.179% .006 48.514);
+  --beige-content: oklch(23.574% .066 313.189);
 
-  --primary-100: oklch(97% .014 343.198);
-  --primary-200: oklch(94% .028 342.258);
-  --primary-300: oklch(89% .061 343.231);
-  --primary-400: oklch(84.896% 0.08751 343.478);
-  --primary-500: oklch(80.882% 0.1127 343.512);
-  --primary-600: oklch(77.488% 0.13602 343.996);
-  --primary-700: oklch(75.461% .183 346.812);
-  --primary-800: oklch(65% .241 354.308);
-  --primary-900: oklch(45% .187 3.815);
+  --accent: hsl(328.42, 100%, 85.1%);
+  --highlight: hsl(66.63, 100%, 68.04%);
 
-  --primary: var(--primary-400);
-  --primary-content: oklch(52% .223 3.958);
-
-  --secondary: oklch(45% .24 277.023);
-  --secondary-content: oklch(93% .034 272.788);
-
-  --accent: hsl(328.42,100%,85.1%);
-  --accent-content: oklch(100% .004 0);
-
-  --highlight: hsl(66.63,100%,68.04%);
-
+  --primary: oklch(65% .241 354.308);
+  --primary-content: oklch(100% 0 0);
+  --secondary: oklch(89% .061 343.231);
+  --secondary-content: oklch(52% .223 3.958);
   --neutral: oklch(39.445% .032 275.524);
   --neutral-content: oklch(87.889% .006 275.524);
-  --neutral-content-strong: rgb(255 250 230 / 1);
 
   --info: oklch(68% .169 237.323);
   --info-content: oklch(29% .066 243.157);
@@ -66,21 +59,151 @@
   --warning-content: oklch(28% .066 53.813);
   --error: rgb(213, 69, 108);
   --error-content: oklch(100% 0 0);
+
+  --component-tooltip-background_color: var(--base-palette-black-40);
+  --component-tooltip-color: var(--base-palette-black-625);
+
+  --glow-neutral-100: #ffffff;
+  --glow-neutral-200: #fafafa;
+  --glow-neutral-300: #f1f1f1;
+  --glow-neutral-400: #ebebeb;
+  --glow-neutral-500: #dedede;
+  --glow-neutral-600: #bfbfbf;
+  --glow-neutral-700: #757575;
+  --glow-neutral-800: #666666;
+  --glow-neutral-900: #575757;
+  --glow-neutral-1000: #3b3b3b;
+  --glow-neutral-1100: #2e2e2e;
+  --glow-neutral-1200: #222222;
+  --glow-pink-100: #fff0f6;
+  --glow-purple-100: #f3eaff;
+  --glow-purple-200: #e9caff;
+  --glow-purple-300: #d7a5fc;
+  --glow-purple-400: #c27af7;
+  --glow-purple-500: #ab54eb;
+  --glow-purple-600: #9344cd;
+  --glow-purple-700: #791ca1;
+  --glow-purple-800: #4f126b;
+  --glow-purple-900: #32223d;
+  --glow-orange-100: #fff6e7;
+  --glow-orange-200: #ffd69d;
+  --glow-orange-300: #ffc574;
+  --glow-orange-400: #ff9b0f;
+  --glow-orange-500: #ea8900;
+  --glow-orange-600: #b36d0b;
+  --glow-orange-700: #7f4c04;
+  --glow-orange-800: #3e3219;
+  --glow-red-100: #ffe6ed;
+  --glow-red-200: #ff96b6;
+  --glow-red-300: #ff467d;
+  --glow-red-400: #ff005c;
+  --glow-red-500: #d80f57;
+  --glow-red-600: #b30543;
+  --glow-red-700: #8c183a;
+  --glow-red-800: #3d2222;
+  --glow-green-100: #e6fcf5;
+  --glow-green-200: #96f2d6;
+  --glow-green-300: #2be5ad;
+  --glow-green-400: #00db9a;
+  --glow-green-500: #00b27d;
+  --glow-green-600: #008960;
+  --glow-green-700: #007d58;
+  --glow-green-800: #1d342d;
+  --glow-blue-100: #f5f9ff;
+  --glow-blue-200: #e6f2ff;
+  --glow-blue-300: #b0d6ff;
+  --glow-blue-400: #54a7ff;
+  --glow-blue-500: #0070e8;
+  --glow-blue-600: #0057b5;
+  --glow-blue-700: #0f4a8b;
+  --glow-blue-800: #293a49;
+
+  --glow-box-shadow-focus: 0px 0px 0px 3px #49494926;
+  --glow-box-shadow-focus-info: 0px 0px 0px 3px #00afc626;
+  --glow-box-shadow-focus-warn: 0px 0px 0px 3px #ffb80026;
+  --glow-box-shadow-focus-error: 0px 0px 0px 3px #d80f5726;
+  --glow-box-shadow-focus-success: 0px 0px 0px 3px #00db9a26;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
+    --primary: #ff85d6;
+    --accent: #fc83ff;
     --background: #0a0a0a;
     --foreground: #ededed;
     --hint: oklch(82% .189 84.429);
-    --info: oklch(74% .16 232.661);
-    --info-content: oklch(29% .066 243.157);
+    --info: #00afc6;
+    --info-content: oklch(100% 0 0);
     --error: rgb(240 68 56 / 1);
+    --error: var(--glow-red-700);
     --error-content: #ffff;
     --success: oklch(77% .152 181.912);
     --success-content: oklch(27% .046 192.524);
     --warning: rgb(244 119 33);
     --warning-content: #ffff;
+
+    --glow-neutral-100: #191919;
+    --glow-neutral-200: #222222;
+    --glow-neutral-300: #3b3b3b;
+    --glow-neutral-400: #575757;
+    --glow-neutral-500: #666666;
+    --glow-neutral-600: #757575;
+    --glow-neutral-700: #858585;
+    --glow-neutral-800: #949494;
+    --glow-neutral-900: #b0b0b0;
+    --glow-neutral-1000: #dedede;
+    --glow-neutral-1100: #f1f1f1;
+    --glow-neutral-1200: #fafafa;
+    --glow-purple-100: #32223d;
+    --glow-purple-200: #4f126b;
+    --glow-purple-300: #791ca1;
+    --glow-purple-400: #9344cd;
+    --glow-purple-500: #ab54eb;
+    --glow-purple-600: #c27af7;
+    --glow-purple-700: #d7a5fc;
+    --glow-purple-800: #e9caff;
+    --glow-purple-900: #f3eaff;
+    --glow-orange-100: #3e3219;
+    --glow-orange-200: #633b03;
+    --glow-orange-300: #7f4c04;
+    --glow-orange-400: #b36d0b;
+    --glow-orange-500: #ea8900;
+    --glow-orange-600: #ff9b0f;
+    --glow-orange-700: #ffc574;
+    --glow-orange-800: #ffd69d;
+    --glow-red-100: #3d2222;
+    --glow-red-200: #6b122d;
+    --glow-red-300: #8c183a;
+    --glow-red-400: #b30543;
+    --glow-red-500: #d80f57;
+    --glow-red-600: #ff005c;
+    --glow-red-700: #ff467d;
+    --glow-red-800: #ff96b6;
+    --glow-green-100: #1d342d;
+    --glow-green-200: #025a40;
+    --glow-green-300: #007d58;
+    --glow-green-400: #008960;
+    --glow-green-500: #00b27d;
+    --glow-green-600: #00db9a;
+    --glow-green-700: #2be5ad;
+    --glow-green-800: #96f2d6;
+    --glow-blue-100: #293a49;
+    --glow-blue-200: #103967;
+    --glow-blue-300: #0f4a8b;
+    --glow-blue-400: #0057b5;
+    --glow-blue-500: #0070e8;
+    --glow-blue-600: #54a7ff;
+    --glow-blue-700: #b0d6ff;
+    --glow-blue-800: #e6f2ff;
+
+    --glow-border-focus: var(--glow-neutral-1000);
+
+    --glow-box-shadow-focus: 0 0 0 3px #d5d5d526;
+    --glow-box-shadow-focus-error: 0 0 0 3px rgba(255, 43, 106, 0.2);
+    --glow-box-shadow-focus-success: 0 0 0 3px #2be5ad26;
+
+    --component-tooltip-background_color: var(--base-palette-black-500);
+    --component-tooltip-color: var(--base-palette-black-50);
   }
 }
 
@@ -91,7 +214,6 @@
   --font-sans: var(--font-nunito), sans-serif;
   --font-mono: var(--font-roboto-mono);
   --font-bungee: var(--font-bungee);
-  --font-bungee-outline: var(--font-bungee-outline);
 
   --color-dark: var(--dark);
   --color-navy: var(--navy);
@@ -99,6 +221,13 @@
   --color-false: var(--false);
   --color-hint: var(--hint);
   --color-gold: var(--gold);
+
+  --color-purple: var(--purple);
+  --color-purple-light: var(--purple-light);
+  --color-purple-dark: var(--purple-dark);
+
+  --color-accent: var(--accent);
+  --color-highlight: var(--highlight);
 
   --color-red-pastel: var(--red-pastel);
   --color-orange-pastel: var(--orange-pastel);
@@ -112,26 +241,22 @@
   --color-purple-pastel: var(--purple-pastel);
 
   --color-cyan-neon: var(--cyan-neon);
-  --color-magenta-neon: var(--magenta-neon);
+  --color-magenta: var(--magenta);
 
   --color-base-100: var(--base-100);
   --color-base-200: var(--base-200);
   --color-base-300: var(--base-300);
-  --color-base-400: var(--base-400);
-  --color-base-500: var(--base-500);
   --color-base-content: var(--base-content);
 
-  --color-primary-100: var(--primary-100);
-  --color-primary-200: var(--primary-200);
-  --color-primary-300: var(--primary-300);
-  --color-primary-400: var(--primary-400);
-  --color-primary-500: var(--primary-500);
-  --color-primary-600: var(--primary-600);
-  --color-primary-700: var(--primary-700);
-  --color-primary-800: var(--primary-800);
-  --color-primary-900: var(--primary-900);
+  --color-beige-100: var(--beige-100);
+  --color-beige-200: var(--beige-200);
+  --color-beige-300: var(--beige-300);
+  --color-beige: var(--beige);
+  --color-beige-content: var(--beige-content);
+
   --color-primary: var(--primary);
   --color-primary-content: var(--primary-content);
+  --color-primary-border: var(--primary-border);
 
   --color-secondary: var(--secondary);
   --color-secondary-content: var(--secondary-content);
@@ -153,6 +278,62 @@
   --color-warning-content: var(--warning-content);
   --color-error: var(--error);
   --color-error-content: var(--error-content);
+
+  /* glow colors */
+  --color-glow-neutral-100: var(--glow-neutral-100);
+  --color-glow-neutral-200: var(--glow-neutral-200);
+  --color-glow-neutral-300: var(--glow-neutral-300);
+  --color-glow-neutral-400: var(--glow-neutral-400);
+  --color-glow-neutral-500: var(--glow-neutral-500);
+  --color-glow-neutral-600: var(--glow-neutral-600);
+  --color-glow-neutral-700: var(--glow-neutral-700);
+  --color-glow-neutral-800: var(--glow-neutral-800);
+  --color-glow-neutral-900: var(--glow-neutral-900);
+  --color-glow-neutral-1000: var(--glow-neutral-1000);
+  --color-glow-neutral-1100: var(--glow-neutral-1100);
+  --color-glow-neutral-1200: var(--glow-neutral-1200);
+  --color-glow-purple-100: var(--glow-purple-100);
+  --color-glow-purple-200: var(--glow-purple-200);
+  --color-glow-purple-300: var(--glow-purple-300);
+  --color-glow-purple-400: var(--glow-purple-400);
+  --color-glow-purple-500: var(--glow-purple-500);
+  --color-glow-purple-600: var(--glow-purple-600);
+  --color-glow-purple-700: var(--glow-purple-700);
+  --color-glow-purple-800: var(--glow-purple-800);
+  --color-glow-purple-900: var(--glow-purple-900);
+  --color-glow-orange-100: var(--glow-orange-100);
+  --color-glow-orange-200: var(--glow-orange-200);
+  --color-glow-orange-300: var(--glow-orange-300);
+  --color-glow-orange-400: var(--glow-orange-400);
+  --color-glow-orange-500: var(--glow-orange-500);
+  --color-glow-orange-600: var(--glow-orange-600);
+  --color-glow-orange-700: var(--glow-orange-700);
+  --color-glow-orange-800: var(--glow-orange-800);
+  --color-glow-red-100: var(--glow-red-100);
+  --color-glow-red-200: var(--glow-red-200);
+  --color-glow-red-300: var(--glow-red-300);
+  --color-glow-red-400: var(--glow-red-400);
+  --color-glow-red-500: var(--glow-red-500);
+  --color-glow-red-600: var(--glow-red-600);
+  --color-glow-red-700: var(--glow-red-700);
+  --color-glow-red-800: var(--glow-red-800);
+  --color-glow-green-100: var(--glow-green-100);
+  --color-glow-green-200: var(--glow-green-200);
+  --color-glow-green-300: var(--glow-green-300);
+  --color-glow-green-400: var(--glow-green-400);
+  --color-glow-green-500: var(--glow-green-500);
+  --color-glow-green-600: var(--glow-green-600);
+  --color-glow-green-700: var(--glow-green-700);
+  --color-glow-green-800: var(--glow-green-800);
+  --color-glow-blue-100: var(--glow-blue-100);
+  --color-glow-blue-200: var(--glow-blue-200);
+  --color-glow-blue-300: var(--glow-blue-300);
+  --color-glow-blue-400: var(--glow-blue-400);
+  --color-glow-blue-500: var(--glow-blue-500);
+  --color-glow-blue-600: var(--glow-blue-600);
+  --color-glow-blue-700: var(--glow-blue-700);
+  --color-glow-blue-800: var(--glow-blue-800);
+  --color-glow-border-focus: var(--glow-border-focus);
 }
 
 body {
@@ -171,6 +352,12 @@ body {
   scrollbar-color: color-mix(in oklch, currentColor 35%, #0000)#0000
 }
 
+/***************************************************************
+                     Colors
+***************************************************************/
+.bg-primary\/10 {
+  background-color: color-mix(in oklab, var(--color-primary)10%, transparent)
+}
 
 /***************************************************************
                      Shadows
@@ -212,12 +399,263 @@ body {
 }
 
 /***************************************************************
+                     Animations
+***************************************************************/
+
+@keyframes bounce {
+    0%,to {
+        transform: translateY(-25%);
+        animation-timing-function: cubic-bezier(.8,0,1,1)
+    }
+
+    50% {
+        transform: none;
+        animation-timing-function: cubic-bezier(0,0,.2,1)
+    }
+
+    0%,50%,to {
+        transform: scale(1)
+    }
+
+    75% {
+        transform: scale(1.2)
+    }
+}
+
+.animate-bounce {
+    animation: bounce 1s ease-out
+}
+
+@keyframes media {
+    0% {
+        transform: scale(.5);
+        opacity: 0
+    }
+
+    16% {
+        transform: scale(1.16);
+        opacity: 1
+    }
+
+    28% {
+        transform: scale(.935);
+        opacity: 1
+    }
+
+    44% {
+        transform: scale(1.025);
+        opacity: 1
+    }
+
+    59% {
+        transform: scale(.99);
+        opacity: 1
+    }
+
+    73% {
+        transform: scale(1.005);
+        opacity: 1
+    }
+
+    88% {
+        transform: scale(1);
+        opacity: 1
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1
+    }
+}
+
+.animate-media {
+    animation: media .64s
+}
+
+@keyframes shakeminor {
+    0% {
+        transform: translate(.25px,.25px) rotate(0deg)
+    }
+
+    10% {
+        transform: translate(-.25px,-.5px) rotate(-.25deg)
+    }
+
+    20% {
+        transform: translate(-.75px) rotate(.25deg)
+    }
+
+    30% {
+        transform: translate(.75px,.5px) rotate(0deg)
+    }
+
+    40% {
+        transform: translate(.25px,-.25px) rotate(.25deg)
+    }
+
+    50% {
+        transform: translate(-.25px,.5px) rotate(-.25deg)
+    }
+
+    60% {
+        transform: translate(-.75px,.25px) rotate(0deg)
+    }
+
+    70% {
+        transform: translate(.75px,.25px) rotate(-.25deg)
+    }
+
+    80% {
+        transform: translate(-.25px,-.25px) rotate(.25deg)
+    }
+
+    90% {
+        transform: translate(.25px,.5px) rotate(0deg)
+    }
+
+    to {
+        transform: translate(.25px,-.5px) rotate(-.25deg)
+    }
+}
+
+.animate-shakeminor {
+    animation: shakeminor 2s infinite
+}
+
+@keyframes shake {
+    0% {
+        transform: translate(.5px,.5px) rotate(0deg)
+    }
+
+    10% {
+        transform: translate(-.5px,-1px) rotate(-.5deg)
+    }
+
+    20% {
+        transform: translate(-1.5px) rotate(.5deg)
+    }
+
+    30% {
+        transform: translate(1.5px,1px) rotate(0deg)
+    }
+
+    40% {
+        transform: translate(.5px,-.5px) rotate(.5deg)
+    }
+
+    50% {
+        transform: translate(-.5px,1px) rotate(-.5deg)
+    }
+
+    60% {
+        transform: translate(-1.5px,.5px) rotate(0deg)
+    }
+
+    70% {
+        transform: translate(1.5px,.5px) rotate(-.5deg)
+    }
+
+    80% {
+        transform: translate(-.5px,-.5px) rotate(.5deg)
+    }
+
+    90% {
+        transform: translate(.5px,1px) rotate(0deg)
+    }
+
+    to {
+        transform: translate(.5px,-1px) rotate(-.5deg)
+    }
+}
+
+.animate-shake {
+    animation: shake 1s infinite
+}
+
+@keyframes shakemajor {
+    0% {
+        transform: translate(1px,1px) rotate(0deg)
+    }
+
+    10% {
+        transform: translate(-1px,-2px) rotate(-1deg)
+    }
+
+    20% {
+        transform: translate(-3px) rotate(1deg)
+    }
+
+    30% {
+        transform: translate(3px,2px) rotate(0deg)
+    }
+
+    40% {
+        transform: translate(1px,-1px) rotate(1deg)
+    }
+
+    50% {
+        transform: translate(-1px,2px) rotate(-1deg)
+    }
+
+    60% {
+        transform: translate(-3px,1px) rotate(0deg)
+    }
+
+    70% {
+        transform: translate(3px,1px) rotate(-1deg)
+    }
+
+    80% {
+        transform: translate(-1px,-1px) rotate(1deg)
+    }
+
+    90% {
+        transform: translate(1px,2px) rotate(0deg)
+    }
+
+    to {
+        transform: translate(1px,-2px) rotate(-1deg)
+    }
+}
+
+.animate-shakemajor {
+    animation: shakemajor .5s infinite
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn)
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite
+}
+
+@keyframes beat {
+  0%,
+  50%,
+  to {
+    transform: scale(1)
+  }
+
+  75% {
+    transform: scale(1.2)
+  }
+}
+
+.animate-beat {
+  animation: beat 2s ease-out infinite
+}
+
+/***************************************************************
                      Skeleton
 ***************************************************************/
+
 .skeleton {
-  background-color: var(--color-base-300);
+  background-color: var(--color-beige-300);
   will-change: background-position;
-  background-image: linear-gradient(105deg, #0000 0% 40%, var(--color-base-100)50%, #0000 60% 100%);
+  background-image: linear-gradient(105deg, #0000 0% 40%, var(--color-beige-100) 50%, #0000 60% 100%);
   background-position-x: -50%;
   background-repeat: no-repeat;
   background-size: 200%;
@@ -243,6 +681,7 @@ body {
 /***************************************************************
                      Icon
 ***************************************************************/
+
 .icon {
   height: calc(var(--spacing)*5);
   width: calc(var(--spacing)*5)
@@ -316,7 +755,7 @@ body {
 }
 
 .sidebar-icon {
-  @apply flex items-center justify-center text-zinc-500 hover:text-zinc-950 hover:bg-zinc-950/5 focus-visible:bg-zinc-950/5 focus-visible:text-zinc-950 rounded-lg dark:text-zinc-400 dark:hover:bg-white/5 dark:focus-visible:bg-white/5 dark:hover:text-white dark:focus-visible:text-white;
+  @apply text-zinc-500 hover:text-zinc-950 hover:bg-zinc-950/5 focus-visible:bg-zinc-950/5 focus-visible:text-zinc-950 rounded-lg dark:text-zinc-400 dark:hover:bg-white/5 dark:focus-visible:bg-white/5 dark:hover:text-white dark:focus-visible:text-white;
 }
 
 /***************************************************************
@@ -363,4 +802,150 @@ body {
   position: relative;
   outline: 2px solid #00ffff;
   border: 2px solid #ff00ff;
+}
+
+/***************************************************************
+                     Highlight Underline
+***************************************************************/
+
+.hl-underline {
+  margin-bottom: 0px;
+  margin-top: 0px;
+  box-shadow: inset 0 -21px 0 0 #c5ecf7;
+  display: inline;
+}
+
+/***************************************************************
+                     Test Input
+***************************************************************/
+
+.peer:checked~.peer-checked\:inline {
+  display: inline
+}
+
+.peer:checked~.peer-checked\:translate-x-24 {
+  --tw-translate-x: 1.5rem
+}
+
+.peer:checked~.peer-checked\:translate-x-24,
+.peer:checked~.peer-checked\:translate-x-\[1\.063rem\] {
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+
+.peer:checked~.peer-checked\:translate-x-\[1\.063rem\] {
+  --tw-translate-x: 1.063rem
+}
+
+.peer:checked~.peer-checked\:translate-x-\[1\.375rem\] {
+  --tw-translate-x: 1.375rem;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+
+.peer:checked~.peer-checked\:opacity-100 {
+  opacity: 1
+}
+
+.peer:placeholder-shown~.peer-placeholder-shown\:top-1\/2 {
+  top: 50%
+}
+
+.peer:placeholder-shown~.peer-placeholder-shown\:-translate-y-1\/2 {
+  --tw-translate-y: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+
+.peer:placeholder-shown~.peer-placeholder-shown\:scale-100 {
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+
+.peer:hover~.peer-hover\:text-gray-800 {
+  --tw-text-opacity: 1;
+  color: rgb(128 138 165/var(--tw-text-opacity, 1))
+}
+
+.peer:hover~.peer-hover\:text-icon-elevated-medium {
+  color: rgb(var(--color-icon-elevated-medium))
+}
+
+.peer:hover~.peer-hover\:text-icon-medium {
+  color: rgb(var(--color-icon-medium))
+}
+
+.peer:focus~.peer-focus\:top-0 {
+  top: 0
+}
+
+.peer:focus~.peer-focus\:-translate-y-1\/2 {
+  --tw-translate-y: -50%
+}
+
+.peer:focus~.peer-focus\:-translate-y-1\/2,
+.peer:focus~.peer-focus\:scale-75 {
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+
+.peer:focus~.peer-focus\:scale-75 {
+  --tw-scale-x: .75;
+  --tw-scale-y: .75
+}
+
+.peer:focus-visible~.peer-focus-visible\:text-icon-elevated-primary {
+  color: rgb(var(--color-icon-elevated-primary))
+}
+
+.peer:focus-visible~.peer-focus-visible\:text-icon-primary {
+  color: rgb(var(--color-icon-primary))
+}
+
+.peer:active~.peer-active\:transition-none {
+  transition-property: none
+}
+
+.peer:enabled:active~.peer-enabled\:peer-active\:h-16 {
+  height: 1rem
+}
+
+.peer:enabled:active~.peer-enabled\:peer-active\:h-28 {
+  height: 1.75rem
+}
+
+.peer:enabled:active~.peer-enabled\:peer-active\:h-\[1\.375rem\] {
+  height: 1.375rem
+}
+
+.peer:enabled:active~.peer-enabled\:peer-active\:w-16 {
+  width: 1rem
+}
+
+.peer:enabled:active~.peer-enabled\:peer-active\:w-28 {
+  width: 1.75rem
+}
+
+.peer:enabled:active~.peer-enabled\:peer-active\:w-\[1\.375rem\] {
+  width: 1.375rem
+}
+
+.peer:enabled:active~.peer-enabled\:peer-active\:translate-x-2 {
+  --tw-translate-x: 0.125rem
+}
+
+.peer:enabled:active:checked~.peer-enabled\:peer-active\:peer-checked\:translate-x-20,
+.peer:enabled:active~.peer-enabled\:peer-active\:translate-x-2 {
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+
+.peer:enabled:active:checked~.peer-enabled\:peer-active\:peer-checked\:translate-x-20 {
+  --tw-translate-x: 1.25rem
+}
+
+.peer:enabled:active:checked~.peer-enabled\:peer-active\:peer-checked\:translate-x-\[0\.938rem\] {
+  --tw-translate-x: 0.938rem;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+
+.peer:enabled:active:checked~.peer-enabled\:peer-active\:peer-checked\:translate-x-\[1\.375rem\] {
+  --tw-translate-x: 1.375rem;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
 }

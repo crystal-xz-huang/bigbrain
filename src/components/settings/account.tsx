@@ -4,18 +4,16 @@ import { Button } from '@/components/ui/button';
 import {
   Description,
   Field,
-  FieldGroup,
   Fieldset,
   Label,
   Legend,
 } from '@/components/ui/fieldset';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
-import Form from 'next/form';
 
 export default function Account() {
   return (
-    <Form>
+    <form>
       <Fieldset className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
         <div>
           <Legend className="!text-base/7">Account Settings</Legend>
@@ -36,9 +34,13 @@ export default function Account() {
                   name="email"
                   type="email"
                   autoComplete="email"
-                  className='w-full sm:max-w-xs'
+                  className="w-full sm:max-w-xs"
                 />
-                <Button type="submit" color="indigo" className="inline-flex w-full sm:mt-0 sm:ml-3 sm:w-auto">
+                <Button
+                  type="submit"
+                  color="indigo"
+                  className="inline-flex w-full sm:mt-0 sm:ml-3 sm:w-auto"
+                >
                   Change Email
                 </Button>
               </form>
@@ -49,13 +51,17 @@ export default function Account() {
               <Field>
                 <Label htmlFor="">Password</Label>
               </Field>
-              <Button type="submit" color="indigo" className="mt-3 sm:col-span-2 sm:mt-0">
+              <Button
+                type="submit"
+                color="indigo"
+                className="mt-3 sm:col-span-2 sm:mt-0"
+              >
                 Reset Password
               </Button>
             </form>
           </div>
         </div>
       </Fieldset>
-    </Form>
+    </form>
   );
 }

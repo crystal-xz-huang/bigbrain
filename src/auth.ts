@@ -1,20 +1,33 @@
-import NextAuth from 'next-auth';
-import { authConfig } from '@/lib/auth.config';
+/* ---------------------------------------------------------------------------
 
-// providers
+NextAuth Configuration
+
+This is an Auth.js instance, initialized with the common configuration options
+from the edge-compatible auth.config.ts file.
+
+This instance will include the database adapter.
+
+-----------------------------------------------------------------------------
+
+Read more:
+https://authjs.dev/guides/edge-compatibility
+https://authjs.dev/getting-started/migrating-to-v5
+
+*/
+import { authConfig } from '@/lib/auth.config';
+import NextAuth from 'next-auth';
+
+// Database Adapter
+import { prisma } from '@/lib/prisma';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+
+// Providers
+import { getUserFromEmailThrow } from '@/lib/data/user-dto';
+import { SignInSchema } from '@/lib/zod';
+import type { Provider } from 'next-auth/providers';
+import Credentials from 'next-auth/providers/credentials';
 import GitHub from 'next-auth/providers/github';
 import Google from 'next-auth/providers/google';
-import Credentials from 'next-auth/providers/credentials';
-import type { Provider } from 'next-auth/providers';
-
-// database adapter
-import { PrismaAdapter } from '@auth/prisma-adapter';
-import { prisma } from '@/lib/prisma';
-
-// validation
-import { signInSchema } from '@/lib/zod';
-import { fetchUserByCredentials } from '@/lib/data';
-
 import { ZodError } from 'zod';
 
 const providers: Provider[] = [
@@ -22,23 +35,28 @@ const providers: Provider[] = [
     credentials: { email: {}, password: {} },
     authorize: async (credentials) => {
       try {
-        // Validate the credentials using Zod schema
-        const { email, password } = await signInSchema.parseAsync(credentials);
-        // Return a User or null
-        return await fetchUserByCredentials(email, password);
+        const parsed = await SignInSchema.parseAsync(credentials);
+        const user = await getUserFromEmailThrow(parsed.email);
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+        };
       } catch (error) {
         // Handle validation errors
         if (error instanceof ZodError) {
+          // Return `null` to indicate that the credentials are invalid
           return null;
         }
         // Handle other errors
-        console.error('Authorization error', error);
+        console.error('Failed to authorize credentials:', error);
         throw error;
       }
     },
   }),
   GitHub,
-  Google
+  Google,
 ];
 
 export const providerMap = providers

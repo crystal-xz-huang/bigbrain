@@ -18,7 +18,7 @@ function cn(variant: 'default' | 'destructive' = 'default') {
 
 function Alert({
   className,
-  variant,
+  variant = 'default',
   ...props
 }: React.ComponentProps<'div'> & {
   variant?: 'default' | 'destructive';

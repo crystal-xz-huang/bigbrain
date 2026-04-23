@@ -1,7 +1,7 @@
 import * as Headless from '@headlessui/react';
 import clsx from 'clsx';
 import React, { forwardRef } from 'react';
-import { Link } from './link';
+import Link from 'next/link';
 
 const styles = {
   rounded: [
@@ -164,10 +164,6 @@ const styles = {
       'text-black [--btn-bg:var(--color-black)]/10 [--btn-border:var(--color-zinc-800)]/0 [--btn-hover-overlay:var(--color-white)]/20',
       '[--btn-icon:var(--color-black)] data-active:[--btn-icon:var(--color-black)]/80 data-hover:[--btn-icon:var(--color-black)]/80',
     ],
-    primary: [
-      'text-primary-content [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-primary-300)] [--btn-border:var(--color-primary-400)]/90',
-      '[--btn-icon:var(--color-primary-content)] data-active:[--btn-icon:var(--color-primary-content)] data-hover:[--btn-icon:var(--color-primary-content)]',
-    ],
     success: [
       'text-success-content [--btn-hover-overlay:var(--color-white)]/20 [--btn-bg:var(--color-success)] [--btn-border:var(--color-success)]/90',
       '[--btn-icon:var(--color-success-content)]/60 data-active:[--btn-icon:var(--color-success-content)]/80 data-hover:[--btn-icon:var(--color-white)]/80',
@@ -183,6 +179,14 @@ const styles = {
     error: [
       'text-error-content [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-error)] [--btn-border:var(--color-error)]/90',
       '[--btn-icon:var(--color-red-300)] data-active:[--btn-icon:var(--color-red-200)] data-hover:[--btn-icon:var(--color-red-200)]',
+    ],
+    primary: [
+      'text-primary-content [--btn-hover-overlay:var(--color-black)]/10 [--btn-bg:var(--color-primary)] [--btn-border:var(--color-primary)]/90',
+      '[--btn-icon:var(--color-white)]/60 data-active:[--btn-icon:var(--color-white)]/80 data-hover:[--btn-icon:var(--color-white)]/80',
+    ],
+    secondary: [
+      'text-secondary-content [--btn-hover-overlay:var(--color-black)]/10 [--btn-bg:var(--color-secondary)] [--btn-border:var(--color-secondary)]/90',
+      '[--btn-icon:var(--color-white)]/60 data-active:[--btn-icon:var(--color-white)]/80 data-hover:[--btn-icon:var(--color-white)]/80',
     ],
   },
 };
@@ -309,16 +313,17 @@ export function ButtonLoading(props: ButtonProps) {
 /***************************************************************
                      Primary Button
 ***************************************************************/
+
 export const primary_styles = {
   base: [
     // Typography
     'font-sans tracking-wide font-black whitespace-nowrap text-base md:text-lg',
     // Base
-    'relative flex items-center justify-center',
+    'relative group flex items-center justify-center',
     // Cursor
-    'cursor-pointer pointer-events-auto group touch-manipulation ',
+    'cursor-pointer pointer-events-auto touch-manipulation ',
     // Disabled
-    'data-disabled:pointer-events-none',
+    'data-disabled:pointer-events-none data-disabled:animate-none',
   ],
   solid: [
     // Base
@@ -330,18 +335,18 @@ export const primary_styles = {
   ],
   colors: {
     zinc: 'bg-zinc-200',
-    indigo: 'bg-indigo-500',
+    indigo: 'bg-indigo-400',
     red: 'bg-red-400',
     orange: 'bg-orange-pastel',
     amber: 'bg-amber-500',
     yellow: 'bg-yellow-500',
     lime: 'bg-lime-500',
     green: 'bg-green-pastel',
-    emerald: 'bg-emerald-500',
+    emerald: 'bg-emerald-400',
     teal: 'bg-teal-500',
-    cyan: 'bg-cyan-300',
-    sky: 'bg-sky-500',
-    blue: 'bg-blue-300',
+    cyan: 'bg-cyan-400',
+    sky: 'bg-sky-400',
+    blue: 'bg-blue-400',
     violet: 'bg-violet-500',
     purple: 'bg-purple-500',
     fuchsia: 'bg-fuchsia-500',
@@ -357,14 +362,14 @@ export const primary_styles = {
 
 function PrimaryTouchTarget({
   color,
-  disabled = false,
+  rounded,
   children,
 }: {
   color?: keyof typeof primary_styles.colors;
-  disabled?: boolean;
+  rounded?: boolean;
   children: React.ReactNode;
 }) {
-  return (
+  return rounded ? (
     <>
       <div className="-inset-1 absolute z-0 rounded-[2.9375rem]" />
       <div className="absolute inset-x-0 top-0 bottom-0 transform group-active:translate-y-0.5 group-active:bottom-0.5 z-1 bg-black rounded-[3.125rem] p-[0.25rem]">
@@ -387,12 +392,64 @@ function PrimaryTouchTarget({
           </div>
         </div>
       </div>
-      {disabled && (
-        <div className="z-1 absolute inset-0 overflow-hidden rounded-[2.8125rem]">
-          <div className="absolute top-0 left-0 w-full h-full bg-black/20" />
-        </div>
-      )}
+      <div className="z-1 absolute inset-0 overflow-hidden rounded-[2.8125rem] hidden group-disabled:block">
+        <div className="absolute top-0 left-0 w-full h-full bg-black/20" />
+      </div>
       <div className="relative flex flex-row gap-x-4 items-center w-full min-h-full pointer-events-none z-2 transform -translate-y-0.5 group-active:translate-y-0 p-[0.25rem]">
+        <div className="flex flex-col flex-1 items-center">
+          <div className="relative">{children}</div>
+        </div>
+      </div>
+    </>
+  ) : (
+    <>
+      <div
+        className="-inset-1 absolute z-0"
+        style={{ borderRadius: '0.625rem' }}
+      />
+      <div
+        className="absolute inset-x-0 top-0 bottom-0 transform group-active:translate-y-0.5 group-active:bottom-0.5 z-1"
+        style={{ borderRadius: 0, padding: 0 }}
+      >
+        <div className="relative w-full h-full">
+          <div
+            className="absolute inset-0 overflow-hidden shadow-hard-0.5"
+            style={{ borderRadius: '0.75rem' }}
+          />
+          <div
+            className={clsx(
+              'top-1 absolute inset-x-0 bottom-0 overflow-hidden',
+              primary_styles.colors[color ?? 'orange']
+            )}
+            style={{
+              borderRadius: '0.4375rem',
+            }}
+          >
+            <div className="absolute inset-0 bg-black/30" />
+          </div>
+          <div
+            className={clsx(
+              'bottom-1 absolute inset-x-0 top-0 overflow-hidden group-active:bottom-0.5',
+              primary_styles.colors[color ?? 'orange']
+            )}
+            style={{
+              borderRadius: '0.4375rem',
+            }}
+          >
+            <div className="group-hover:bg-white/20 absolute inset-0" />
+          </div>
+        </div>
+      </div>
+      <div
+        className="z-1 absolute inset-0 overflow-hidden hidden group-disabled:block"
+        style={{ borderRadius: '0.4375rem' }}
+      >
+        <div className="absolute top-0 left-0 w-full h-full bg-black/20" />
+      </div>
+      <div
+        className="relative flex flex-row gap-x-4 items-center w-full min-h-full pointer-events-none z-2 transform -translate-y-0.5 group-active:translate-y-0"
+        style={{ padding: 0 }}
+      >
         <div className="flex flex-col flex-1 items-center">
           <div className="relative">{children}</div>
         </div>
@@ -403,19 +460,19 @@ function PrimaryTouchTarget({
 
 export type PrimaryButtonProps = {
   color?: keyof typeof primary_styles.colors;
+  rounded?: boolean;
   className?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 } & (
   | Omit<Headless.ButtonProps, 'as' | 'className'>
   | Omit<React.ComponentPropsWithoutRef<typeof Link>, 'className'>
 );
 
 export const ButtonPrimary = forwardRef(function Button(
-  { color, className, children, ...props }: PrimaryButtonProps,
+  { color, rounded = true, className, children, ...props }: PrimaryButtonProps,
   ref: React.ForwardedRef<HTMLElement>
 ) {
   const classes = clsx(className, primary_styles.base, primary_styles.solid);
-  const isDisabled = 'disabled' in props && props.disabled;
 
   return 'href' in props ? (
     <Link
@@ -423,13 +480,13 @@ export const ButtonPrimary = forwardRef(function Button(
       className={classes}
       ref={ref as React.ForwardedRef<HTMLAnchorElement>}
     >
-      <PrimaryTouchTarget color={color} disabled={isDisabled}>
+      <PrimaryTouchTarget color={color} rounded={rounded}>
         {children}
       </PrimaryTouchTarget>
     </Link>
   ) : (
     <Headless.Button {...props} className={classes} ref={ref}>
-      <PrimaryTouchTarget color={color} disabled={isDisabled}>
+      <PrimaryTouchTarget color={color} rounded={rounded}>
         {children}
       </PrimaryTouchTarget>
     </Headless.Button>

@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import ToastContext from './toast-context';
-import { ToastType, ToastInput, ToastOptions } from '@/lib/types';
+import type { ToastType, ToastInput, ToastOptions } from '@/lib/definitions/types';
 
 const useToast = () => {
   const context = useContext(ToastContext);
@@ -26,7 +26,7 @@ const useToast = () => {
   };
 
   return {
-    success: (input: ToastInput, options?: ToastOptions) => showToast('success', input, options),
+    success: (input: ToastInput, options?: ToastOptions) => showToast("success", input, options),
     error: (input: ToastInput, options?: ToastOptions) => showToast('error', input, options),
     info: (input: ToastInput, options?: ToastOptions) => showToast('info', input, options),
     warn: (input: ToastInput, options?: ToastOptions) => showToast('warning', input, options),

@@ -1,0 +1,63 @@
+model GameRevision {
+  id          Int            @id @default(autoincrement())
+  revisedAt   DateTime       @default(now())
+  // all contents of the game at this revision
+  title       String
+  description String?
+  image       String?
+  ownerId     String?
+  status      GameStatus
+  visibility  GameVisibility
+  questions   GameQuestion[]
+  // bidirectional 1-n relation to Game for all revisions
+  plays       GamePlay[]
+  // mandatory 1-1 relation to Game
+  game        Game           @relation("History", fields: [gameId], references: [id], onDelete: Cascade)
+  gameId      String
+  // optional back reference to Game.latestRevision
+  latestFor   Game?          @relation("Latest")
+  // self-relation for versioning (a revision can have 0 or 1 parent, and 0 or more children)
+  parent      GameRevision?  @relation("Parent", fields: [parentRevId], references: [id])
+  parentRevId Int?
+  children    GameRevision[] @relation("Parent")
+
+  @@index([gameId, id]) // to quickly find all revisions of a game
+}
+
+enum GameQuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  TYPE_ANSWER
+  TRUE_FALSE
+}
+
+model GameQuestion {
+  id           String             @id @default(cuid())
+  // all contents of the question at this revision
+  title        String
+  image        String?
+  hint         String?
+  funfact      String?
+  duration     Int                @default(20)
+  points       Int                @default(1)
+  type         GameQuestionType
+  // mandatory 1-1 relation to GameRevision
+  gameRevision GameRevision       @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  revisionId   Int
+  // optional 1-n relations
+  answers      GameAnswer[]
+  plays        GamePlayQuestion[]
+}
+
+model GameAnswer {
+  id         String       @id @default(cuid())
+  // content
+  title      String
+  correct    Boolean
+  // mandatory 1-1 relation to GameQuestion
+  question   GameQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+
+  @@unique([questionId, title])
+  @@index([questionId, correct])
+}
